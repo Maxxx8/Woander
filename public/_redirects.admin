@@ -1,0 +1,7 @@
+/login /admin.html 200
+/dashboard /admin.html 200
+/users /admin.html 200
+/invitations /admin.html 200
+/activity /admin.html 200
+/analytics /admin.html 200
+/* /admin.html 200
