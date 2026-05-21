@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, ArrowUpRight } from 'lucide-react';
 import TouchGallery from './TouchGallery';
 
 interface DestinationCardProps {
@@ -20,56 +20,55 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   price
 }) => {
   const [showGallery, setShowGallery] = useState(false);
-  
-  // Sample gallery images - in real app, these would come from props
-  const galleryImages = [
-    image,
-    image, // You would have multiple images here
-    image
-  ];
+
+  const galleryImages = [image, image, image];
 
   return (
     <>
       <div
-        className="group relative overflow-hidden rounded-3xl shadow-xl transition-all duration-500 cursor-pointer h-[500px] hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] animate-scale-in"
+        className="group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer h-[450px] hover:shadow-glow-lg"
         onClick={() => setShowGallery(true)}
-        style={{ transformStyle: 'preserve-3d' }}
       >
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{ backgroundImage: `url(${image})` }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent group-hover:from-black/80 group-hover:via-black/50 transition-all duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/40 to-transparent group-hover:from-charcoal/90 transition-all duration-500" />
 
-        <div className="relative h-full flex flex-col justify-end p-8">
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-sm font-semibold text-gray-800 shadow-lg">
-            {price}
-          </div>
+        <div className="absolute inset-0 glass opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <div className="inline-flex items-center space-x-2 mb-4 self-start">
-            <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+        <div className="relative h-full flex flex-col justify-between p-6 md:p-8">
+          <div className="flex justify-between items-start">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
+              <Star className="h-4 w-4 text-teal-400 fill-current" />
               <span className="text-sm text-white font-semibold">{rating}</span>
+            </div>
+            <div className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 text-sm font-medium text-white">
+              {price}
             </div>
           </div>
 
-          <h3 className="text-4xl font-bold text-white mb-3 transform transition-all duration-300 drop-shadow-2xl">
-            {title}
-          </h3>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-3xl md:text-4xl font-display font-bold text-white mb-2 drop-shadow-lg">
+                {title}
+              </h3>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-teal-400 flex-shrink-0" />
+                <span className="text-sm text-white/80">{location}</span>
+              </div>
+            </div>
 
-          <div className="flex items-center space-x-2 mb-4">
-            <MapPin className="h-4 w-4 text-teal-400" />
-            <span className="text-sm text-white/90">{location}</span>
+            <p className="text-white/90 text-sm leading-relaxed line-clamp-2">
+              {description}
+            </p>
+
+            <button className="w-full group/btn px-6 py-3 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r from-teal-500/90 to-teal-600/90 backdrop-blur-sm text-white hover:from-teal-500 hover:to-teal-600 flex items-center justify-center gap-2 active:scale-95">
+              <span>Explore</span>
+              <ArrowUpRight className="h-4 w-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+            </button>
           </div>
-
-          <p className="text-white text-base leading-relaxed mb-4 line-clamp-2 drop-shadow-lg">
-            {description}
-          </p>
-
-          <button className="w-full py-4 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r from-coral-500/80 to-sunset-500/80 backdrop-blur-sm text-white hover:from-coral-600 hover:to-sunset-600 shadow-lg">
-            Explore Now
-          </button>
         </div>
       </div>
 

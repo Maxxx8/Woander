@@ -1,9 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 @import './utils/animations.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-pearl text-charcoal font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold;
+  }
+}
 
 @layer utilities {
   .smooth-scroll {
@@ -16,6 +26,22 @@
 
   .will-change-opacity {
     will-change: opacity;
+  }
+
+  .glass {
+    @apply bg-white/30 backdrop-blur-lg border border-white/20 shadow-glass;
+  }
+
+  .glass-dark {
+    @apply bg-charcoal/40 backdrop-blur-lg border border-white/10 shadow-glass;
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700;
+  }
+
+  .glow-teal {
+    @apply shadow-glow-md;
   }
 
   @media (prefers-reduced-motion: reduce) {
