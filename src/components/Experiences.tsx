@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mountain, Waves, TreePine, Sun, Star, MapPin, Clock, Users, Camera } from 'lucide-react';
+import { MapPin, Clock, Users, Camera, Mountain, Waves, TreePine, Sun, Heart, Compass } from 'lucide-react';
 
 interface Experience {
   id: string;
@@ -12,87 +12,77 @@ interface Experience {
   description: string;
   highlights: string[];
   icon: React.ReactNode;
-  gradient: string;
-  ambientSound?: string;
 }
 
 const experiences: Experience[] = [
   {
     id: 'mountain',
     title: 'Himalayan Trek',
-    category: 'Mountain Adventure',
+    category: 'Mountain Exploration',
     location: 'Manali to Leh',
     duration: '7-10 Days',
-    groupSize: '4-12 People',
+    groupSize: '4-12 Explorers',
     image: 'https://images.pexels.com/photos/2437299/pexels-photo-2437299.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    description: 'Embark on a breathtaking journey through the majestic Himalayas. Experience crisp mountain air, snow-capped peaks, and ancient monasteries nestled in the clouds.',
+    description: 'Embark on a breathtaking journey through the majestic Himalayas. Experience crisp mountain air, snow-capped peaks, and ancient monasteries.',
     highlights: [
-      'Trek through pristine mountain trails',
-      'Visit ancient Buddhist monasteries',
-      'Camp under star-filled skies',
-      'Experience local Himalayan culture',
-      'Witness sunrise over snow peaks'
+      'Hidden mountain trails',
+      'Ancient Buddhist monasteries',
+      'Night under star-filled skies',
+      'Local Himalayan culture',
     ],
-    icon: <Mountain className="h-8 w-8" />,
-    gradient: 'from-blue-600 to-cyan-500'
+    icon: <Mountain className="h-6 w-6" />,
   },
   {
-    id: 'beach',
-    title: 'Coastal Paradise',
-    category: 'Beach & Islands',
+    id: 'coastal',
+    title: 'Coastal Expedition',
+    category: 'Ocean Discovery',
     location: 'Andaman Islands',
     duration: '5-7 Days',
-    groupSize: '2-8 People',
+    groupSize: '2-8 Explorers',
     image: 'https://images.pexels.com/photos/994605/pexels-photo-994605.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    description: 'Dive into crystal-clear turquoise waters, walk on pristine white sand beaches, and discover vibrant coral reefs teeming with marine life.',
+    description: 'Dive into crystal-clear waters, walk on pristine white sand, and discover vibrant coral reefs.',
     highlights: [
       'Snorkeling in coral gardens',
       'Beach camping under palms',
-      'Sunset cruise experiences',
-      'Water sports adventures',
-      'Fresh seafood dinners by the shore'
+      'Sunset journeys by boat',
+      'Fresh seafood by the shore'
     ],
-    icon: <Waves className="h-8 w-8" />,
-    gradient: 'from-teal-500 to-blue-400'
+    icon: <Waves className="h-6 w-6" />,
   },
   {
     id: 'forest',
-    title: 'Wildlife Expedition',
-    category: 'Forest Safari',
-    location: 'Jim Corbett National Park',
-    duration: '3-5 Days',
-    groupSize: '4-10 People',
-    image: 'https://images.pexels.com/photos/1661471/pexels-photo-1661471.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    description: 'Venture deep into lush forests in search of majestic tigers, elephants, and exotic birds. Experience the raw beauty of India\'s wilderness.',
+    title: 'Wildlife Journey',
+    category: 'Forest Expedition',
+    location: 'Western Ghats',
+    duration: '4-6 Days',
+    groupSize: '4-10 Explorers',
+    image: 'https://images.pexels.com/photos/1287445/pexels-photo-1287445.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    description: 'Walk through ancient forests, spot exotic wildlife, and discover hidden waterfalls.',
     highlights: [
-      'Early morning jungle safaris',
-      'Tiger and elephant spotting',
-      'Bird watching expeditions',
-      'Nature photography sessions',
-      'Campfire stories under stars'
+      'Tiger safari experiences',
+      'Hidden waterfall treks',
+      'Bird watching at dawn',
+      'Forest village stays'
     ],
-    icon: <TreePine className="h-8 w-8" />,
-    gradient: 'from-green-600 to-emerald-500'
+    icon: <TreePine className="h-6 w-6" />,
   },
   {
     id: 'desert',
-    title: 'Desert Odyssey',
-    category: 'Desert Experience',
-    location: 'Jaisalmer, Rajasthan',
-    duration: '4-6 Days',
-    groupSize: '4-15 People',
-    image: 'https://images.pexels.com/photos/3010168/pexels-photo-3010168.jpeg?auto=compress&cs=tinysrgb&w=1920',
-    description: 'Journey across golden sand dunes on camelback, witness spectacular sunsets, and spend nights in luxury desert camps under infinite stars.',
+    title: 'Desert Passage',
+    category: 'Arid Exploration',
+    location: 'Rajasthan',
+    duration: '4-5 Days',
+    groupSize: '2-6 Explorers',
+    image: 'https://images.pexels.com/photos/3889742/pexels-photo-3889742.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    description: 'Experience the magic of golden sand dunes, night skies, and forgotten fortresses.',
     highlights: [
-      'Camel safari through dunes',
-      'Traditional Rajasthani performances',
-      'Luxury camping experience',
-      'Sunset and sunrise views',
-      'Visit ancient desert forts'
+      'Camel safari at sunset',
+      'Desert camping under stars',
+      'Forgotten fort exploration',
+      'Traditional desert culture'
     ],
-    icon: <Sun className="h-8 w-8" />,
-    gradient: 'from-orange-500 to-amber-600'
-  }
+    icon: <Sun className="h-6 w-6" />,
+  },
 ];
 
 const Experiences = () => {
@@ -100,112 +90,119 @@ const Experiences = () => {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
-    <section id="experiences" className="py-20 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+    <section id="experiences" className="py-24 bg-forest-950 relative overflow-hidden">
+      {/* Atmospheric Lines */}
+      <div className="absolute inset-0 opacity-5">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(201, 168, 74, 0.3)" strokeWidth="0.05" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(201, 168, 74, 0.2)" strokeWidth="0.05" />
+          <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(201, 168, 74, 0.3)" strokeWidth="0.05" />
+        </svg>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center p-3 bg-orange-100 rounded-full mb-6">
-            <Star className="h-8 w-8 text-orange-600" />
+          <div className="inline-flex items-center gap-2 border border-gold-500/15 px-4 py-2 mb-6">
+            <Compass className="w-3.5 h-3.5 text-gold-500/60" />
+            <span
+              className="text-[10px] uppercase tracking-[0.25em] text-gold-400/70"
+              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+            >
+              Immersive Experiences
+            </span>
           </div>
-          <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Immersive Experiences
+          <h2
+            className="text-3xl sm:text-4xl md:text-5xl font-serif text-mist-100 mb-4"
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          >
+            Step into extraordinary
+            <br />
+            <span className="italic text-mist-300/80">journeys of discovery.</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Step into extraordinary adventures that awaken your senses. Each experience is crafted to transport you to another world.
+          <p className="text-mist-500/60 max-w-xl mx-auto leading-relaxed text-sm md:text-base">
+            Each experience is crafted to transport you beyond the ordinary.
           </p>
         </div>
 
-        {/* Experience Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
           {experiences.map((experience) => (
             <div
               key={experience.id}
-              className="group relative overflow-hidden rounded-3xl shadow-xl transition-all duration-500 cursor-pointer"
-              style={{ height: activeExperience === experience.id ? '700px' : '500px' }}
+              className="group relative overflow-hidden cursor-pointer transition-all duration-500"
+              style={{ height: activeExperience === experience.id ? '700px' : '480px' }}
               onMouseEnter={() => setHoveredCard(experience.id)}
               onMouseLeave={() => setHoveredCard(null)}
               onClick={() => setActiveExperience(activeExperience === experience.id ? null : experience.id)}
             >
-              {/* Background Image with Parallax Effect */}
+              {/* Background */}
               <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700"
+                className="absolute inset-0 bg-cover bg-center grayscale-[30%] transition-all duration-700"
                 style={{
                   backgroundImage: `url(${experience.image})`,
-                  transform: hoveredCard === experience.id ? 'scale(1.1)' : 'scale(1)'
+                  transform: hoveredCard === experience.id ? 'scale(1.05)' : 'scale(1)',
+                  filter: hoveredCard === experience.id ? 'grayscale(10%)' : 'grayscale(30%)',
                 }}
               />
+              <div className={`absolute inset-0 bg-gradient-to-t transition-all duration-500 ${
+                hoveredCard === experience.id
+                  ? 'from-forest-950 via-forest-950/60 to-forest-900/40'
+                  : 'from-forest-950/90 via-forest-900/50 to-transparent'
+              }`} />
 
-              {/* Gradient Overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${hoveredCard === experience.id ? 'from-black/90 via-black/60' : 'from-black/70 via-black/40'} to-transparent transition-all duration-500`} />
+              {/* Icon */}
+              <div className="absolute top-6 left-6 w-12 h-12 flex items-center justify-center bg-forest-950/80 backdrop-blur-sm border border-gold-500/15 text-gold-400/70">
+                {experience.icon}
+              </div>
+
+              {/* Category */}
+              <div className="absolute top-6 right-6 px-3 py-1.5 bg-forest-950/60 backdrop-blur-sm border border-gold-500/10">
+                <span className="text-[10px] uppercase tracking-wider text-gold-300/60">{experience.category}</span>
+              </div>
 
               {/* Content */}
-              <div className="relative h-full flex flex-col justify-end p-8">
-                {/* Icon Badge */}
-                <div className={`absolute top-8 left-8 p-4 rounded-2xl bg-gradient-to-br ${experience.gradient} text-white shadow-lg transform transition-all duration-500 ${hoveredCard === experience.id ? 'scale-110 rotate-6' : 'scale-100'}`}>
-                  {experience.icon}
-                </div>
-
-                {/* Category Tag */}
-                <div className="inline-flex items-center space-x-2 mb-4 self-start">
-                  <span className={`px-4 py-2 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${experience.gradient} shadow-lg`}>
-                    {experience.category}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-4xl font-bold text-white mb-3 transform transition-all duration-300">
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <h3
+                  className="text-2xl sm:text-3xl font-serif text-mist-100 mb-3"
+                  style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+                >
                   {experience.title}
                 </h3>
 
-                {/* Info Grid */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-orange-400" />
-                    <span className="text-sm text-white/90">{experience.location}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-orange-400" />
-                    <span className="text-sm text-white/90">{experience.duration}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-orange-400" />
-                    <span className="text-sm text-white/90">{experience.groupSize}</span>
-                  </div>
+                <div className="flex items-center gap-4 text-xs text-mist-500/60 mb-4">
+                  <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3" />{experience.location}</span>
+                  <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" />{experience.duration}</span>
+                  <span className="flex items-center gap-1.5"><Users className="w-3 h-3" />{experience.groupSize}</span>
                 </div>
 
-                {/* Description - Shows on expand */}
-                <div className={`transform transition-all duration-500 origin-bottom ${activeExperience === experience.id ? 'opacity-100 max-h-96 mb-4' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                  <p className="text-white/90 text-lg leading-relaxed mb-4">
-                    {experience.description}
-                  </p>
-
-                  {/* Highlights */}
+                <div className={`transition-all duration-500 ${
+                  activeExperience === experience.id ? 'opacity-100 max-h-96 mb-4' : 'opacity-0 max-h-0 overflow-hidden'
+                }`}>
+                  <p className="text-mist-300/70 text-sm mb-4">{experience.description}</p>
                   <div className="space-y-2">
-                    <h4 className="text-white font-semibold text-lg mb-3 flex items-center space-x-2">
-                      <Camera className="h-5 w-5 text-orange-400" />
-                      <span>Experience Highlights</span>
-                    </h4>
-                    {experience.highlights.map((highlight, index) => (
-                      <div key={index} className="flex items-start space-x-3 text-white/80">
-                        <span className="text-orange-400 mt-1">•</span>
-                        <span>{highlight}</span>
+                    <div className="flex items-center gap-2 text-gold-400/50 text-xs uppercase tracking-wider">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Highlights</span>
+                    </div>
+                    {experience.highlights.map((item, i) => (
+                      <div key={i} className="flex items-start gap-2 text-mist-400/80 text-sm">
+                        <span className="text-gold-400/50 mt-0.5">-</span>
+                        <span>{item}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* CTA Button */}
                 <button
-                  className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
+                  className={`w-full py-3 transition-all duration-300 ${
                     activeExperience === experience.id
-                      ? `bg-gradient-to-r ${experience.gradient} text-white shadow-2xl transform hover:scale-105`
-                      : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
+                      ? 'bg-gold-500/20 border border-gold-500/30 text-gold-300 hover:bg-gold-500/30'
+                      : 'bg-forest-800/50 border border-mist-700/20 text-mist-400 hover:border-gold-500/20'
                   }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {activeExperience === experience.id ? 'Book This Experience' : 'Explore More'}
+                  <span className="text-xs uppercase tracking-wider">
+                    {activeExperience === experience.id ? 'Begin Journey' : 'Expand'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -213,15 +210,21 @@ const Experiences = () => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-16 p-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-3xl shadow-2xl">
-          <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready for Your Next Experience?
+        <div className="text-center py-12 border-t border-mist-700/10">
+          <h3
+            className="text-xl md:text-2xl font-serif text-mist-100 mb-4"
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          >
+            Ready for your next journey of discovery?
           </h3>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Let us create a personalized experience that matches your dreams. Every journey is unique, just like you.
+          <p className="text-mist-500/60 mb-8 max-w-lg mx-auto text-sm">
+            Let us create a personalized experience that matches your curiosity. Every journey is unique.
           </p>
-          <button className="px-10 py-4 bg-white text-orange-600 text-lg font-bold rounded-xl hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-xl">
-            Plan My Experience
+          <button
+            onClick={() => window.location.href = '/experiences'}
+            className="px-8 py-3 bg-forest-800/80 border border-gold-500/15 text-mist-200 text-sm uppercase tracking-wider hover:bg-forest-700 hover:border-gold-400/25 transition-all duration-500"
+          >
+            Explore Experiences
           </button>
         </div>
       </div>

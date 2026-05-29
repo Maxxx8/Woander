@@ -3,7 +3,65 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+        display: ['Cormorant Garamond', 'Georgia', 'serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
       colors: {
+        forest: {
+          50: '#f0f5f0',
+          100: '#dce8dc',
+          200: '#b8d1b8',
+          300: '#8fb58f',
+          400: '#5f8a5f',
+          500: '#2d4a2d',
+          600: '#243d24',
+          700: '#1a2d1a',
+          800: '#1a2618',
+          900: '#0f1a0f',
+          950: '#0a120a',
+        },
+        earth: {
+          50: '#faf6f2',
+          100: '#f0e8df',
+          200: '#e0cbb8',
+          300: '#cba88f',
+          400: '#a67c5c',
+          500: '#8b5e3c',
+          600: '#6b4423',
+          700: '#5a3820',
+          800: '#3d2818',
+          900: '#2a1c12',
+        },
+        gold: {
+          50: '#fdfbf3',
+          100: '#f9f3d6',
+          200: '#f0e4a8',
+          300: '#e5c96e',
+          400: '#c9a84a',
+          500: '#9a7b32',
+          600: '#7a5f28',
+          700: '#5c4a1f',
+          800: '#3d3115',
+          900: '#2a2110',
+        },
+        mist: {
+          50: '#f8f9fa',
+          100: '#e9ecef',
+          200: '#dee2e6',
+          300: '#adb5bd',
+          400: '#868e96',
+          500: '#6c757d',
+          600: '#495057',
+          700: '#343a40',
+          800: '#212529',
+          900: '#121416',
+        },
+        cream: '#faf8f5',
+        charcoal: '#1a1f2e',
+        spice: '#c45628',
         coral: {
           50: '#fff1f1',
           100: '#ffe1e1',
@@ -40,6 +98,43 @@ export default {
           800: '#9a3412',
           900: '#7c2d12',
         },
+      },
+      backgroundImage: {
+        'forest-gradient': 'linear-gradient(135deg, #1a2618 0%, #0f1a0f 50%, #1a1a1a 100%)',
+        'mist-gradient': 'linear-gradient(180deg, rgba(248,249,250,0) 0%, rgba(33,37,41,0.8) 100%)',
+      },
+      animation: {
+        'float-slow': 'floatSlow 8s ease-in-out infinite',
+        'drift': 'drift 20s ease-in-out infinite',
+        'pulse-subtle': 'pulseSubtle 4s ease-in-out infinite',
+        'glow-node': 'glowNode 3s ease-in-out infinite',
+      },
+      keyframes: {
+        floatSlow: {
+          '0%, 100%': { transform: 'translateY(0) translateX(0)' },
+          '50%': { transform: 'translateY(-10px) translateX(5px)' },
+        },
+        drift: {
+          '0%, 100%': { transform: 'translateX(0) translateY(0)' },
+          '50%': { transform: 'translateX(30px) translateY(-20px)' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '0.6' },
+        },
+        glowNode: {
+          '0%, 100%': {
+            boxShadow: '0 0 4px rgba(201, 168, 74, 0.3), 0 0 8px rgba(201, 168, 74, 0.1)',
+            transform: 'scale(1)'
+          },
+          '50%': {
+            boxShadow: '0 0 12px rgba(201, 168, 74, 0.5), 0 0 24px rgba(201, 168, 74, 0.2)',
+            transform: 'scale(1.1)'
+          },
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },

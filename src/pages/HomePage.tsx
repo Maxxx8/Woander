@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin, Compass } from 'lucide-react';
 import Hero from '../components/Hero';
 import QuoteSection from '../components/QuoteSection';
 import Destinations from '../components/Destinations';
@@ -10,7 +10,6 @@ import InstallPrompt from '../components/InstallPrompt';
 import OfflineIndicator from '../components/OfflineIndicator';
 import AdventureCreator from '../components/AdventureCreator';
 import MyAdventures from '../components/MyAdventures';
-import SearchBar from '../components/SearchBar';
 import SearchResults from '../components/SearchResults';
 import ScrollProgress from '../components/ScrollProgress';
 import { useRandomQuotes } from '../hooks/useRandomQuotes';
@@ -27,8 +26,6 @@ const HomePage = () => {
   const { results, loading, error, searchContent } = useSearch();
   const [hasSearched, setHasSearched] = useState(false);
 
-  const searchSectionRef = useRef<HTMLDivElement>(null);
-  const searchHeaderRef = useRef<HTMLDivElement>(null);
   const adventuresSectionRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = async (filters: any) => {
@@ -38,33 +35,15 @@ const HomePage = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      if (searchHeaderRef.current) {
-        gsap.fromTo(searchHeaderRef.current.children,
-          { opacity: 0, y: 30 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: searchHeaderRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
-
       if (adventuresSectionRef.current) {
-        gsap.fromTo(adventuresSectionRef.current.querySelector('h2'),
-          { opacity: 0, scale: 0.9, y: 30 },
+        gsap.fromTo(
+          adventuresSectionRef.current.querySelector('h2'),
+          { opacity: 0, y: 40 },
           {
             opacity: 1,
-            scale: 1,
             y: 0,
             duration: 1,
-            ease: 'back.out(1.2)',
+            ease: 'power3.out',
             scrollTrigger: {
               trigger: adventuresSectionRef.current,
               start: 'top 70%',
@@ -79,99 +58,118 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="pb-20 md:pb-0">
+    <div className="bg-forest-950">
       <ScrollProgress />
       <Hero />
 
-      <section ref={searchSectionRef} className="py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/30 to-pink-50/50 opacity-60"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div ref={searchHeaderRef} className="text-center mb-10">
-            <span className="inline-block px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 text-orange-600 rounded-full text-sm font-semibold mb-4">
-              Start Exploring
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-              Discover Your Next Adventure
+      {/* First Quote - Cinematic Break */}
+      {!quotesLoading && randomQuotes[0] && <QuoteSection quote={randomQuotes[0]} />}
+
+      {/* Destinations Section */}
+      <Destinations />
+
+      {/* Why Choose Us */}
+      <WhyChooseUs />
+
+      {/* Second Quote */}
+      {!quotesLoading && randomQuotes[1] && <QuoteSection quote={randomQuotes[1]} />}
+
+      {/* Hidden Gems Discovery Section */}
+      <section className="py-24 bg-forest-900 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <pattern id="grid" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                <circle cx="5" cy="5" r="0.2" fill="rgba(201, 168, 74, 0.3)" />
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" ref={adventuresSectionRef}>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 border border-gold-500/20 px-4 py-2 mb-6">
+              <Compass className="w-4 h-4 text-gold-500/60" />
+              <span
+                className="text-xs uppercase tracking-[0.2em] text-gold-400/80"
+                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+              >
+                Community Discovery
+              </span>
+            </div>
+            <h2
+              className="text-3xl sm:text-4xl md:text-5xl font-serif text-mist-100 mb-4"
+              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+            >
+              Some places reveal themselves
+              <br />
+              <span className="italic text-mist-300/80">only to the curious.</span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Search through hidden gems, curated experiences, and personalized adventures
+            <p className="text-mist-500/60 max-w-xl mx-auto leading-relaxed text-sm md:text-base">
+              Hidden gems discovered by our community of explorers.
+              Every gem has a founder. Every place, a story.
             </p>
           </div>
 
-          <div className="mb-8 transform transition-all duration-500 hover:scale-[1.02]">
-            <div className="backdrop-blur-xl bg-white/80 rounded-3xl shadow-2xl border border-white/20 p-8">
-              <SearchBar
-              onSearch={handleSearch}
-              showBudgetFilter={true}
-              showCategoryFilter={true}
-              showDifficultyFilter={true}
-              placeholder="Search destinations, experiences, hidden gems..."
-              />
-            </div>
-          </div>
-
+          <SearchResults results={results} loading={loading} error={error} />
           {hasSearched && (
-            <div className="mb-12">
-              <SearchResults results={results} loading={loading} error={error} />
+            <div className="mt-12">
+              <MyAdventures
+                key={refreshAdventures}
+                onLoginRequired={() => {
+                  setShowAdventureCreator(true);
+                }}
+              />
             </div>
           )}
         </div>
       </section>
 
-      <WhyChooseUs />
+      {/* About Section */}
+      <About />
 
-      {quotesLoading ? (
-        <QuoteSection loading={true} />
-      ) : (
-        randomQuotes[0] && <QuoteSection quote={randomQuotes[0]} />
-      )}
+      {/* Final Quote */}
+      {!quotesLoading && randomQuotes[2] && <QuoteSection quote={randomQuotes[2]} />}
 
-      <Destinations />
-
-      {quotesLoading ? (
-        <QuoteSection loading={true} />
-      ) : (
-        randomQuotes[1] && <QuoteSection quote={randomQuotes[1]} />
-      )}
-
-      <section ref={adventuresSectionRef} className="py-16 md:py-20 px-4 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
-        <div id="adventures" className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Create Your Adventure
-            </h2>
-            <p className="text-xl text-gray-600 mb-8">
-              Plan your dream trip with detailed itineraries and cost estimates
-            </p>
+      {/* Call to Adventure Section */}
+      <section className="py-24 bg-forest-950 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-forest-900/50 via-transparent to-forest-950" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div
+            className="text-3xl md:text-5xl font-serif text-mist-100 mb-6 leading-tight"
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          >
+            Ready to become part of
+            <br />
+            <span className="italic text-gold-400/80">the discovery?</span>
+          </div>
+          <p className="text-mist-500/60 mb-12 leading-relaxed max-w-xl mx-auto text-sm md:text-base">
+            Join a community of modern explorers who believe
+            the best places are often the ones not yet found.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => {
+                window.location.href = '/hidden-gems';
+              }}
+              className="group px-8 py-4 bg-forest-800/80 backdrop-blur-sm border border-gold-500/20 text-mist-200 text-sm uppercase tracking-wider hover:bg-forest-700 hover:border-gold-400/30 transition-all duration-500"
+            >
+              <span className="flex items-center justify-center gap-3">
+                <MapPin className="w-4 h-4 text-gold-400/70" />
+                Explore Hidden Gems
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
             <button
               onClick={() => setShowAdventureCreator(true)}
-              className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg font-semibold rounded-xl transform hover:scale-110 active:scale-95 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 relative overflow-hidden"
+              className="px-8 py-4 bg-earth-700/60 backdrop-blur-sm border border-earth-500/20 text-mist-300 text-sm uppercase tracking-wider hover:bg-earth-600/80 hover:border-earth-400/30 transition-all duration-500"
             >
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
-              <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              Create New Adventure
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <span className="text-gold-400/80">Become a Contributor</span>
             </button>
-          </div>
-
-          <div className="mt-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">My Adventures</h3>
-            <MyAdventures
-              key={refreshAdventures}
-              onLoginRequired={() => alert('Please log in to create and view adventures')}
-            />
           </div>
         </div>
       </section>
-
-      <About />
-
-      {quotesLoading ? (
-        <QuoteSection loading={true} />
-      ) : (
-        randomQuotes[2] && <QuoteSection quote={randomQuotes[2]} />
-      )}
 
       <Footer />
 

@@ -3,7 +3,12 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
-import { Quote } from '../data/quotes';
+
+interface Quote {
+  quote: string;
+  author: string;
+  backgroundImage?: string;
+}
 
 interface QuoteSectionProps {
   quote?: Quote;
@@ -12,7 +17,7 @@ interface QuoteSectionProps {
 
 const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const quoteRef = useRef<HTMLQuoteElement>(null);
+  const quoteRef = useRef<HTMLElement>(null);
   const authorRef = useRef<HTMLElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
 
@@ -43,11 +48,11 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
             opacity: 1,
             y: 0,
             filter: 'blur(0px)',
-            duration: 1,
+            duration: 1.2,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top 70%',
+              start: 'top 60%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -56,16 +61,16 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
 
       if (authorRef.current) {
         gsap.fromTo(authorRef.current,
-          { opacity: 0, x: -20 },
+          { opacity: 0, y: 15 },
           {
             opacity: 1,
-            x: 0,
+            y: 0,
             duration: 0.8,
-            delay: 0.5,
+            delay: 0.3,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top 70%',
+              start: 'top 60%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -80,7 +85,7 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
             trigger: sectionRef.current,
             start: 'top bottom',
             end: 'bottom top',
-            scrub: true,
+            scrub: 1,
           },
         });
       }
@@ -88,14 +93,14 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
 
     return () => ctx.revert();
   }, [loading, quote]);
+
   if (loading) {
     return (
-      <section className="relative py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gray-300 animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60"></div>
+      <section className="relative py-28 md:py-36 overflow-hidden bg-forest-950">
+        <div className="absolute inset-0 bg-forest-900/50" />
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
-          <div className="h-8 bg-white/20 rounded-lg w-3/4 mx-auto mb-6 animate-pulse"></div>
-          <div className="h-6 bg-white/10 rounded-lg w-1/4 mx-auto animate-pulse"></div>
+          <div className="h-8 bg-mist-700/10 rounded w-3/4 mx-auto mb-6 animate-pulse" />
+          <div className="h-4 bg-mist-700/20 rounded w-1/4 mx-auto animate-pulse" />
         </div>
       </section>
     );
@@ -104,16 +109,30 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
   if (!quote) return null;
 
   return (
-    <section ref={sectionRef} className="relative py-32 overflow-hidden">
-      <div ref={bgRef} className="absolute inset-0 bg-cover bg-center will-change-transform" style={{ backgroundImage: `url("${quote.backgroundImage}")` }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60"></div>
+    <section ref={sectionRef} className="relative py-28 md:py-36 overflow-hidden">
+      <div
+        ref={bgRef}
+        className="absolute inset-0 bg-cover bg-center will-change-transform"
+        style={{ backgroundImage: quote.backgroundImage ? `url("${quote.backgroundImage}")` : 'none' }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-forest-950/80 via-forest-900/70 to-forest-950/80" />
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
-        <blockquote ref={quoteRef} className="text-2xl md:text-4xl text-white font-light leading-relaxed mb-6 drop-shadow-2xl">
+        <blockquote
+          ref={quoteRef}
+          className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-mist-100/90 font-light leading-relaxed tracking-wide mb-8"
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+        >
           "{quote.quote}"
         </blockquote>
-        <cite ref={authorRef} className="text-xl text-orange-300 italic drop-shadow-lg">- {quote.author}</cite>
+        <cite
+          ref={authorRef}
+          className="text-xs sm:text-sm text-gold-400/50 tracking-[0.2em] uppercase"
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+        >
+          — {quote.author}
+        </cite>
       </div>
     </section>
   );

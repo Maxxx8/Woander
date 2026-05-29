@@ -32,9 +32,7 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
   const childrenArray = Children.toArray(children);
   const totalCards = childrenArray.length;
 
-  // Determine cards per view based on breakpoint
-  const cardsPerView = isMobile ? mobileCards : isTablet ? tabletCards : desktopCards;
-  const maxIndex = Math.max(0, totalCards - cardsPerView);
+  const cardsPerView = isMobile ? mobileCards : isTablet ? tabletCards : desktopCards; const maxIndex = Math.max(0, totalCards - cardsPerView);
   const showSwipe = isMobile || isTablet;
 
   const goToNext = () => {
@@ -61,14 +59,12 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
     minSwipeDistance: 50
   });
 
-  // Reset index if it exceeds bounds after resize
   useEffect(() => {
     if (currentIndex > maxIndex) {
       setCurrentIndex(maxIndex);
     }
   }, [currentIndex, maxIndex]);
 
-  // Calculate transform based on current index and offset
   const getTransform = () => {
     if (!containerRef.current) return 'translateX(0)';
 
@@ -83,7 +79,7 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
   // Desktop grid layout (no swipe)
   if (!showSwipe) {
     return (
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${desktopCards} gap-${gap / 4} ${className}`}>
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${desktopCards} gap-6 ${className}`}>
         {children}
       </div>
     );
@@ -91,28 +87,28 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Navigation Arrows */}
-      {showArrows && totalCards > cardsPerView && (
+      {/* Navigation Arrows - Hidden on mobile */}
+      {showArrows && !isMobile && totalCards > cardsPerView && (
         <>
           <button
             onClick={goToPrevious}
             disabled={currentIndex === 0}
-            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg transition-all ${
-              currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:bg-white hover:scale-110'
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-forest-900/90 backdrop-blur-sm p-2.5 transition-all duration-300 ${
+              currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:bg-forest-800'
             }`}
-            aria-label="Previous card"
+            aria-label="Previous"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
+            <ChevronLeft className="w-5 h-5 text-mist-300" />
           </button>
           <button
             onClick={goToNext}
             disabled={currentIndex >= maxIndex}
-            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg transition-all ${
-              currentIndex >= maxIndex ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:bg-white hover:scale-110'
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-forest-900/90 backdrop-blur-sm p-2.5 transition-all duration-300 ${
+              currentIndex >= maxIndex ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:bg-forest-800'
             }`}
-            aria-label="Next card"
+            aria-label="Next"
           >
-            <ChevronRight className="w-6 h-6 text-gray-800" />
+            <ChevronRight className="w-5 h-5 text-mist-300" />
           </button>
         </>
       )}
@@ -130,11 +126,13 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
         onMouseLeave={handleMouseLeave}
       >
         <div
-          className="flex transition-transform duration-300 ease-out"
+          className="flex"
           style={{
             transform: getTransform(),
             gap: `${gap}px`,
-            cursor: isDragging ? 'grabbing' : 'grab'
+            cursor: isDragging ? 'grabbing' : 'grab',
+            willChange: isDragging ? 'transform' : 'auto',
+            transition: isDragging ? 'none' : 'transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
           }}
         >
           {childrenArray.map((child, index) => (
@@ -153,15 +151,15 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
 
       {/* Pagination Dots */}
       {showDots && totalCards > cardsPerView && (
-        <div className="flex justify-center items-center gap-2 mt-6">
+        <div className="flex justify-center items-center gap-2 mt-8">
           {Array.from({ length: maxIndex + 1 }).map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`transition-all duration-300 rounded-full ${
+              className={`transition-all duration-500 ${
                 index === currentIndex
-                  ? 'w-8 h-2 bg-blue-600'
-                  : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                  ? 'w-8 h-1 bg-gold-500/70'
+                  : 'w-1 h-1 bg-mist-600/40 hover:bg-mist-500/60'
               }`}
               aria-label={`Go to page ${index + 1}`}
             />
@@ -169,10 +167,10 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
         </div>
       )}
 
-      {/* Swipe Hint (mobile only, shows briefly) */}
+      {/* Swipe Hint (mobile only) */}
       {isMobile && currentIndex === 0 && totalCards > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-full animate-pulse">
-          ← Swipe to explore →
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-forest-900/80 backdrop-blur-sm border border-gold-500/10 text-mist-400 text-xs px-4 py-2 tracking-wider uppercase">
+          Swipe to explore
         </div>
       )}
     </div>

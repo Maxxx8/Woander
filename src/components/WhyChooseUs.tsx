@@ -1,102 +1,54 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Users, Brain, DollarSign, Heart, MapPin, Shield, Sparkles, TrendingUp } from 'lucide-react';
+import { Compass, Eye, Heart, Lightbulb, BookOpen } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const features = [
+const principles = [
   {
-    icon: MapPin,
-    title: 'Curated by Locals',
-    description: 'Connect with authentic experiences handpicked by people who know these places best',
-    color: 'from-blue-500 to-cyan-500'
+    icon: Compass,
+    title: 'Discovery-Led',
+    description: 'We guide you to places that feel like personal discoveries, not tourist checkpoints.'
   },
   {
-    icon: Brain,
-    title: 'Smart Planning',
-    description: 'AI-powered itinerary suggestions that adapt to your interests and travel style',
-    color: 'from-purple-500 to-pink-500'
-  },
-  {
-    icon: DollarSign,
-    title: 'Cost Transparency',
-    description: 'See real costs upfront with detailed breakdowns for accommodation, food, and activities',
-    color: 'from-green-500 to-emerald-500'
+    icon: BookOpen,
+    title: 'Story-Driven',
+    description: 'Every place has a history. We surface the narratives that make destinations meaningful.'
   },
   {
     icon: Heart,
-    title: 'Community Driven',
-    description: 'Discover hidden gems and insider tips from real travelers who have been there',
-    color: 'from-red-500 to-orange-500'
+    title: 'Community-Powered',
+    description: 'Our gems are discovered, verified, and shared by real explorers, not algorithms.'
   },
   {
-    icon: Shield,
-    title: 'Safe & Secure',
-    description: 'Verified listings and secure bookings with 24/7 support for peace of mind',
-    color: 'from-indigo-500 to-blue-500'
+    icon: Eye,
+    title: 'Observation',
+    description: 'We celebrate slow travel, deep observation, and understanding context.'
   },
   {
-    icon: Sparkles,
-    title: 'Unique Experiences',
-    description: 'Go beyond tourist traps with personalized adventures tailored to your preferences',
-    color: 'from-yellow-500 to-amber-500'
-  },
-  {
-    icon: Users,
-    title: 'Small Groups',
-    description: 'Intimate group sizes ensure better connections and more meaningful experiences',
-    color: 'from-teal-500 to-green-500'
-  },
-  {
-    icon: TrendingUp,
-    title: 'Flexible Booking',
-    description: 'Change your plans with ease - we understand that travel can be unpredictable',
-    color: 'from-pink-500 to-rose-500'
+    icon: Lightbulb,
+    title: 'Curiosity',
+    description: 'For people who ask "why," who seek the hidden, who question the obvious.'
   }
 ];
 
 const WhyChooseUs = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [travelerCount, setTravelerCount] = useState(0);
-  const [destinationCount, setDestinationCount] = useState(0);
-  const [ratingValue, setRatingValue] = useState(0);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      if (headerRef.current) {
-        gsap.fromTo(headerRef.current.children,
-          { opacity: 0, y: 30 },
+      if (cardsRef.current) {
+        const cards = cardsRef.current.children;
+        gsap.fromTo(cards,
+          { opacity: 0, y: 40 },
           {
             opacity: 1,
             y: 0,
             duration: 0.8,
-            stagger: 0.15,
+            stagger: 0.1,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: headerRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
-
-      if (cardsRef.current) {
-        const cards = cardsRef.current.children;
-        gsap.fromTo(cards,
-          { opacity: 0, y: 50, scale: 0.9, rotateX: 15 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotateX: 0,
-            duration: 0.6,
-            stagger: 0.08,
-            ease: 'back.out(1.2)',
             scrollTrigger: {
               trigger: cardsRef.current,
               start: 'top 75%',
@@ -105,106 +57,82 @@ const WhyChooseUs = () => {
           }
         );
       }
-
-      if (statsRef.current) {
-        ScrollTrigger.create({
-          trigger: statsRef.current,
-          start: 'top 80%',
-          onEnter: () => {
-            gsap.to({ val: 0 }, {
-              val: 10000,
-              duration: 2,
-              ease: 'power2.out',
-              onUpdate: function() {
-                setTravelerCount(Math.floor(this.targets()[0].val));
-              },
-            });
-            gsap.to({ val: 0 }, {
-              val: 100,
-              duration: 2,
-              ease: 'power2.out',
-              onUpdate: function() {
-                setDestinationCount(Math.floor(this.targets()[0].val));
-              },
-            });
-            gsap.to({ val: 0 }, {
-              val: 4.9,
-              duration: 2,
-              ease: 'power2.out',
-              onUpdate: function() {
-                setRatingValue(this.targets()[0].val);
-              },
-            });
-          },
-        });
-      }
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(96,165,250,0.1),transparent_50%)] pointer-events-none"></div>
+    <section ref={sectionRef} className="py-24 bg-forest-950 relative overflow-hidden">
+      {/* Atmospheric Lines */}
+      <div className="absolute inset-0 flex justify-center opacity-10 pointer-events-none">
+        <div className="w-px h-full bg-gradient-to-b from-transparent via-gold-500/30 to-transparent" />
+        <div className="w-px h-full bg-gradient-to-b from-transparent via-gold-500/20 to-transparent mx-20" />
+        <div className="w-px h-full bg-gradient-to-b from-transparent via-gold-500/20 to-transparent -mx-20" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div ref={headerRef} className="text-center mb-16">
-          <span className="inline-block px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold mb-4">
-            Why Choose Woander
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Travel Smarter, Not Harder
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 border border-gold-500/15 px-4 py-2 mb-6">
+            <span
+              className="text-[10px] uppercase tracking-[0.25em] text-gold-400/70"
+              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+            >
+              Philosophy
+            </span>
+          </div>
+          <h2
+            className="text-3xl sm:text-4xl md:text-5xl font-serif text-mist-100 mb-6"
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          >
+            Built for explorers,
+            <br />
+            <span className="italic text-mist-300/80">not tourists.</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We combine local expertise, smart technology, and community insights to create
-            unforgettable travel experiences that go beyond the guidebook
+          <p className="text-mist-500/60 max-w-xl mx-auto leading-relaxed text-sm md:text-base">
+            Woander exists for people who believe travel should be about discovering,
+            <br className="hidden sm:block" />
+            not just visiting. For contributors, not just consumers.
           </p>
         </div>
 
-        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {features.map((feature, index) => (
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-20">
+          {principles.map((principle, index) => (
             <div
               key={index}
-              className="group relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-3 hover:scale-[1.02] border border-gray-100 cursor-pointer"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="group bg-forest-900/50 border border-mist-700/10 p-6 transition-all duration-300 hover:border-gold-500/15 hover:bg-forest-900/70"
             >
-              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
-                <feature.icon className="w-7 h-7 text-white" />
+              <div className="w-10 h-10 flex items-center justify-center border border-gold-500/15 mb-4 group-hover:border-gold-500/30 transition-colors">
+                <principle.icon className="w-4 h-4 text-gold-400/60 group-hover:text-gold-400 transition-colors" />
               </div>
-
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                {feature.title}
+              <h3
+                className="text-base font-serif text-mist-200 mb-2"
+                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+              >
+                {principle.title}
               </h3>
-
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {feature.description}
+              <p className="text-xs text-mist-500/60 leading-relaxed">
+                {principle.description}
               </p>
-
-              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
             </div>
           ))}
         </div>
 
-        <div ref={statsRef} className="text-center">
-          <div className="inline-flex items-center gap-8 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl px-8 py-6 border border-blue-100 shadow-lg">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-blue-600">{travelerCount > 0 ? `${travelerCount.toLocaleString()}+` : '10,000+'}</p>
-              <p className="text-sm text-gray-600">Happy Travelers</p>
-            </div>
-            <div className="h-12 w-px bg-gray-300"></div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-purple-600">{destinationCount > 0 ? `${destinationCount}+` : '100+'}</p>
-              <p className="text-sm text-gray-600">Destinations</p>
-            </div>
-            <div className="h-12 w-px bg-gray-300"></div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-pink-600">{ratingValue > 0 ? `${ratingValue.toFixed(1)}/5` : '4.9/5'}</p>
-              <p className="text-sm text-gray-600">Average Rating</p>
-            </div>
-          </div>
+        {/* Philosophical Statement */}
+        <div className="text-center py-12 border-t border-mist-700/10">
+          <p
+            className="text-mist-400/50 italic tracking-wide text-sm md:text-base"
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+          >
+            "We are building contributors, discoverers, explorers, and communities.
+            <br className="hidden md:block" />
+            <span className="text-mist-500/40">Not passive users.</span>"
+          </p>
         </div>
       </div>
     </section>
   );
+
 };
 
 export default WhyChooseUs;
