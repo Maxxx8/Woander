@@ -94,11 +94,12 @@ const WhyChooseUs = () => {
         </div>
 
         {/* Stats strip */}
-        <div className="mt-16 pt-12 border-t border-forest-800 grid grid-cols-3 gap-8 max-w-2xl">
+        <div className="mt-16 pt-12 border-t border-forest-800 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl">
           {[
-            { value: '10,000+', label: 'Explorers' },
-            { value: '100+', label: 'Hidden Places' },
-            { value: '4.9', label: 'Trust Score' },
+            { value: '847', label: 'Hidden Gems Mapped' },
+            { value: '3,240+', label: 'Field Notes Written' },
+            { value: '1,200+', label: 'Active Explorers' },
+            { value: '64', label: 'Guides Verified' },
           ].map(({ value, label }) => (
             <div key={label}>
               <p className="font-display text-3xl font-light text-cream mb-1">{value}</p>

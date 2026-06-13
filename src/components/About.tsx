@@ -101,10 +101,10 @@ const About = () => {
               <em className="italic text-gold-300">for the quiet seekers.</em>
             </h2>
             <p className="text-mist-500 text-sm leading-relaxed mb-5 font-light">
-              For over 15 years, the places that matter most in India have been kept alive by the people who live near them — fishermen who know which reef is untouched, tea farmers who walk trails that aren't on any map, grandmothers who remember how the forest sounded before the road came.
+              The places that matter most in India are kept alive by the people who live near them — fishermen who know which reef is untouched, tea farmers who walk trails with no name.
             </p>
             <p className="text-mist-600 text-sm leading-relaxed mb-8 font-light">
-              Woander was built to honor that knowledge. To give it structure, visibility, and value — without destroying what makes it rare.
+              Woander honors that knowledge. Gives it structure, visibility, and value — without destroying what makes it rare.
             </p>
             <blockquote className="font-display text-lg italic text-gold-400/70 border-l border-gold-400/30 pl-6">
               "Adventure is worthwhile in itself." — Amelia Earhart

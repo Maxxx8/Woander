@@ -20,6 +20,96 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const ARCHIVE_SIGNALS = [
+  { type: 'coord', text: '10.8505° N, 76.2711° E — Nelliyampathy' },
+  { type: 'quote', text: '"Every civilization began as a hidden place."' },
+  { type: 'fact', text: '61% of India\'s biodiversity corridors have no tourism infrastructure.' },
+  { type: 'quote', text: '"The unknown still exists."' },
+  { type: 'coord', text: '9.9312° N, 76.2673° E — Idukki Arc' },
+  { type: 'fact', text: 'Over 400 waterfall trails in Kerala remain unmapped.' },
+  { type: 'quote', text: '"The map is never the territory."' },
+  { type: 'coord', text: '11.6854° N, 75.9912° E — Wayanad Ridge' },
+  { type: 'fact', text: 'The average hidden gem is visited by fewer than 20 people per year.' },
+  { type: 'quote', text: '"Find the others who still wander."' },
+];
+
+const ArchiveSection: React.FC = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex(i => (i + 1) % ARCHIVE_SIGNALS.length);
+    }, 3200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section className="py-20 bg-forest-950 border-t border-forest-800">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="mb-12">
+          <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Archive</p>
+          <h2 className="font-display text-3xl font-light text-cream">
+            Signals From <em className="italic text-gold-300">The Archive.</em>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border border-forest-800">
+          {/* Rotating signal */}
+          <div className="p-10 border-b lg:border-b-0 lg:border-r border-forest-800 flex flex-col justify-between min-h-[200px]">
+            <div>
+              <span className="font-jetbrains text-[9px] text-gold-400/40 tracking-widest uppercase block mb-6">
+                {ARCHIVE_SIGNALS[activeIndex].type === 'coord' ? 'Coordinates' : ARCHIVE_SIGNALS[activeIndex].type === 'quote' ? 'Transmission' : 'Field Note'}
+              </span>
+              <p
+                key={activeIndex}
+                className={`font-display font-light leading-relaxed transition-all duration-700 ${
+                  ARCHIVE_SIGNALS[activeIndex].type === 'coord'
+                    ? 'font-jetbrains text-base text-gold-400/70'
+                    : ARCHIVE_SIGNALS[activeIndex].type === 'quote'
+                    ? 'text-2xl italic text-cream'
+                    : 'text-base text-mist-400'
+                }`}
+                style={{ animation: 'fadeInUp 0.6s ease-out' }}
+              >
+                {ARCHIVE_SIGNALS[activeIndex].text}
+              </p>
+            </div>
+            {/* Progress dots */}
+            <div className="flex gap-1 mt-8">
+              {ARCHIVE_SIGNALS.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`h-px transition-all duration-300 ${i === activeIndex ? 'w-6 bg-gold-400' : 'w-2 bg-forest-700'}`}
+                  aria-label={`Signal ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Static archive fragments */}
+          <div className="p-10 grid grid-cols-1 gap-4">
+            {ARCHIVE_SIGNALS.filter(s => s.type === 'fact').slice(0, 3).map((signal, i) => (
+              <div key={i} className="group flex items-start gap-3">
+                <span className="text-gold-400/20 group-hover:text-gold-400/60 transition-colors duration-300 mt-0.5 flex-shrink-0">◦</span>
+                <p className="text-mist-700 text-xs leading-relaxed font-light group-hover:text-mist-500 transition-colors duration-300">
+                  {signal.text}
+                </p>
+              </div>
+            ))}
+            <div className="mt-4 pt-4 border-t border-forest-800">
+              <p className="font-jetbrains text-[9px] text-mist-800 tracking-widest">
+                Last updated: Field season 2024 — 847 gems catalogued
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>{`@keyframes fadeInUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }`}</style>
+    </section>
+  );
+};
+
 interface StorySection {
   image: string;
   headline: string;
@@ -226,16 +316,53 @@ const HomePage = () => {
         <StoryBlock key={i} section={section} index={i} />
       ))}
 
-      {/* Divider into discovery content */}
-      <div className="relative bg-forest-950 py-24">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="font-jetbrains text-[10px] text-gold-400/50 tracking-widest uppercase mb-6">What We've Found</p>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-cream mb-4">
-            Hidden Destinations
-          </h2>
-          <p className="text-mist-600 text-sm font-light max-w-md mx-auto">
-            Places that haven't been discovered by the algorithm. Yet.
-          </p>
+      {/* Hidden Gems community section */}
+      <div className="bg-forest-950 pt-24 pb-0">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Community Discoveries</p>
+              <h2 className="font-display text-4xl font-light text-cream">
+                Hidden Gems, <em className="italic text-gold-300">recently mapped.</em>
+              </h2>
+            </div>
+            <a href="/hidden-gems" className="hidden md:block font-jetbrains text-[10px] text-mist-600 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300">
+              View All →
+            </a>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-l border-forest-800">
+            {[
+              { name: 'Nelliyampathy Mist Trail', location: 'Palakkad, Kerala', founder: 'Arjun V.', notes: 12, visits: 43, verified: true, coord: '10.8505° N' },
+              { name: 'Kadalar Cave Springs', location: 'Idukki, Kerala', founder: 'Meera S.', notes: 7, visits: 18, verified: true, coord: '9.9312° N' },
+              { name: 'Vellarimala Summit Path', location: 'Wayanad, Kerala', founder: 'Rahul K.', notes: 19, visits: 61, verified: false, coord: '11.6854° N' },
+              { name: 'Pookode Lake Inlet', location: 'Wayanad, Kerala', founder: 'Divya R.', notes: 5, visits: 22, verified: true, coord: '11.5100° N' },
+              { name: 'Athirappilly Upper Falls', location: 'Thrissur, Kerala', founder: 'Santhosh M.', notes: 9, visits: 37, verified: true, coord: '10.2833° N' },
+              { name: 'Peermade Cardamom Route', location: 'Idukki, Kerala', founder: 'Anita J.', notes: 14, visits: 29, verified: false, coord: '9.5670° N' },
+            ].map((gem, i) => (
+              <div key={i} className="border-b border-r border-forest-800 p-6 group hover:bg-forest-900/40 transition-colors duration-400 cursor-pointer">
+                <div className="flex items-start justify-between mb-4">
+                  <p className="font-jetbrains text-[9px] text-gold-400/40 tracking-widest">{gem.coord}</p>
+                  <span className={`font-jetbrains text-[9px] tracking-widest px-2 py-0.5 border ${gem.verified ? 'border-gold-400/30 text-gold-400/60' : 'border-forest-700 text-mist-700'}`}>
+                    {gem.verified ? 'VERIFIED' : 'PENDING'}
+                  </span>
+                </div>
+                <h3 className="font-display text-lg font-light text-cream mb-1 group-hover:text-gold-200 transition-colors duration-300">{gem.name}</h3>
+                <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-4">{gem.location}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 rounded-full bg-forest-700 border border-forest-600 flex items-center justify-center">
+                      <span className="text-[7px] text-mist-500">{gem.founder[0]}</span>
+                    </div>
+                    <span className="font-jetbrains text-[9px] text-mist-600">{gem.founder}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-jetbrains text-[9px] text-mist-700">{gem.notes} notes</span>
+                    <span className="font-jetbrains text-[9px] text-mist-700">{gem.visits} visits</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -260,6 +387,36 @@ const HomePage = () => {
       <div className="bg-forest-950">
         <WhyChooseUs />
       </div>
+
+      {/* Explorer Profiles */}
+      <section className="py-20 bg-forest-900 border-t border-forest-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-12">
+            <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Who Explores Here</p>
+            <h2 className="font-display text-3xl font-light text-cream">
+              The <em className="italic text-gold-300">explorer hierarchy.</em>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 border-t border-l border-forest-800">
+            {[
+              { rank: 'Pathfinder', desc: 'First to visit and document an undiscovered place.', stat: '1–3 gems found', icon: '◎' },
+              { rank: 'Vanguard', desc: 'Recurring contributor with verified field notes and local connections.', stat: '4–10 gems found', icon: '◈' },
+              { rank: 'Gem Founder', desc: 'Discovered a gem that earned community verification and explorer visits.', stat: 'Verified gem owner', icon: '◆' },
+              { rank: 'Cartographer', desc: 'Mapped an entire region — trails, guides, seasonal notes, local lore.', stat: 'Region complete', icon: '⊕' },
+            ].map((profile, i) => (
+              <div key={i} className="border-b border-r border-forest-800 p-8 group hover:bg-forest-800/30 transition-colors duration-400">
+                <span className="text-xl text-gold-400/30 group-hover:text-gold-400/70 transition-colors duration-300 block mb-4">{profile.icon}</span>
+                <h3 className="font-display text-xl font-light text-cream mb-2 group-hover:text-gold-200 transition-colors duration-300">{profile.rank}</h3>
+                <p className="text-mist-600 text-xs leading-relaxed font-light mb-4">{profile.desc}</p>
+                <span className="font-jetbrains text-[9px] text-gold-400/50 tracking-widest uppercase">{profile.stat}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Archive section */}
+      <ArchiveSection />
 
       {/* Search section */}
       <section className="py-20 bg-forest-900 border-t border-forest-800">
