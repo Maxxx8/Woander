@@ -20,30 +20,14 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
     if (loading || !quote) return;
 
     const ctx = gsap.context(() => {
-      if (bgRef.current) {
-        gsap.fromTo(bgRef.current,
-          { scale: 1.1 },
-          {
-            scale: 1,
-            duration: 1.5,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
-
       if (quoteRef.current) {
         gsap.fromTo(quoteRef.current,
-          { opacity: 0, y: 30, filter: 'blur(5px)' },
+          { opacity: 0, y: 30, filter: 'blur(6px)' },
           {
             opacity: 1,
             y: 0,
             filter: 'blur(0px)',
-            duration: 1,
+            duration: 1.2,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -56,12 +40,12 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
 
       if (authorRef.current) {
         gsap.fromTo(authorRef.current,
-          { opacity: 0, x: -20 },
+          { opacity: 0, y: 10 },
           {
             opacity: 1,
-            x: 0,
+            y: 0,
             duration: 0.8,
-            delay: 0.5,
+            delay: 0.6,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -72,30 +56,28 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
         );
       }
 
-      if (sectionRef.current) {
-        gsap.to(bgRef.current, {
-          yPercent: -20,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: true,
-          },
-        });
-      }
+      gsap.to(bgRef.current, {
+        yPercent: -15,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        },
+      });
     }, sectionRef);
 
     return () => ctx.revert();
   }, [loading, quote]);
+
   if (loading) {
     return (
-      <section className="relative py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gray-300 animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60"></div>
-        <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
-          <div className="h-8 bg-white/20 rounded-lg w-3/4 mx-auto mb-6 animate-pulse"></div>
-          <div className="h-6 bg-white/10 rounded-lg w-1/4 mx-auto animate-pulse"></div>
+      <section className="relative py-32 overflow-hidden bg-forest-950">
+        <div className="absolute inset-0 bg-forest-800/30 animate-pulse" />
+        <div className="relative z-10 max-w-3xl mx-auto text-center px-6">
+          <div className="h-6 bg-mist-700/20 rounded w-2/3 mx-auto mb-4 animate-pulse" />
+          <div className="h-4 bg-mist-700/10 rounded w-1/4 mx-auto animate-pulse" />
         </div>
       </section>
     );
@@ -105,15 +87,35 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
 
   return (
     <section ref={sectionRef} className="relative py-32 overflow-hidden">
-      <div ref={bgRef} className="absolute inset-0 bg-cover bg-center will-change-transform" style={{ backgroundImage: `url("${quote.backgroundImage}")` }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60"></div>
+      {/* Background */}
+      <div
+        ref={bgRef}
+        className="absolute inset-0 bg-cover bg-center scale-110 will-change-transform"
+        style={{ backgroundImage: `url("${quote.backgroundImage}")` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-forest-950/80 via-forest-950/65 to-forest-950/85" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
-        <blockquote ref={quoteRef} className="text-2xl md:text-4xl text-white font-light leading-relaxed mb-6 drop-shadow-2xl">
+      {/* Subtle topo overlay */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-[1]" style={{ opacity: 0.04 }}>
+        <defs>
+          <pattern id="topo-quote" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+            <ellipse cx="100" cy="100" rx="80" ry="60" fill="none" stroke="#c9a84a" strokeWidth="0.6"/>
+            <ellipse cx="100" cy="100" rx="50" ry="38" fill="none" stroke="#c9a84a" strokeWidth="0.5"/>
+            <ellipse cx="100" cy="100" rx="22" ry="16" fill="none" stroke="#c9a84a" strokeWidth="0.4"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#topo-quote)" />
+      </svg>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-3xl mx-auto text-center px-6">
+        <blockquote ref={quoteRef} className="font-display text-2xl md:text-4xl font-light italic text-cream leading-relaxed mb-6">
           "{quote.quote}"
         </blockquote>
-        <cite ref={authorRef} className="text-xl text-orange-300 italic drop-shadow-lg">- {quote.author}</cite>
+        <cite ref={authorRef} className="font-jetbrains text-[11px] text-gold-400/70 tracking-widest uppercase not-italic">
+          — {quote.author}
+        </cite>
       </div>
     </section>
   );

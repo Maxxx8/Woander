@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import TouchGallery from './TouchGallery';
 
 interface DestinationCardProps {
@@ -16,60 +16,64 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   location,
   description,
   image,
-  rating,
   price
 }) => {
   const [showGallery, setShowGallery] = useState(false);
-  
-  // Sample gallery images - in real app, these would come from props
-  const galleryImages = [
-    image,
-    image, // You would have multiple images here
-    image
-  ];
+  const galleryImages = [image, image, image];
 
   return (
     <>
       <div
-        className="group relative overflow-hidden rounded-3xl shadow-xl transition-all duration-500 cursor-pointer h-[500px] hover:shadow-2xl hover:-translate-y-3 hover:scale-[1.02] animate-scale-in"
+        className="group relative overflow-hidden cursor-pointer h-[480px] border border-forest-700 hover:border-gold-400/30 transition-all duration-500"
         onClick={() => setShowGallery(true)}
-        style={{ transformStyle: 'preserve-3d' }}
       >
+        {/* Background image */}
         <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-          style={{ backgroundImage: `url(${image})` }}
+          className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-105"
+          style={{
+            backgroundImage: `url(${image})`,
+            filter: 'grayscale(40%) brightness(0.55) saturate(0.7)',
+          }}
+        />
+        {/* On hover, reveal color */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-0 group-hover:opacity-100"
+          style={{
+            backgroundImage: `url(${image})`,
+            filter: 'brightness(0.45)',
+          }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent group-hover:from-black/80 group-hover:via-black/50 transition-all duration-500" />
+        {/* Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-forest-950/95 via-forest-950/40 to-transparent" />
 
-        <div className="relative h-full flex flex-col justify-end p-8">
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-full text-sm font-semibold text-gray-800 shadow-lg">
+        {/* Price tag */}
+        <div className="absolute top-5 right-5 z-10">
+          <span className="font-jetbrains text-[10px] text-gold-400/80 tracking-widest border border-gold-400/20 px-3 py-1">
             {price}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div className="relative h-full flex flex-col justify-end p-7 z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin className="h-3 w-3 text-gold-400/60 flex-shrink-0" />
+            <span className="font-jetbrains text-[10px] text-mist-600 tracking-widest uppercase">{location}</span>
           </div>
 
-          <div className="inline-flex items-center space-x-2 mb-4 self-start">
-            <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="text-sm text-white font-semibold">{rating}</span>
-            </div>
-          </div>
-
-          <h3 className="text-4xl font-bold text-white mb-3 transform transition-all duration-300 drop-shadow-2xl">
+          <h3 className="font-display text-3xl font-light text-cream mb-3 leading-tight group-hover:text-gold-200 transition-colors duration-300">
             {title}
           </h3>
 
-          <div className="flex items-center space-x-2 mb-4">
-            <MapPin className="h-4 w-4 text-teal-400" />
-            <span className="text-sm text-white/90">{location}</span>
-          </div>
-
-          <p className="text-white text-base leading-relaxed mb-4 line-clamp-2 drop-shadow-lg">
+          <p className="text-mist-600 text-sm leading-relaxed mb-5 line-clamp-2 font-light group-hover:text-mist-400 transition-colors duration-300">
             {description}
           </p>
 
-          <button className="w-full py-4 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r from-coral-500/80 to-sunset-500/80 backdrop-blur-sm text-white hover:from-coral-600 hover:to-sunset-600 shadow-lg">
-            Explore Now
-          </button>
+          <div className="flex items-center justify-between">
+            <span className="font-jetbrains text-[10px] text-gold-400/40 tracking-widest uppercase group-hover:text-gold-400/80 transition-colors duration-500">
+              View Details →
+            </span>
+          </div>
         </div>
       </div>
 

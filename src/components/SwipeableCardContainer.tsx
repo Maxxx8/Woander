@@ -97,22 +97,22 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
           <button
             onClick={goToPrevious}
             disabled={currentIndex === 0}
-            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg transition-all ${
-              currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:bg-white hover:scale-110'
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-forest-900/90 border border-forest-700 p-2 transition-all ${
+              currentIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'opacity-80 hover:opacity-100 hover:border-gold-400/40'
             }`}
             aria-label="Previous card"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-800" />
+            <ChevronLeft className="w-5 h-5 text-mist-400" />
           </button>
           <button
             onClick={goToNext}
             disabled={currentIndex >= maxIndex}
-            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg transition-all ${
-              currentIndex >= maxIndex ? 'opacity-30 cursor-not-allowed' : 'opacity-100 hover:bg-white hover:scale-110'
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-forest-900/90 border border-forest-700 p-2 transition-all ${
+              currentIndex >= maxIndex ? 'opacity-20 cursor-not-allowed' : 'opacity-80 hover:opacity-100 hover:border-gold-400/40'
             }`}
             aria-label="Next card"
           >
-            <ChevronRight className="w-6 h-6 text-gray-800" />
+            <ChevronRight className="w-5 h-5 text-mist-400" />
           </button>
         </>
       )}
@@ -158,10 +158,10 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`transition-all duration-300 rounded-full ${
+              className={`transition-all duration-300 rounded-none ${
                 index === currentIndex
-                  ? 'w-8 h-2 bg-blue-600'
-                  : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                  ? 'w-8 h-px bg-gold-400'
+                  : 'w-2 h-px bg-forest-700 hover:bg-mist-600'
               }`}
               aria-label={`Go to page ${index + 1}`}
             />
@@ -171,7 +171,7 @@ const SwipeableCardContainer: React.FC<SwipeableCardContainerProps> = ({
 
       {/* Swipe Hint (mobile only, shows briefly) */}
       {isMobile && currentIndex === 0 && totalCards > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-full animate-pulse">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-forest-950/80 border border-forest-700 text-mist-500 font-jetbrains text-[10px] px-4 py-2 tracking-widest uppercase">
           ← Swipe to explore →
         </div>
       )}
