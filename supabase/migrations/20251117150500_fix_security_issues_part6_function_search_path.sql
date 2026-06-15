@@ -62,7 +62,9 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION generate_confirmation_code()
+DROP FUNCTION IF EXISTS generate_confirmation_code();
+
+CREATE FUNCTION generate_confirmation_code()
 RETURNS TEXT
 SECURITY DEFINER
 SET search_path = public
