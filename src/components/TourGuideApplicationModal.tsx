@@ -29,6 +29,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
     location_state: '',
     location_country: 'India',
     years_experience: 1,
+    archetype: '',
     languages: [] as string[],
     specialties: [] as string[],
     certifications: [] as Array<{ name: string; issuer: string; year: string }>,
@@ -47,6 +48,11 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
   const specialtyOptions = [
     'cultural', 'adventure', 'food', 'history', 'nature',
     'photography', 'walking', 'cycling', 'wildlife', 'spiritual'
+  ];
+
+  const archetypeOptions = [
+    'Historian', 'Pathfinder', 'Food Explorer', 'Naturalist',
+    'Architect', 'Storykeeper', 'Photographer', 'Adventure Specialist',
   ];
 
   if (!isOpen) return null;
@@ -145,6 +151,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
         location_state: formData.location_state,
         location_country: formData.location_country,
         years_experience: formData.years_experience,
+        archetype: formData.archetype || null,
         languages: formData.languages,
         specialties: formData.specialties,
         certifications: formData.certifications,
@@ -214,7 +221,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
       <div className="bg-white rounded-2xl max-w-2xl w-full my-8">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Become a Vanguard Guide</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Join the Vanguard Network</h2>
             <p className="text-sm text-gray-600 mt-1">Step {step} of 4</p>
           </div>
           <button
@@ -367,12 +374,29 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Explorer Archetype
+                </label>
+                <select
+                  name="archetype"
+                  value={formData.archetype}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                >
+                  <option value="">Select your archetype</option>
+                  {archetypeOptions.map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Languages & Specialties</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Languages & Explorer Focus</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -416,7 +440,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tour Specialties <span className="text-red-500">*</span>
+                  Explorer Focus <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2 mb-2">
                   <select
@@ -460,7 +484,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
 
           {step === 4 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Bio & Certifications</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Bio & Expertise</h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -478,7 +502,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Certifications (Optional)
+                  Expertise & Credentials (Optional)
                 </label>
                 <div className="space-y-2 mb-2">
                   <input
@@ -562,7 +586,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
               disabled={loading}
               className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Submitting...' : 'Submit Application'}
+              {loading ? 'Submitting...' : 'Join the Vanguard Network'}
             </button>
           )}
         </div>

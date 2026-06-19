@@ -91,6 +91,11 @@ export interface TourGuide {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  archetype?: string | null;
+  hidden_gems_count?: number;
+  field_notes_count?: number;
+  hosted_gems?: string[];
+  sample_field_notes?: string[];
 }
 
 export interface Tour {
