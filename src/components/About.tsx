@@ -6,11 +6,44 @@ import { MapPin, Users, Award, Eye, Compass, BookOpen } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const stats = [
-  { icon: Award, label: "Years Exploring", value: "15+" },
-  { icon: MapPin, label: "Hidden Places", value: "100+" },
-  { icon: Users, label: "Explorers", value: "10,000+" },
-  { icon: Eye, label: "Discoveries", value: "2,500+" }
+import { TrendingUp, Recycle, Target, Globe, Lightbulb, Users as Users2, Eye } from 'lucide-react';
+
+const principles = [
+  {
+    icon: TrendingUp,
+    title: 'Covariance',
+    description: 'The outcomes of every project are interlinked. What one community discovers benefits the collective.',
+  },
+  {
+    icon: Recycle,
+    title: 'Continuous Improvement',
+    description: 'No map is final. We iterate constantly — higher frequency, smaller feedback loops.',
+  },
+  {
+    icon: Target,
+    title: 'Alignment',
+    description: 'Every contributor shares the same north star: honest, sustainable, community-led discovery.',
+  },
+  {
+    icon: Globe,
+    title: 'Sustainability',
+    description: 'We only surface places that can absorb the attention without being destroyed by it.',
+  },
+  {
+    icon: Lightbulb,
+    title: 'Innovation',
+    description: 'Hyper-local technology solves hyper-local problems. The solutions look different here.',
+  },
+  {
+    icon: Users2,
+    title: 'Community Engagement',
+    description: 'The people who live in these places shape how they are discovered. Always.',
+  },
+  {
+    icon: Eye,
+    title: 'Transparency',
+    description: 'You know how your contribution is used, rewarded, and shared. No black boxes.',
+  },
 ];
 
 const About = () => {
@@ -28,7 +61,7 @@ const About = () => {
             opacity: 1,
             y: 0,
             duration: 0.7,
-            stagger: 0.1,
+            stagger: 0.08,
             ease: 'power3.out',
             scrollTrigger: {
               trigger: principlesRef.current,
@@ -38,133 +71,112 @@ const About = () => {
           }
         );
       }
+
+      gsap.fromTo('.about-text-block',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.about-text-block',
+            start: 'top 75%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} id="about" className="py-20 md:py-28 bg-forest-900 relative overflow-hidden">
-      {/* Subtle Grid Overlay */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <defs>
-          <pattern id="grid" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
-            <rect x="3.9" y="3.9" width="0.2" height="0.2" fill="rgba(201, 168, 74, 0.5)" />
-          </pattern>
-        </defs>
-        <rect width="100" height="100" fill="url(#grid)" />
-      </svg>
+    <section ref={sectionRef} id="about" className="py-24 bg-forest-950">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-28">
-          {/* Left - Text */}
+        {/* Header + body */}
+        <div className="about-text-block grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-24">
           <div>
-            <div className="inline-flex items-center gap-2 border border-gold-500/15 px-4 py-2 mb-8">
-              <Compass className="w-3.5 h-3.5 text-gold-500/60" />
-              <span
-                className="text-[10px] uppercase tracking-[0.25em] text-gold-400/70"
-                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-              >
-                About Woander
-              </span>
-            </div>
-
-            <h2
-              className="text-3xl sm:text-4xl lg:text-5xl font-serif text-mist-100 mb-6 leading-tight"
-              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-            >
-              For those who believe
-              <br />
-              <span className="italic text-mist-300/80">the best places</span>
-              <br />
-              are often not yet discovered.
+            <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-6">The Origin</p>
+            <h2 className="font-display text-4xl md:text-5xl font-light text-cream leading-tight mb-8">
+              Woander was built<br />
+              <em className="italic text-gold-300">for the quiet seekers.</em>
             </h2>
-
-            <p className="text-mist-500/60 leading-relaxed mb-6 text-sm md:text-base">
-              We believe that travel is not just about visiting places—it's about awakening your senses,
-              discovering new perspectives, and creating memories that last a lifetime.
+            <p className="text-mist-500 text-sm leading-relaxed mb-5 font-light">
+              The places that matter most in India are kept alive by the people who live near them — fishermen who know which reef is untouched, tea farmers who walk trails with no name.
             </p>
-            <p className="text-mist-500/60 leading-relaxed mb-8 text-sm md:text-base">
-              Woander exists for the pathfinders, the curious observers, the cultural wanderers.
-              Those who seek the hidden, question the obvious, and believe that some places
-              reveal themselves only to those who truly look.
+            <p className="text-mist-600 text-sm leading-relaxed mb-8 font-light">
+              Woander honors that knowledge. Gives it structure, visibility, and value — without destroying what makes it rare.
             </p>
-
-            <blockquote
-              className="pl-5 border-l-2 border-gold-500/30 text-gold-300/70 italic"
-              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-            >
-              "Adventure is worthwhile in itself."
-              <span className="block mt-1 text-xs text-mist-500/50 not-italic tracking-wider">— Amelia Earhart</span>
+            <blockquote className="font-display text-lg italic text-gold-400/70 border-l border-gold-400/30 pl-6">
+              "Adventure is worthwhile in itself." — Amelia Earhart
             </blockquote>
           </div>
 
           {/* Right - Image with Overlay */}
           <div className="relative">
-            <div className="overflow-hidden">
-              <img
-                src="https://images.pexels.com/photos/1660995/pexels-photo-1660995.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Misty mountain landscape"
-                className="w-full h-[400px] md:h-[500px] object-cover opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-forest-900 via-transparent to-transparent" />
-            </div>
-
-            {/* Stats Overlay */}
-            <div
-              ref={principlesRef}
-              className="hidden lg:grid grid-cols-2 gap-4 absolute -bottom-6 -left-6 right-8"
-            >
-              {[
-                { label: "Curated", value: "Locally" },
-                { label: "Powered by", value: "Community" },
-                { label: "For", value: "Explorers" },
-                { label: "Since", value: "2009" }
-              ].map((item, i) => (
-                <div key={i} className="bg-forest-950/90 backdrop-blur-sm border border-gold-500/10 p-4">
-                  <div
-                    className="text-sm text-gold-400/80 mb-1"
-                    style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-                  >
-                    {item.value}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider text-mist-600/50">
-                    {item.label}
-                  </div>
-                </div>
-              ))}
+            <img
+              src="https://images.pexels.com/photos/1660995/pexels-photo-1660995.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Indian landscape"
+              className="w-full object-cover"
+              style={{ filter: 'grayscale(20%) brightness(0.7) saturate(0.85)', height: '440px' }}
+            />
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-forest-950/80 to-transparent">
+              <p className="font-jetbrains text-[10px] text-gold-400/50 tracking-widest">10.8505° N, 76.2711° E</p>
             </div>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6 mt-20 lg:mt-32">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 border border-gold-500/15 mb-4">
-                <stat.icon className="h-5 w-5 text-gold-400/60" />
+        {/* Vision & Mission */}
+        <div className="mb-24">
+          <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-8">Direction</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-forest-700">
+            <div className="p-10 border-b md:border-b-0 md:border-r border-forest-700 hover:bg-forest-900/40 transition-colors duration-500">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-1 h-8 bg-gold-400/40" />
+                <h4 className="font-display text-2xl font-light text-cream">Vision</h4>
               </div>
-              <p
-                className="text-2xl md:text-3xl font-serif text-mist-100 mb-1"
-                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-              >
-                {stat.value}
+              <p className="text-mist-500 leading-relaxed text-sm font-light">
+                A world where coherent and coordinated efforts lead to sustainable development, social equity, and technological innovation — starting from the places the world forgot to look.
               </p>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-mist-600/50">
-                {stat.label}
+            </div>
+            <div className="p-10 hover:bg-forest-900/40 transition-colors duration-500">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-1 h-8 bg-gold-400/40" />
+                <h4 className="font-display text-2xl font-light text-cream">Mission</h4>
+              </div>
+              <p className="text-mist-500 leading-relaxed text-sm font-light">
+                To empower travelers and local communities through innovative, hyper-local technology solutions and quality services that enhance travel experiences and support sustainable sector development.
               </p>
             </div>
           ))}
         </div>
 
-        {/* Philosophical Footer */}
-        <div className="mt-20 pt-8 border-t border-mist-700/10 text-center">
-          <p
-            className="text-sm text-mist-500/40 italic tracking-wide"
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-          >
-            "Not all those who wander are lost."
-          </p>
+        {/* Principles */}
+        <div>
+          <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-8">Core Principles</p>
+
+          <div ref={principlesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-l border-forest-800">
+            {principles.map((principle, index) => (
+              <div
+                key={index}
+                className="border-b border-r border-forest-800 p-7 group hover:bg-forest-900/40 transition-colors duration-400"
+              >
+                <div className="flex items-start gap-4">
+                  <principle.icon className="h-4 w-4 text-gold-400/40 flex-shrink-0 mt-1 group-hover:text-gold-400/80 transition-colors duration-300" />
+                  <div>
+                    <h4 className="font-display text-base font-light text-cream mb-2 group-hover:text-gold-200 transition-colors duration-300">
+                      {principle.title}
+                    </h4>
+                    <p className="text-mist-700 text-sm leading-relaxed font-light group-hover:text-mist-500 transition-colors duration-300">
+                      {principle.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import {
-  MapPin, Search, Filter, TrendingUp, Heart, Flame, Crown, Eye, Plus,
-  Mountain, Coffee, Compass, Waves, TreePine, Camera, Map, Star, Users,
-  Award, ChevronDown, X
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapPin, Plus, Eye, ChevronRight } from 'lucide-react';
 import Footer from '../components/Footer';
-import QuoteSection from '../components/QuoteSection';
 import AddGemModal from '../components/AddGemModal';
-import SwipeableCardContainer from '../components/SwipeableCardContainer';
-import { useRandomQuotes } from '../hooks/useRandomQuotes';
 import { supabase } from '../shared/supabase';
 import { useAuth } from '../shared/AuthContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface HiddenGem {
   id: string;
@@ -20,444 +17,503 @@ interface HiddenGem {
   category: string;
   difficulty_level: string;
   image_url: string;
-  best_time_to_visit: string;
-  tips: string;
   total_votes: number;
   total_visits: number;
   verification_status: string;
   created_at: string;
 }
 
-const categories = [
-  { id: 'all', label: 'All Gems', icon: Compass },
-  { id: 'cafe', label: 'Cafés', icon: Coffee },
-  { id: 'viewpoint', label: 'Viewpoints', icon: Mountain },
-  { id: 'waterfall', label: 'Waterfalls', icon: Waves },
-  { id: 'trail', label: 'Trails', icon: TreePine },
-  { id: 'beach', label: 'Beaches', icon: Camera },
-  { id: 'other', label: 'Other', icon: Map }
+const FEATURED_DISCOVERIES = [
+  {
+    name: 'Hidden Lighthouse Ridge',
+    location: 'Kannur, Kerala',
+    status: 'Emerging Destination',
+    reports: 12,
+    verification: 42,
+    founder: 'Awaiting Discovery',
+    coord: '11.8745° N, 75.3704° E',
+    image: 'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=800',
+  },
+  {
+    name: 'Vellarimala Summit Path',
+    location: 'Wayanad, Kerala',
+    status: 'Under Verification',
+    reports: 8,
+    verification: 67,
+    founder: 'Rahul K.',
+    coord: '11.6854° N, 75.9912° E',
+    image: 'https://images.pexels.com/photos/2104152/pexels-photo-2104152.jpeg?auto=compress&cs=tinysrgb&w=800',
+  },
+  {
+    name: 'Peermade Cardamom Route',
+    location: 'Idukki, Kerala',
+    status: 'Signal Detected',
+    reports: 3,
+    verification: 18,
+    founder: 'Anita J.',
+    coord: '9.5670° N, 77.0200° E',
+    image: 'https://images.pexels.com/photos/5273584/pexels-photo-5273584.jpeg?auto=compress&cs=tinysrgb&w=800',
+  },
 ];
 
-const difficulties = [
-  { id: 'all', label: 'All Levels' },
-  { id: 'easy', label: 'Easy', color: 'green' },
-  { id: 'moderate', label: 'Moderate', color: 'yellow' },
-  { id: 'challenging', label: 'Challenging', color: 'red' }
+const FIELD_NOTES = [
+  {
+    id: '041',
+    text: 'Reached before sunrise. No signs. Only the sound of water.',
+    author: 'Pathfinder 012',
+    location: 'Nelliyampathy',
+    coord: '10.8505° N',
+  },
+  {
+    id: '087',
+    text: "The trail ends at a boulder. Behind it: a clearing no map shows. I didn't tell anyone.",
+    author: 'Vanguard 004',
+    location: 'Wayanad Ridge',
+    coord: '11.6854° N',
+  },
+  {
+    id: '103',
+    text: 'Three hours from the nearest road. The village elder knew the way. He asked if we were lost. We said yes.',
+    author: 'Pathfinder 031',
+    location: 'Idukki Arc',
+    coord: '9.9312° N',
+  },
+  {
+    id: '129',
+    text: 'Monsoon season. No one comes here then. That is precisely why we went.',
+    author: 'Cartographer 002',
+    location: 'Thrissur',
+    coord: '10.5276° N',
+  },
 ];
 
-const sortOptions = [
-  { id: 'trending', label: 'Trending', icon: TrendingUp },
-  { id: 'newest', label: 'Newest', icon: Star },
-  { id: 'most_voted', label: 'Most Voted', icon: Heart },
-  { id: 'most_visited', label: 'Most Visited', icon: Eye }
+const MISSIONS = [
+  {
+    region: 'Western Ghats',
+    objective: 'Find undocumented viewpoints above 1,200m elevation',
+    reward: 'Founder Status',
+    signals: 4,
+    active: true,
+    coord: '10.8505° N — 11.6854° N',
+  },
+  {
+    region: 'Kochi',
+    objective: 'Document forgotten colonial and vernacular architecture',
+    reward: 'Cartographer Badge',
+    signals: 2,
+    active: true,
+    coord: '9.9312° N, 76.2673° E',
+  },
+  {
+    region: 'Lakshadweep Corridor',
+    objective: 'Map unmapped reef entry points for ethical diving',
+    reward: 'Vanguard Recognition',
+    signals: 1,
+    active: false,
+    coord: '10.5593° N, 72.6358° E',
+  },
+];
+
+const ARCHIVE_SIGNALS = [
+  'Every civilization began as a hidden place.',
+  'The unknown still exists.',
+  'The map is never the territory.',
+  'Not everything forgotten was lost.',
+  'Discovery is not an act. It is a practice.',
+];
+
+const LIFECYCLE_STEPS = [
+  { label: 'Signal', desc: 'A place is reported by an explorer' },
+  { label: 'Explorer Reports', desc: 'Multiple field notes accumulate' },
+  { label: 'Verification', desc: 'Community validates the discovery' },
+  { label: 'Hidden Gem', desc: 'Officially mapped and attributed' },
+  { label: 'Destination', desc: 'Becomes part of the living atlas' },
 ];
 
 const HiddenGemsPage = () => {
-  const { quotes: randomQuotes, isLoading: quotesLoading } = useRandomQuotes(2);
   const { user } = useAuth();
   const [gems, setGems] = useState<HiddenGem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
-  const [selectedSort, setSelectedSort] = useState('trending');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [activeNote, setActiveNote] = useState(0);
+  const [archiveIndex, setArchiveIndex] = useState(0);
+  const [archiveVisible, setArchiveVisible] = useState(true);
+  const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchGems();
-  }, [selectedCategory, selectedDifficulty, selectedSort]);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveNote(i => (i + 1) % FIELD_NOTES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setArchiveVisible(false);
+      setTimeout(() => {
+        setArchiveIndex(i => (i + 1) % ARCHIVE_SIGNALS.length);
+        setArchiveVisible(true);
+      }, 500);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.obs-fade',
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1, y: 0, duration: 0.9, stagger: 0.12, ease: 'power3.out',
+          scrollTrigger: { trigger: '.obs-fade', start: 'top 75%', toggleActions: 'play none none reverse' },
+        }
+      );
+    }, pageRef);
+    return () => ctx.revert();
+  }, []);
 
   const fetchGems = async () => {
     setLoading(true);
     try {
-      let query = supabase
+      const { data } = await supabase
         .from('hidden_gems')
         .select('*')
-        .in('verification_status', ['verified', 'featured']);
-
-      if (selectedCategory !== 'all') {
-        query = query.eq('category', selectedCategory);
-      }
-
-      if (selectedDifficulty !== 'all') {
-        query = query.eq('difficulty_level', selectedDifficulty);
-      }
-
-      switch (selectedSort) {
-        case 'newest':
-          query = query.order('created_at', { ascending: false });
-          break;
-        case 'most_voted':
-          query = query.order('total_votes', { ascending: false });
-          break;
-        case 'most_visited':
-          query = query.order('total_visits', { ascending: false });
-          break;
-        default:
-          query = query.order('total_votes', { ascending: false }).limit(50);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
+        .in('verification_status', ['verified', 'featured'])
+        .order('total_votes', { ascending: false })
+        .limit(6);
       setGems(data || []);
-    } catch (error) {
-      console.error('Error fetching gems:', error);
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVote = async (gemId: string, event: React.MouseEvent) => {
-    event.preventDefault();
-
-    if (!user) {
-      alert('Please sign in to vote on hidden gems');
-      return;
-    }
-
-    try {
-      const { data: existingVote } = await supabase
-        .from('gem_votes')
-        .select('id')
-        .eq('gem_id', gemId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (existingVote) {
-        await supabase
-          .from('gem_votes')
-          .delete()
-          .eq('gem_id', gemId)
-          .eq('user_id', user.id);
-      } else {
-        await supabase
-          .from('gem_votes')
-          .insert({ gem_id: gemId, user_id: user.id, vote_type: 'upvote' });
-      }
-
-      await fetchGems();
-    } catch (error) {
-      console.error('Error voting:', error);
-      alert('Failed to register vote. Please try again.');
-    }
-  };
-
-  const filteredGems = gems.filter(gem => {
-    const matchesSearch = gem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         gem.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         gem.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'easy': return 'bg-green-100 text-green-700 border-green-200';
-      case 'moderate': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'challenging': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
-
   return (
-    <div className="min-h-screen pt-20 pb-20 md:pb-0">
-      {!quotesLoading && randomQuotes[0] && <QuoteSection quote={randomQuotes[0]} />}
+    <div ref={pageRef} className="min-h-screen bg-forest-950 pt-16 pb-20 md:pb-0">
 
-      <section className="py-16 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 shadow-sm">
-              <MapPin className="h-5 w-5 text-orange-600" />
-              <span className="text-orange-600 font-semibold">Community Discovery</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
-              Hidden <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-pink-600 to-purple-600">Gems</span>
-            </h1>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8 leading-relaxed">
-              A digital treasure hunt powered by explorers like you. Discover secret spots that aren't in any guidebook.
-            </p>
-
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
-              <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-sm">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-orange-600" />
-                  <span className="font-bold text-2xl text-gray-900">{filteredGems.length}</span>
-                  <span className="text-gray-600">Gems</span>
-                </div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-600" />
-                  <span className="font-bold text-2xl text-gray-900">1.2k</span>
-                  <span className="text-gray-600">Explorers</span>
-                </div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-purple-600" />
-                  <span className="font-bold text-2xl text-gray-900">156</span>
-                  <span className="text-gray-600">Verified</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search hidden gems..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-semibold"
-              >
-                <Filter className="h-5 w-5" />
-                Filters
-                <ChevronDown className={`h-5 w-5 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
-
-            {showFilters && (
-              <div className="mt-6 pt-6 border-t border-gray-200 space-y-6">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Compass className="h-4 w-4" />
-                    Categories
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map(category => (
-                      <button
-                        key={category.id}
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-                          selectedCategory === category.id
-                            ? 'bg-gradient-to-r from-orange-600 to-pink-600 text-white shadow-lg'
-                            : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-orange-500'
-                        }`}
-                      >
-                        <category.icon className="h-4 w-4" />
-                        {category.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Mountain className="h-4 w-4" />
-                      Difficulty Level
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {difficulties.map(difficulty => (
-                        <button
-                          key={difficulty.id}
-                          onClick={() => setSelectedDifficulty(difficulty.id)}
-                          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                            selectedDifficulty === difficulty.id
-                              ? 'bg-gray-900 text-white'
-                              : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-900'
-                          }`}
-                        >
-                          {difficulty.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      Sort By
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {sortOptions.map(option => (
-                        <button
-                          key={option.id}
-                          onClick={() => setSelectedSort(option.id)}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-                            selectedSort === option.id
-                              ? 'bg-gray-900 text-white'
-                              : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-900'
-                          }`}
-                        >
-                          <option.icon className="h-4 w-4" />
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setSelectedDifficulty('all');
-                    setSelectedSort('trending');
-                    setSearchQuery('');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 font-semibold transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                  Clear All Filters
-                </button>
-              </div>
-            )}
-          </div>
+      {/* ── Hero ── */}
+      <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.pexels.com/photos/1366909/pexels-photo-1366909.jpeg?auto=compress&cs=tinysrgb&w=1920"
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ filter: 'grayscale(30%) brightness(0.4) saturate(0.7)' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-forest-950/60 via-forest-950/40 to-forest-950/90" />
         </div>
-      </section>
+        {/* Topo overlay */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.05 }}>
+          <defs>
+            <pattern id="topo-h" x="0" y="0" width="300" height="300" patternUnits="userSpaceOnUse">
+              <ellipse cx="150" cy="150" rx="130" ry="100" fill="none" stroke="#c9a84a" strokeWidth="0.7"/>
+              <ellipse cx="150" cy="150" rx="90" ry="68" fill="none" stroke="#c9a84a" strokeWidth="0.5"/>
+              <ellipse cx="150" cy="150" rx="50" ry="38" fill="none" stroke="#c9a84a" strokeWidth="0.4"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#topo-h)" />
+        </svg>
 
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-600 border-t-transparent mb-4"></div>
-              <p className="text-gray-600 font-semibold">Loading hidden gems...</p>
-            </div>
-          ) : filteredGems.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
-                <MapPin className="h-10 w-10 text-gray-400" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">No hidden gems found</h3>
-              <p className="text-gray-600 mb-6">Try adjusting your filters or search query</p>
-              <button
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setSelectedDifficulty('all');
-                  setSearchQuery('');
-                }}
-                className="px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors font-semibold"
-              >
-                Reset Filters
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="mb-8">
-                <p className="text-gray-600">
-                  Showing <span className="font-bold text-orange-600">{filteredGems.length}</span> hidden gems
-                </p>
-              </div>
-
-              <SwipeableCardContainer
-                mobileCards={1}
-                tabletCards={2}
-                desktopCards={3}
-                showDots={true}
-                showArrows={true}
-                className="px-4 md:px-0"
-              >
-                {filteredGems.map((gem) => (
-                  <div
-                    key={gem.id}
-                    className="group bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
-                  >
-                    <div className="relative h-64 overflow-hidden">
-                      <img
-                        src={gem.image_url || 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800'}
-                        alt={gem.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                      <div className="absolute top-4 left-4 flex gap-2">
-                        {gem.verification_status === 'featured' && (
-                          <span className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full">
-                            <Crown className="h-3 w-3" />
-                            Featured
-                          </span>
-                        )}
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getDifficultyColor(gem.difficulty_level)}`}>
-                          {gem.difficulty_level}
-                        </span>
-                      </div>
-
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <h3 className="text-2xl font-bold text-white mb-1">{gem.title}</h3>
-                        <div className="flex items-center gap-1 text-white/90 text-sm">
-                          <MapPin className="h-4 w-4" />
-                          {gem.location}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6">
-                      <p className="text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                        {gem.description}
-                      </p>
-
-                      {gem.tips && (
-                        <div className="mb-4 p-3 bg-orange-50 border border-orange-100 rounded-lg">
-                          <p className="text-sm text-orange-900 font-medium">💡 {gem.tips}</p>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-4">
-                          <button
-                            onClick={(e) => handleVote(gem.id, e)}
-                            className="flex items-center gap-1 text-gray-600 hover:text-orange-600 transition-colors"
-                          >
-                            <Heart className="h-5 w-5" />
-                            <span className="font-semibold">{gem.total_votes}</span>
-                          </button>
-                          <div className="flex items-center gap-1 text-gray-600">
-                            <Eye className="h-5 w-5" />
-                            <span className="font-semibold">{gem.total_visits}</span>
-                          </div>
-                        </div>
-                        <button className="px-4 py-2 bg-gradient-to-r from-orange-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all">
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </SwipeableCardContainer>
-            </>
-          )}
-        </div>
-      </section>
-
-      <section className="py-20 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full mb-6">
-            <Plus className="h-8 w-8" />
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Found a Hidden Gem?
-          </h2>
-          <p className="text-xl mb-8 text-white/90">
-            Share your secret spot with the community. Help fellow explorers discover amazing places. Earn rewards for positive, valuable contributions!
+        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full">
+          <p className="font-jetbrains text-[10px] text-gold-400/70 tracking-widest uppercase mb-8">Discovery Observatory</p>
+          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-cream leading-[1.05] mb-6 max-w-4xl">
+            Every Destination Was Once<br />
+            <em className="italic text-gold-300">A Hidden Gem.</em>
+          </h1>
+          <p className="text-mist-400 text-base font-light max-w-xl mb-12">
+            Discover, validate, and help shape the next generation of destinations.
           </p>
-          <button
-            onClick={() => {
-              if (!user) {
-                alert('Please sign in to add a hidden gem');
-                return;
-              }
-              setShowAddModal(true);
-            }}
-            className="px-8 py-4 bg-white text-teal-600 text-lg font-bold rounded-xl hover:bg-gray-50 transform hover:scale-105 transition-all duration-200 shadow-xl"
-          >
-            Add Your Discovery
-          </button>
+
+          {/* Stats */}
+          <div className="flex flex-wrap gap-0 border border-forest-800 w-fit">
+            {[
+              { value: '1,200', label: 'Explorers' },
+              { value: '156', label: 'Signals Under Review' },
+              { value: '18', label: 'Active Missions' },
+            ].map(({ value, label }, i) => (
+              <div key={i} className={`px-8 py-5 ${i < 2 ? 'border-r border-forest-800' : ''}`}>
+                <p className="font-display text-2xl font-light text-cream">{value}</p>
+                <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {!quotesLoading && randomQuotes[1] && <QuoteSection quote={randomQuotes[1]} />}
+      {/* ── Featured Discoveries ── */}
+      <section className="py-20 border-t border-forest-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-12">
+            <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Featured Signals</p>
+            <h2 className="font-display text-3xl font-light text-cream">
+              Discoveries <em className="italic text-gold-300">emerging now.</em>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-forest-800">
+            {FEATURED_DISCOVERIES.map((d, i) => (
+              <div key={i} className="border-b border-r border-forest-800 group overflow-hidden">
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={d.image}
+                    alt={d.name}
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                    style={{ filter: 'grayscale(35%) brightness(0.55)' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest-950/90 to-transparent" />
+                  <div className="absolute top-3 right-3">
+                    <span className="font-jetbrains text-[9px] text-gold-400/70 border border-gold-400/20 px-2 py-0.5 bg-forest-950/60">
+                      {d.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="absolute bottom-3 left-3 font-jetbrains text-[9px] text-gold-400/50 tracking-widest">{d.coord}</p>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-display text-lg font-light text-cream mb-1 group-hover:text-gold-200 transition-colors duration-300">{d.name}</h3>
+                  <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-4">{d.location}</p>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="space-y-1">
+                      <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest">{d.reports} EXPLORER REPORTS</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-px bg-forest-700 w-20">
+                          <div className="h-px bg-gold-400/60" style={{ width: `${d.verification}%` }} />
+                        </div>
+                        <span className="font-jetbrains text-[9px] text-gold-400/60">{d.verification}% VERIFIED</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="font-jetbrains text-[9px] text-mist-700">
+                      FOUNDER: <span className="text-gold-400/60">{d.founder}</span>
+                    </p>
+                    <button className="font-jetbrains text-[9px] text-mist-500 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300">
+                      Investigate Signal →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Discovery Lifecycle ── */}
+      <section className="py-20 bg-forest-900 border-t border-forest-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-12">
+            <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">The Process</p>
+            <h2 className="font-display text-3xl font-light text-cream">
+              Discovery <em className="italic text-gold-300">Creates Reality.</em>
+            </h2>
+          </div>
+          <div className="flex flex-col md:flex-row items-stretch gap-0 border border-forest-700">
+            {LIFECYCLE_STEPS.map((step, i) => (
+              <div key={i} className={`flex-1 p-6 ${i < LIFECYCLE_STEPS.length - 1 ? 'border-b md:border-b-0 md:border-r border-forest-700' : ''} group hover:bg-forest-800/40 transition-colors duration-400`}>
+                <span className="font-jetbrains text-[9px] text-gold-400/30 tracking-widest block mb-4">0{i + 1}</span>
+                <h3 className="font-display text-base font-light text-cream mb-2 group-hover:text-gold-200 transition-colors duration-300">{step.label}</h3>
+                <p className="text-mist-700 text-xs font-light leading-relaxed group-hover:text-mist-500 transition-colors duration-300">{step.desc}</p>
+                {i < LIFECYCLE_STEPS.length - 1 && (
+                  <ChevronRight className="hidden md:block h-3 w-3 text-gold-400/20 mt-4" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Explorer Field Notes ── */}
+      <section className="py-20 border-t border-forest-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Field Notes</p>
+              <h2 className="font-display text-3xl font-light text-cream mb-2">
+                From the <em className="italic text-gold-300">ground.</em>
+              </h2>
+              <p className="text-mist-600 text-sm font-light mb-8">Unedited transmissions from active explorers.</p>
+
+              {/* Rotating note */}
+              <div className="border border-forest-700 p-8 min-h-[200px] flex flex-col justify-between hover:border-forest-600 transition-colors duration-500">
+                <div>
+                  <span className="font-jetbrains text-[9px] text-gold-400/50 tracking-widest block mb-6">
+                    FIELD NOTE #{FIELD_NOTES[activeNote].id}
+                  </span>
+                  <p
+                    key={activeNote}
+                    className="font-display text-xl italic font-light text-cream leading-relaxed mb-6"
+                    style={{ animation: 'noteReveal 0.6s ease-out' }}
+                  >
+                    "{FIELD_NOTES[activeNote].text}"
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-jetbrains text-[9px] text-mist-700">— {FIELD_NOTES[activeNote].author}</p>
+                    <p className="font-jetbrains text-[9px] text-gold-400/40">{FIELD_NOTES[activeNote].coord} · {FIELD_NOTES[activeNote].location}</p>
+                  </div>
+                </div>
+                <div className="flex gap-1 mt-6">
+                  {FIELD_NOTES.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveNote(i)}
+                      className={`h-px transition-all duration-300 ${i === activeNote ? 'w-6 bg-gold-400' : 'w-2 bg-forest-700'}`}
+                      aria-label={`Note ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Static notes */}
+            <div className="space-y-0 border-t border-l border-forest-800">
+              {FIELD_NOTES.map((note, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveNote(i)}
+                  className={`w-full text-left p-5 border-b border-r border-forest-800 transition-colors duration-300 ${activeNote === i ? 'bg-forest-900/60' : 'hover:bg-forest-900/30'}`}
+                >
+                  <span className="font-jetbrains text-[9px] text-gold-400/40 block mb-1">#{note.id} · {note.location}</span>
+                  <p className="text-mist-600 text-xs font-light line-clamp-2 text-left">{note.text}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Discovery Missions ── */}
+      <section className="py-20 bg-forest-900 border-t border-forest-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-12">
+            <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Active Missions</p>
+            <h2 className="font-display text-3xl font-light text-cream">
+              Regions awaiting <em className="italic text-gold-300">their founders.</em>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-forest-800">
+            {MISSIONS.map((mission, i) => (
+              <div key={i} className="border-b border-r border-forest-800 p-8 group hover:bg-forest-800/40 transition-colors duration-400">
+                <div className="flex items-start justify-between mb-4">
+                  <span className={`font-jetbrains text-[9px] tracking-widest px-2 py-0.5 border ${mission.active ? 'border-gold-400/30 text-gold-400/70' : 'border-forest-700 text-mist-700'}`}>
+                    {mission.active ? 'ACTIVE' : 'UPCOMING'}
+                  </span>
+                  <span className="font-jetbrains text-[9px] text-mist-700">{mission.signals} signals</span>
+                </div>
+                <h3 className="font-display text-xl font-light text-cream mb-2 group-hover:text-gold-200 transition-colors duration-300">{mission.region}</h3>
+                <p className="text-mist-600 text-xs font-light leading-relaxed mb-6">{mission.objective}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-jetbrains text-[9px] text-mist-700 mb-0.5">REWARD</p>
+                    <p className="font-jetbrains text-[10px] text-gold-400/70 tracking-wide">{mission.reward}</p>
+                  </div>
+                  <p className="font-jetbrains text-[8px] text-mist-800 tracking-widest">{mission.coord}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Founder Economy ── */}
+      <section className="py-20 border-t border-forest-800">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">The Economy of Discovery</p>
+              <h2 className="font-display text-4xl md:text-5xl font-light text-cream leading-tight mb-6">
+                Every Hidden Gem<br />
+                <em className="italic text-gold-300">Has A Founder.</em>
+              </h2>
+              <p className="text-mist-500 text-sm font-light leading-relaxed mb-8 max-w-md">
+                When you discover a place and document it, you are permanently associated with it. As it grows, your recognition grows. Contributors shape the living atlas — and the atlas remembers.
+              </p>
+              <button
+                onClick={() => { if (!user) { alert('Please sign in to add a discovery'); return; } setShowAddModal(true); }}
+                className="group flex items-center gap-3 px-8 py-3 border border-gold-400/30 text-gold-300 font-jetbrains text-[11px] tracking-widest uppercase hover:border-gold-400/70 transition-all duration-300"
+              >
+                <Plus className="h-3 w-3 group-hover:rotate-90 transition-transform duration-300" />
+                Submit A Discovery
+              </button>
+            </div>
+
+            {/* Flow */}
+            <div className="flex flex-col gap-0 border border-forest-700">
+              {[
+                { step: 'Discovery', desc: 'You find an unmapped place and file a signal' },
+                { step: 'Verification', desc: 'Other explorers confirm and add field notes' },
+                { step: 'Founder Recognition', desc: 'Your name is permanently attached to the gem' },
+                { step: 'Community Impact', desc: 'The discovery enters the living atlas — and your legacy grows' },
+              ].map((item, i) => (
+                <div key={i} className={`flex items-start gap-5 p-6 group hover:bg-forest-900/40 transition-colors duration-400 ${i < 3 ? 'border-b border-forest-700' : ''}`}>
+                  <span className="font-jetbrains text-[9px] text-gold-400/30 tracking-widest flex-shrink-0 mt-0.5">0{i + 1}</span>
+                  <div>
+                    <h4 className="font-display text-base font-light text-cream mb-1 group-hover:text-gold-200 transition-colors duration-300">{item.step}</h4>
+                    <p className="text-mist-700 text-xs font-light group-hover:text-mist-500 transition-colors duration-300">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Verified Gems from DB (if any) ── */}
+      {!loading && gems.length > 0 && (
+        <section className="py-20 bg-forest-900 border-t border-forest-800">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="mb-12">
+              <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Verified Atlas</p>
+              <h2 className="font-display text-3xl font-light text-cream">
+                Confirmed <em className="italic text-gold-300">discoveries.</em>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-l border-forest-800">
+              {gems.map((gem) => (
+                <div key={gem.id} className="border-b border-r border-forest-800 group overflow-hidden">
+                  <div className="relative h-40 overflow-hidden">
+                    <img
+                      src={gem.image_url || 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                      alt={gem.title}
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                      style={{ filter: 'grayscale(35%) brightness(0.5)' }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-forest-950/90 to-transparent" />
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-display text-base font-light text-cream mb-1 group-hover:text-gold-200 transition-colors duration-300">{gem.title}</h3>
+                    <div className="flex items-center gap-1 mb-3">
+                      <MapPin className="h-3 w-3 text-gold-400/40" />
+                      <span className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase">{gem.location}</span>
+                    </div>
+                    <p className="text-mist-700 text-xs font-light line-clamp-2">{gem.description}</p>
+                    <div className="flex items-center gap-4 mt-4">
+                      <span className="font-jetbrains text-[9px] text-mist-700">{gem.total_visits} visits</span>
+                      <Eye className="h-3 w-3 text-mist-700" />
+                      <span className="font-jetbrains text-[9px] text-mist-700">{gem.total_votes} signals</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Archive Signals ── */}
+      <section className="py-16 border-t border-forest-800">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="font-jetbrains text-[10px] text-gold-400/40 tracking-widest uppercase mb-6">Archive</p>
+          <p
+            key={archiveIndex}
+            className="font-display text-2xl md:text-3xl italic font-light text-mist-500 transition-all duration-500"
+            style={{ opacity: archiveVisible ? 1 : 0, transform: archiveVisible ? 'translateY(0)' : 'translateY(6px)' }}
+          >
+            "{ARCHIVE_SIGNALS[archiveIndex]}"
+          </p>
+        </div>
+      </section>
 
       <Footer />
 
@@ -466,6 +522,13 @@ const HiddenGemsPage = () => {
         onClose={() => setShowAddModal(false)}
         onSuccess={fetchGems}
       />
+
+      <style>{`
+        @keyframes noteReveal {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };

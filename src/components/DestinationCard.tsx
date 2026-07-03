@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Star, ArrowUpRight } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import TouchGallery from './TouchGallery';
 
 interface DestinationCardProps {
@@ -16,67 +16,63 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
   location,
   description,
   image,
-  rating,
   price
 }) => {
   const [showGallery, setShowGallery] = useState(false);
-
   const galleryImages = [image, image, image];
 
   return (
     <>
       <div
-        className="group relative overflow-hidden h-[420px] cursor-pointer transition-all duration-500 hover:outline hover:outline-1 hover:outline-gold-400/20"
+        className="group relative overflow-hidden cursor-pointer h-[480px] border border-forest-700 hover:border-gold-400/30 transition-all duration-500"
         onClick={() => setShowGallery(true)}
       >
+        {/* Background image */}
         <div
-          className="absolute inset-0 bg-cover bg-center grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
-          style={{ backgroundImage: `url(${image})` }}
+          className="absolute inset-0 bg-cover bg-center transition-all duration-700 group-hover:scale-105"
+          style={{
+            backgroundImage: `url(${image})`,
+            filter: 'grayscale(40%) brightness(0.55) saturate(0.7)',
+          }}
+        />
+        {/* On hover, reveal color */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-0 group-hover:opacity-100"
+          style={{
+            backgroundImage: `url(${image})`,
+            filter: 'brightness(0.45)',
+          }}
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-900/40 to-transparent group-hover:from-forest-950/95 transition-all duration-500" />
+        {/* Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-forest-950/95 via-forest-950/40 to-transparent" />
+
+        {/* Price tag */}
+        <div className="absolute top-5 right-5 z-10">
+          <span className="font-jetbrains text-[10px] text-gold-400/80 tracking-widest border border-gold-400/20 px-3 py-1">
+            {price}
+          </span>
+        </div>
 
         {/* Content */}
-        <div className="relative h-full flex flex-col justify-end p-5">
-          {/* Top Labels */}
-          <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-            <div className="flex items-center gap-2 bg-forest-950/60 backdrop-blur-sm p-2 border border-gold-500/10">
-              <Star className="h-3.5 w-3.5 text-gold-400" />
-              <span className="text-xs text-mist-200 font-medium">{rating}</span>
-            </div>
-            <div className="bg-forest-950/60 backdrop-blur-sm px-3 py-1.5 border border-gold-500/10">
-              <span className="text-[10px] uppercase tracking-wider text-gold-300/70">{price}</span>
-            </div>
+        <div className="relative h-full flex flex-col justify-end p-7 z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin className="h-3 w-3 text-gold-400/60 flex-shrink-0" />
+            <span className="font-jetbrains text-[10px] text-mist-600 tracking-widest uppercase">{location}</span>
           </div>
 
-          {/* Title */}
-          <h3
-            className="text-2xl sm:text-3xl font-serif text-mist-100 mb-2 group-hover:tracking-wider transition-all duration-300"
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-          >
+          <h3 className="font-display text-3xl font-light text-cream mb-3 leading-tight group-hover:text-gold-200 transition-colors duration-300">
             {title}
           </h3>
 
-          {/* Location */}
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin className="h-3.5 w-3.5 text-gold-400/70" />
-            <span className="text-xs text-mist-400/80 uppercase tracking-wider">{location}</span>
-          </div>
-
-          {/* Description */}
-          <p className="text-mist-300/70 text-sm leading-relaxed line-clamp-2 mb-4">
+          <p className="text-mist-600 text-sm leading-relaxed mb-5 line-clamp-2 font-light group-hover:text-mist-400 transition-colors duration-300">
             {description}
           </p>
 
-          {/* CTA */}
-          <div className="flex items-center gap-3 text-mist-300/60 group-hover:text-mist-100 transition-colors">
-            <span
-              className="text-sm tracking-wider"
-              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-            >
-              Explore
+          <div className="flex items-center justify-between">
+            <span className="font-jetbrains text-[10px] text-gold-400/40 tracking-widest uppercase group-hover:text-gold-400/80 transition-colors duration-500">
+              View Details →
             </span>
-            <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </div>
         </div>
 

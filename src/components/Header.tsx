@@ -9,173 +9,154 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const navLinks = [
-    { label: 'Gems', to: '/hidden-gems' },
-    { label: 'Adventures', to: '/adventures' },
-    { label: 'Destinations', to: '/destinations' },
-    { label: 'Experiences', to: '/experiences' },
-  ];
 
   return (
     <>
       <header
-        className={`fixed top-0 w-full z-50 transition-all duration-700 ${
-          isScrolled
-            ? 'bg-forest-900/95 backdrop-blur-md border-b border-gold-500/10'
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+          scrolled
+            ? 'bg-forest-950/95 backdrop-blur-md border-b border-gold-400/10'
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4 md:py-5">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="flex justify-between items-center py-5">
+
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="relative">
-                <img
-                  src="/Logo Large.jpeg"
-                  alt="Woander"
-                  className="h-9 w-9 object-contain rounded-sm transition-all duration-300 group-hover:scale-105"
-                />
-              </div>
-              <span
-                className="text-lg font-serif text-mist-100 tracking-wider transition-colors duration-300 group-hover:text-gold-300"
-                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-              >
+            <Link to="/" className="flex items-center space-x-3 group">
+              <img
+                src="/Logo Large.jpeg"
+                alt="Woander"
+                className="h-9 w-9 object-contain rounded-full opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+              />
+              <span className="font-display text-xl font-light text-cream tracking-wider group-hover:text-gold-300 transition-colors duration-300">
                 Woander
               </span>
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navLinks.map(link => (
+            <nav className="hidden md:flex items-center space-x-8">
+              {[
+                { to: '/hidden-gems', label: 'Hidden Gems' },
+                { to: '/adventures', label: 'Adventures' },
+                { to: '/experiences', label: 'Experiences' },
+                { to: '/vanguard', label: 'Vanguard' },
+              ].map(({ to, label }) => (
                 <Link
-                  key={link.to}
-                  to={link.to}
-                  className="px-4 py-2 text-xs uppercase tracking-widest text-mist-300/80 hover:text-mist-50 hover:bg-forest-800/50 transition-all duration-300"
+                  key={to}
+                  to={to}
+                  className="text-mist-400 hover:text-cream text-sm tracking-wide transition-colors duration-300"
                 >
-                  {link.label}
+                  {label}
                 </Link>
               ))}
-            </nav>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsSearchModalOpen(true)}
-                className="p-2.5 text-mist-400/70 hover:text-gold-400 hover:bg-forest-800/50 transition-all duration-300 rounded-sm"
+                className="text-mist-500 hover:text-cream transition-colors duration-300"
+                type="button"
                 aria-label="Search"
               >
-                <Search size={18} />
+                <Search size={17} strokeWidth={1.5} />
               </button>
 
               {user ? (
-                <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center space-x-5">
                   <Link
                     to="/dashboard"
-                    className="px-4 py-2 text-xs uppercase tracking-widest bg-gold-500/10 border border-gold-500/20 text-gold-300 hover:bg-gold-500/20 transition-all duration-300"
+                    className="flex items-center space-x-2 text-mist-400 hover:text-cream text-sm transition-colors duration-300"
                   >
-                    <User className="h-3.5 w-3.5 inline mr-2" />
-                    Dashboard
+                    <User className="h-4 w-4" />
+                    <span>Dashboard</span>
                   </Link>
                   <button
                     onClick={signOut}
-                    className="p-2.5 text-mist-500/50 hover:text-mist-300 transition-all duration-300"
-                    title="Sign Out"
+                    className="text-mist-600 hover:text-mist-400 transition-colors duration-300"
+                    aria-label="Sign out"
                   >
-                    <LogOut size={16} />
+                    <LogOut className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="hidden md:block px-5 py-2.5 text-xs uppercase tracking-widest bg-forest-700/80 border border-gold-500/20 text-mist-200 hover:bg-forest-600 hover:border-gold-400/30 transition-all duration-300"
+                  className="px-5 py-2 border border-gold-400/30 text-gold-300 text-sm tracking-wide hover:border-gold-400/70 hover:text-gold-200 transition-all duration-300"
                 >
-                  Enter
+                  Sign In
                 </button>
               )}
+            </nav>
 
-              {/* Mobile Toggle */}
-              <button
-                className="lg:hidden p-2.5 text-mist-400/70 hover:text-gold-400 transition-all duration-300"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-              >
-                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
-            </div>
+            {/* Mobile menu toggle */}
+            <button
+              className="md:hidden text-mist-400 hover:text-cream transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile menu */}
           {isMenuOpen && (
-            <div className="lg:hidden py-6 border-t border-gold-500/10 space-y-1">
-              {navLinks.map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="block px-4 py-3 text-sm uppercase tracking-widest text-mist-300/80 hover:text-mist-50 hover:bg-forest-800/50 transition-all duration-300"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <button
-                onClick={() => {
-                  setIsSearchModalOpen(true);
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left px-4 py-3 text-sm uppercase tracking-widest text-mist-300/80 hover:text-mist-50 hover:bg-forest-800/50 transition-all duration-300 flex items-center gap-3"
-              >
-                <Search size={16} />
-                Search
-              </button>
-              {user ? (
-                <>
+            <div className="md:hidden border-t border-forest-700/50 pb-6">
+              <div className="flex flex-col space-y-5 pt-5">
+                {[
+                  { to: '/', label: 'Home' },
+                  { to: '/hidden-gems', label: 'Hidden Gems' },
+                  { to: '/adventures', label: 'Adventures' },
+                  { to: '/experiences', label: 'Experiences' },
+                  { to: '/vanguard', label: 'Vanguard' },
+                ].map(({ to, label }) => (
                   <Link
-                    to="/dashboard"
-                    className="block px-4 py-3 text-sm uppercase tracking-widest text-mist-300/80 hover:text-mist-50 hover:bg-forest-800/50 transition-all duration-300"
+                    key={to}
+                    to={to}
+                    className="text-mist-400 hover:text-cream text-sm tracking-wide transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Dashboard
+                    {label}
                   </Link>
-                  <button
-                    onClick={() => {
-                      signOut();
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm uppercase tracking-widest text-mist-500/60 hover:text-mist-300 transition-all duration-300 flex items-center gap-3"
-                  >
-                    <LogOut size={16} />
-                    Depart
-                  </button>
-                </>
-              ) : (
+                ))}
                 <button
-                  onClick={() => {
-                    setIsAuthModalOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full px-4 py-3 mt-4 text-sm uppercase tracking-widest bg-forest-700/80 border border-gold-500/20 text-mist-200 hover:bg-forest-600 transition-all duration-300"
+                  onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }}
+                  className="flex items-center gap-2 text-mist-400 hover:text-cream text-sm transition-colors text-left"
                 >
-                  Enter
+                  <Search size={15} strokeWidth={1.5} />
+                  Search
                 </button>
-              )}
+                {user ? (
+                  <>
+                    <Link to="/dashboard" className="text-mist-400 hover:text-cream text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
+                      Dashboard
+                    </Link>
+                    <button onClick={signOut} className="flex items-center gap-2 text-mist-600 hover:text-mist-400 text-sm transition-colors text-left">
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => { setIsAuthModalOpen(true); setIsMenuOpen(false); }}
+                    className="text-gold-300 text-sm tracking-wide border border-gold-400/30 px-5 py-2 hover:border-gold-400/70 transition-all w-fit"
+                  >
+                    Sign In
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
+        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       </header>
-
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
     </>
   );

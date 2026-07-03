@@ -1,51 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, MapPin, ChevronDown } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const discoveryNodes = [
-  { x: '15%', y: '25%', delay: 0.5 },
-  { x: '78%', y: '18%', delay: 0.8 },
-  { x: '35%', y: '65%', delay: 1.2 },
-  { x: '85%', y: '72%', delay: 0.3 },
-  { x: '52%', y: '35%', delay: 1.5 },
-  { x: '22%', y: '78%', delay: 0.7 },
-];
-
-const coordinates = [
-  { lat: '10.5276° N', lng: '76.2144° E', label: 'Nelliyampathy' },
-  { lat: '9.9312° N', lng: '76.2673° E', label: 'Iddukki' },
-  { lat: '11.2543° N', lng: '75.7804° E', label: 'Wayanad' },
-];
-
-const loadingMessages = [
+const PHILOSOPHY_LINES = [
+  "The map is never the territory.",
   "Curiosity precedes discovery.",
-  "Some places are hidden for a reason.",
-  "Every destination was once undiscovered.",
-  "Explore beyond the algorithm.",
-  "Not all maps reveal the territory.",
+  "Some places reveal themselves only to those who seek.",
+  "Travel slower. Discover deeper.",
+];
+
+const discoveryNodes = [
+  { top: '22%', left: '14%', label: '10.8505° N, 76.2711° E' },
+  { top: '38%', left: '78%', label: '9.9312° N, 76.2673° E' },
+  { top: '61%', left: '22%', label: '11.6854° N, 75.9912° E' },
+  { top: '55%', left: '65%', label: '10.0159° N, 77.0648° E' },
+  { top: '75%', left: '42%', label: '9.2648° N, 76.7870° E' },
+  { top: '28%', left: '52%', label: '11.3000° N, 76.1000° E' },
 ];
 
 const Hero = () => {
   const navigate = useNavigate();
-  const [showArrow, setShowArrow] = useState(true);
-  const [currentMessage, setCurrentMessage] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const taglineRef = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [philosophyIndex, setPhilosophyIndex] = useState(0);
+  const [philosophyVisible, setPhilosophyVisible] = useState(true);
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowArrow(window.scrollY < 50);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const interval = setInterval(() => {
+      setPhilosophyVisible(false);
+      setTimeout(() => {
+        setPhilosophyIndex(i => (i + 1) % PHILOSOPHY_LINES.length);
+        setPhilosophyVisible(true);
+      }, 600);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -59,29 +51,50 @@ const Hero = () => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      tl.fromTo(headlineRef.current,
-        { opacity: 0, y: 60, scale: 0.95, filter: 'blur(8px)' },
-        { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 1.8, delay: 0.3 }
+      tl.fromTo('.hero-topline',
+        { opacity: 0, y: 20, letterSpacing: '0.4em' },
+        { opacity: 1, y: 0, letterSpacing: '0.25em', duration: 1.4, delay: 0.3 }
       )
-      .fromTo(taglineRef.current,
-        { opacity: 0, y: 40, scale: 0.98 },
-        { opacity: 1, y: 0, scale: 1, duration: 1.2 },
-        '-=1.2'
+      .fromTo('.hero-headline',
+        { opacity: 0, y: 60, filter: 'blur(8px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4 },
+        '-=0.9'
       )
-      .fromTo(subtitleRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 1 },
+      .fromTo('.hero-sub',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power2.out' },
         '-=0.8'
       )
-      .fromTo(buttonsRef.current?.children || [],
-        { opacity: 0, y: 30, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.15 },
+      .fromTo('.hero-supporting',
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 1 },
+        '-=0.7'
+      )
+      .fromTo('.hero-cta',
+        { opacity: 0, y: 30, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.8 },
         '-=0.5'
+      )
+      .fromTo('.hero-secondary-cta',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6 },
+        '-=0.3'
+      )
+      .fromTo('.hero-node',
+        { opacity: 0, scale: 0 },
+        { opacity: 1, scale: 1, duration: 0.5, stagger: 0.15, ease: 'back.out(2)' },
+        '-=0.5'
+      )
+      .fromTo('.hero-scroll-indicator',
+        { opacity: 0, y: -10 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        '-=0.3'
       );
 
+      // Subtle parallax on scroll
       if (heroRef.current) {
-        gsap.to(heroRef.current, {
-          yPercent: 15,
+        gsap.to('.hero-bg-image', {
+          yPercent: 25,
           ease: 'none',
           scrollTrigger: {
             trigger: heroRef.current,
@@ -109,140 +122,145 @@ const Hero = () => {
     return () => ctx.revert();
   }, []);
 
-  const scrollToContent = () => {
+  const scrollDown = () => {
     window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
   };
 
   return (
-    <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden bg-forest-950">
-      {/* Cinematic Kerala Background */}
-      <div className="absolute inset-0">
+    <section
+      ref={heroRef}
+      id="home"
+      className="relative h-screen min-h-screen flex items-center justify-center overflow-hidden bg-forest-950"
+    >
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full">
         <img
-          src="https://images.pexels.com/photos/1365425/pexels-photo-1365425.jpeg?auto=compress&cs=tinysrgb&w=1920"
-          alt="Misty Kerala landscape"
-          className="w-full h-full object-cover object-center opacity-60"
+          src="https://images.pexels.com/photos/2161467/pexels-photo-2161467.jpeg?auto=compress&cs=tinysrgb&w=1920"
+          alt="Misty Kerala forest"
+          className="hero-bg-image w-full h-full object-cover object-center scale-110"
+          style={{ filter: 'grayscale(25%) brightness(0.55) saturate(0.8)' }}
         />
-        {/* Atmospheric overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-900/70 to-forest-800/50" />
-        <div className="absolute inset-0 bg-gradient-to-r from-forest-950/80 via-transparent to-forest-950/60" />
-        <div ref={overlayRef} className="absolute inset-0 fog-overlay" />
       </div>
 
-      {/* Discovery Nodes - Constellation-like */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {discoveryNodes.map((node, index) => (
-          <React.Fragment key={index}>
-            <div
-              className="absolute discovery-node"
-              style={{
-                left: node.x,
-                top: node.y,
-                animationDelay: `${node.delay}s`,
-              }}
-            >
-              <div className="w-2 h-2 bg-gold-300 rounded-full opacity-60" />
-              <div className="absolute inset-0 w-2 h-2 bg-gold-400 rounded-full animate-ping opacity-30" style={{ animationDelay: `${node.delay}s` }} />
-            </div>
-          </React.Fragment>
-        ))}
-      </div>
+      {/* Cinematic dark gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-forest-950/50 via-forest-950/30 to-forest-950/90 z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-forest-950/60 via-transparent to-forest-950/40 z-[1]" />
 
-      {/* Topographic Lines SVG Overlay */}
-      <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+      {/* Topographic SVG pattern */}
+      <svg
+        className="absolute inset-0 w-full h-full z-[2] pointer-events-none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ opacity: 0.06 }}
+      >
         <defs>
-          <pattern id="topoLines" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M0 10 Q5 5 10 10 T20 10" fill="none" stroke="rgba(201, 168, 74, 0.3)" strokeWidth="0.1" />
-            <path d="M0 15 Q5 10 10 15 T20 15" fill="none" stroke="rgba(201, 168, 74, 0.2)" strokeWidth="0.08" />
+          <pattern id="topo" x="0" y="0" width="300" height="300" patternUnits="userSpaceOnUse">
+            <ellipse cx="150" cy="150" rx="130" ry="100" fill="none" stroke="#c9a84a" strokeWidth="0.8"/>
+            <ellipse cx="150" cy="150" rx="95" ry="72" fill="none" stroke="#c9a84a" strokeWidth="0.6"/>
+            <ellipse cx="150" cy="150" rx="60" ry="45" fill="none" stroke="#c9a84a" strokeWidth="0.5"/>
+            <ellipse cx="150" cy="150" rx="28" ry="20" fill="none" stroke="#c9a84a" strokeWidth="0.4"/>
           </pattern>
         </defs>
-        <rect width="100" height="100" fill="url(#topoLines)" className="animate-topo" />
-        {/* Sacred Geometry - Fibonacci Spiral Hint */}
-        <g className="animate-constellation" style={{ transformOrigin: '50% 50%' }}>
-          <circle cx="50" cy="50" r="15" fill="none" stroke="rgba(201, 168, 74, 0.08)" strokeWidth="0.05" />
-          <circle cx="50" cy="50" r="25" fill="none" stroke="rgba(201, 168, 74, 0.06)" strokeWidth="0.05" />
-          <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(201, 168, 74, 0.04)" strokeWidth="0.05" />
-        </g>
+        <rect width="100%" height="100%" fill="url(#topo)" />
       </svg>
 
-      {/* Hidden Coordinates - Easter Eggs */}
-      <div className="absolute bottom-20 left-8 coordinate-text text-gold-300/40 font-mono space-y-3 hidden lg:block">
-        {coordinates.map((coord, i) => (
-          <div key={i} className="animate-coordinate" style={{ animationDelay: `${i * 0.3}s` }}>
-            <div className="text-[10px] tracking-widest">{coord.lat}</div>
-            <div className="text-[10px] tracking-widest">{coord.lng}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Compass Element */}
-      <div className="absolute top-24 right-8 lg:right-16 hidden lg:block compass-sway">
-        <div className="relative w-16 h-16 opacity-30">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(201, 168, 74, 0.3)" strokeWidth="1" />
-            <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(201, 168, 74, 0.2)" strokeWidth="0.5" />
-            <path d="M50 5 L45 50 L50 45 L55 50 Z" fill="rgba(201, 168, 74, 0.4)" />
-            <path d="M50 95 L45 50 L50 55 L55 50 Z" fill="rgba(201, 168, 74, 0.2)" />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Compass className="w-5 h-5 text-gold-400/50" />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-20 text-center max-w-5xl mx-auto px-6 md:px-12">
-        {/* Headline */}
-        <h1
-          ref={headlineRef}
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-serif font-light text-mist-50 leading-tight tracking-wide mb-4"
-          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+      {/* Discovery Nodes */}
+      {discoveryNodes.map((node, i) => (
+        <div
+          key={i}
+          className="hero-node absolute z-[3] group cursor-default"
+          style={{ top: node.top, left: node.left }}
+          onMouseEnter={() => setHoveredNode(i)}
+          onMouseLeave={() => setHoveredNode(null)}
         >
-          Discover Places.
-          <br />
-          <span className="text-elegant font-normal italic text-mist-200/90">
-            Create Destinations.
-          </span>
+          <div
+            className="w-2 h-2 rounded-full bg-gold-400"
+            style={{
+              boxShadow: '0 0 8px 3px rgba(201,168,74,0.5)',
+              animation: `discoveryPulse ${2.5 + i * 0.4}s ease-in-out infinite`,
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+          {/* Pulse ring */}
+          <div
+            className="absolute inset-0 rounded-full border border-gold-400/30"
+            style={{ animation: `discoveryRing ${3 + i * 0.5}s ease-out infinite`, animationDelay: `${i * 0.4}s` }}
+          />
+          {/* Coordinate tooltip */}
+          {hoveredNode === i && (
+            <div className="absolute left-4 top-0 -translate-y-1/2 whitespace-nowrap z-10">
+              <span className="font-jetbrains text-gold-400/80 text-[10px] tracking-widest">
+                {node.label}
+              </span>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Compass — top right */}
+      <div className="absolute top-24 right-8 z-[3] opacity-20 pointer-events-none" style={{ animation: 'compassSway 8s ease-in-out infinite' }}>
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="22" stroke="#c9a84a" strokeWidth="0.8"/>
+          <circle cx="24" cy="24" r="16" stroke="#c9a84a" strokeWidth="0.5"/>
+          <line x1="24" y1="4" x2="24" y2="12" stroke="#c9a84a" strokeWidth="1.5"/>
+          <line x1="24" y1="36" x2="24" y2="44" stroke="#c9a84a" strokeWidth="0.8"/>
+          <line x1="4" y1="24" x2="12" y2="24" stroke="#c9a84a" strokeWidth="0.8"/>
+          <line x1="36" y1="24" x2="44" y2="24" stroke="#c9a84a" strokeWidth="0.8"/>
+          <polygon points="24,6 21,20 24,22 27,20" fill="#c9a84a" opacity="0.9"/>
+          <polygon points="24,42 21,28 24,26 27,28" fill="#c9a84a" opacity="0.4"/>
+          <circle cx="24" cy="24" r="2" fill="#c9a84a"/>
+          <text x="24" y="3" textAnchor="middle" fill="#c9a84a" fontSize="4" fontFamily="JetBrains Mono">N</text>
+          <text x="24" y="47" textAnchor="middle" fill="#c9a84a" fontSize="4" fontFamily="JetBrains Mono">S</text>
+          <text x="2" y="25" textAnchor="middle" fill="#c9a84a" fontSize="4" fontFamily="JetBrains Mono">W</text>
+          <text x="47" y="25" textAnchor="middle" fill="#c9a84a" fontSize="4" fontFamily="JetBrains Mono">E</text>
+        </svg>
+      </div>
+
+      {/* Hidden coordinate easter egg — bottom left */}
+      <div className="absolute bottom-16 left-6 z-[3] pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-1000">
+        <span className="font-jetbrains text-[10px] text-gold-400/40 tracking-widest">
+          10.8505° N, 76.2711° E — Nelliyampathy
+        </span>
+      </div>
+
+      {/* Main content */}
+      <div ref={contentRef} className="relative z-10 text-center text-white max-w-4xl mx-auto px-6">
+
+        {/* Top line */}
+        <p className="hero-topline opacity-0 font-jetbrains text-xs text-gold-400/80 tracking-[0.25em] uppercase mb-8">
+          Some places are still undiscovered.
+        </p>
+
+        {/* Main headline */}
+        <h1 className="hero-headline opacity-0 font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light leading-[1.05] text-cream mb-6">
+          Discover Places.<br />
+          <em className="italic text-gold-300">Create Destinations.</em>
         </h1>
 
-        {/* Tagline */}
-        <div ref={taglineRef} className="mb-8 md:mb-12">
-          <p className="text-lg md:text-xl lg:text-2xl text-mist-300/80 font-light tracking-wide" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-            The community-powered discovery network for hidden India.
-          </p>
-        </div>
+        {/* Subheadline */}
+        <p className="hero-sub opacity-0 text-mist-300 text-sm sm:text-base tracking-wide max-w-xl mx-auto mb-4 font-light">
+          The community-powered discovery network for hidden India.
+        </p>
 
-        {/* Subtitle - Philosophical */}
-        <p
-          ref={subtitleRef}
-          className="text-sm md:text-base text-mist-400/60 max-w-3xl mx-auto leading-relaxed mb-12 md:mb-16 font-light tracking-wider"
-        >
-          Modern travel made the world more accessible — but somehow less discoverable.
-          <br className="hidden md:block" />
-          <span className="text-mist-300/70">
-            Woander exists for people who believe the best places are often the ones not yet found.
-          </span>
+        {/* Supporting text */}
+        <p className="hero-supporting opacity-0 text-mist-500 text-xs sm:text-sm max-w-md mx-auto mb-12 leading-relaxed font-light">
+          Modern travel made the world more accessible — yet somehow less discoverable.
         </p>
 
         {/* CTAs */}
-        <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col items-center gap-5">
           <button
             onClick={() => navigate('/hidden-gems')}
-            className="group relative px-8 py-4 bg-forest-700/80 backdrop-blur-sm border border-gold-500/20 text-mist-100 text-sm md:text-base font-medium tracking-wider rounded-sm hover:bg-forest-600/90 hover:border-gold-400/40 transition-all duration-500"
+            className="hero-cta opacity-0 group relative px-10 py-4 border border-gold-400/40 text-cream text-sm tracking-[0.15em] uppercase font-light transition-all duration-500 hover:border-gold-400/80 hover:bg-gold-400/8 hover:tracking-[0.2em] overflow-hidden"
           >
-            <span className="flex items-center gap-3">
-              <MapPin className="w-4 h-4 text-gold-400/80 group-hover:text-gold-300 transition-colors" />
-              Explore Hidden Gems
-            </span>
+            <span className="relative z-10">Explore Beyond The Algorithm</span>
+            <span className="absolute inset-0 bg-gold-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </button>
+
           <button
-            onClick={() => navigate('/hidden-gems')}
-            className="group relative px-8 py-4 bg-earth-700/60 backdrop-blur-sm border border-earth-500/20 text-mist-100 text-sm md:text-base font-medium tracking-wider rounded-sm hover:bg-earth-600/80 hover:border-earth-400/40 transition-all duration-500"
+            onClick={() => navigate('/vanguard')}
+            className="hero-secondary-cta opacity-0 font-jetbrains text-[11px] text-mist-500 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300"
           >
-            <span className="flex items-center gap-3">
-              <span className="text-gold-400/80 group-hover:text-gold-300 transition-colors">
-                Become a Gem Founder
-              </span>
-            </span>
+            Become a Gem Founder →
           </button>
         </div>
 
@@ -263,21 +281,44 @@ const Hero = () => {
         </p>
       </div>
 
-      {/* Scroll Indicator */}
-      {showArrow && (
-        <button
-          onClick={scrollToContent}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-mist-500/60 hover:text-gold-400/80 transition-all duration-300 group"
-          aria-label="Scroll to content"
+      {/* Rotating philosophy line */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[3] text-center pointer-events-none">
+        <p
+          className="font-display italic text-mist-500/60 text-sm transition-all duration-500"
+          style={{ opacity: philosophyVisible ? 1 : 0, transform: philosophyVisible ? 'translateY(0)' : 'translateY(8px)' }}
         >
-          <div className="flex flex-col items-center gap-3">
-            <span className="text-[10px] uppercase tracking-[0.2em] group-hover:text-gold-400/60 transition-colors">
-              Descend
-            </span>
-            <ChevronDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
-          </div>
-        </button>
-      )}
+          "{PHILOSOPHY_LINES[philosophyIndex]}"
+        </p>
+      </div>
+
+      {/* Scroll indicator */}
+      <button
+        onClick={scrollDown}
+        className="hero-scroll-indicator opacity-0 absolute bottom-6 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2 text-mist-500 hover:text-gold-400 transition-colors duration-300 group"
+        aria-label="Scroll down"
+      >
+        <span className="font-jetbrains text-[10px] tracking-widest uppercase">Descend</span>
+        <div className="w-px h-8 bg-mist-500/40 group-hover:bg-gold-400/60 transition-colors duration-300" style={{ animation: 'descend 2s ease-in-out infinite' }} />
+      </button>
+
+      <style>{`
+        @keyframes discoveryPulse {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.4); }
+        }
+        @keyframes discoveryRing {
+          0% { transform: scale(1); opacity: 0.6; }
+          100% { transform: scale(4); opacity: 0; }
+        }
+        @keyframes compassSway {
+          0%, 100% { transform: rotate(-4deg); }
+          50% { transform: rotate(4deg); }
+        }
+        @keyframes descend {
+          0%, 100% { transform: scaleY(1); opacity: 0.5; }
+          50% { transform: scaleY(1.3); opacity: 1; }
+        }
+      `}</style>
     </section>
   );
 };

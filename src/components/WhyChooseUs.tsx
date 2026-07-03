@@ -1,133 +1,111 @@
 import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Compass, Eye, Heart, Lightbulb, BookOpen } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const principles = [
+const pillars = [
   {
-    icon: Compass,
-    title: 'Discovery-Led',
-    description: 'We guide you to places that feel like personal discoveries, not tourist checkpoints.'
+    number: '01',
+    title: 'Local Knowledge',
+    description: 'Every place in Woander is submitted by someone who has actually been there — a villager, a guide, a wanderer who found something worth sharing.',
+    quote: '"You cannot discover a place from a screen."',
   },
   {
-    icon: BookOpen,
-    title: 'Story-Driven',
-    description: 'Every place has a history. We surface the narratives that make destinations meaningful.'
+    number: '02',
+    title: 'Hidden Access',
+    description: "The algorithm rewards the popular. We track what it misses — waterfall paths with no signage, villages that don't have Instagram pages.",
+    quote: '"The best places have no reviews."',
   },
   {
-    icon: Heart,
-    title: 'Community-Powered',
-    description: 'Our gems are discovered, verified, and shared by real explorers, not algorithms.'
+    number: '03',
+    title: 'Community Trust',
+    description: 'Reputation is earned through discovery, not paid placement. The people who contribute the most have their names on the map.',
+    quote: '"Trust is built one honest report at a time."',
   },
   {
-    icon: Eye,
-    title: 'Observation',
-    description: 'We celebrate slow travel, deep observation, and understanding context.'
+    number: '04',
+    title: 'Founder Rewards',
+    description: "When you find a hidden gem and document it, you become its Founder. As it grows, so does your stake. Discovery should have value.",
+    quote: '"Find it first. Own it forever."',
   },
-  {
-    icon: Lightbulb,
-    title: 'Curiosity',
-    description: 'For people who ask "why," who seek the hidden, who question the obvious.'
-  }
 ];
 
 const WhyChooseUs = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      if (cardsRef.current) {
-        const cards = cardsRef.current.children;
-        gsap.fromTo(cards,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: cardsRef.current,
-              start: 'top 75%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      }
+      gsap.fromTo('.pillar-item',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          stagger: 0.15,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 70%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
     }, sectionRef);
-
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-forest-950 relative overflow-hidden">
-      {/* Atmospheric Lines */}
-      <div className="absolute inset-0 flex justify-center opacity-10 pointer-events-none">
-        <div className="w-px h-full bg-gradient-to-b from-transparent via-gold-500/30 to-transparent" />
-        <div className="w-px h-full bg-gradient-to-b from-transparent via-gold-500/20 to-transparent mx-20" />
-        <div className="w-px h-full bg-gradient-to-b from-transparent via-gold-500/20 to-transparent -mx-20" />
-      </div>
+    <section ref={sectionRef} className="py-24 bg-forest-900 border-t border-forest-800">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 border border-gold-500/15 px-4 py-2 mb-6">
-            <span
-              className="text-[10px] uppercase tracking-[0.25em] text-gold-400/70"
-              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-            >
-              Philosophy
-            </span>
-          </div>
-          <h2
-            className="text-3xl sm:text-4xl md:text-5xl font-serif text-mist-100 mb-6"
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-          >
-            Built for explorers,
-            <br />
-            <span className="italic text-mist-300/80">not tourists.</span>
+        {/* Header */}
+        <div className="mb-20">
+          <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-5">The Foundation</p>
+          <h2 className="font-display text-4xl md:text-5xl font-light text-cream leading-tight max-w-xl">
+            Built on four<br />
+            <em className="italic text-gold-300">uncomfortable truths.</em>
           </h2>
-          <p className="text-mist-500/60 max-w-xl mx-auto leading-relaxed text-sm md:text-base">
-            Woander exists for people who believe travel should be about discovering,
-            <br className="hidden sm:block" />
-            not just visiting. For contributors, not just consumers.
-          </p>
         </div>
 
-        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-20">
-          {principles.map((principle, index) => (
+        {/* Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border border-forest-700">
+          {pillars.map((pillar, i) => (
             <div
-              key={index}
-              className="group bg-forest-900/50 border border-mist-700/10 p-6 transition-all duration-300 hover:border-gold-500/15 hover:bg-forest-900/70"
+              key={i}
+              className={`pillar-item opacity-0 p-8 border-b md:border-b-0 border-forest-700 ${
+                i < pillars.length - 1 ? 'lg:border-r border-forest-700' : ''
+              } group hover:bg-forest-800/50 transition-colors duration-500`}
             >
-              <div className="w-10 h-10 flex items-center justify-center border border-gold-500/15 mb-4 group-hover:border-gold-500/30 transition-colors">
-                <principle.icon className="w-4 h-4 text-gold-400/60 group-hover:text-gold-400 transition-colors" />
-              </div>
-              <h3
-                className="text-base font-serif text-mist-200 mb-2"
-                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-              >
-                {principle.title}
+              <span className="font-jetbrains text-xs text-gold-400/40 tracking-widest block mb-6">
+                {pillar.number}
+              </span>
+              <h3 className="font-display text-xl font-light text-cream mb-4 group-hover:text-gold-300 transition-colors duration-300">
+                {pillar.title}
               </h3>
-              <p className="text-xs text-mist-500/60 leading-relaxed">
-                {principle.description}
+              <p className="text-mist-600 text-sm leading-relaxed mb-6 font-light">
+                {pillar.description}
+              </p>
+              <p className="font-display italic text-mist-700 text-sm group-hover:text-mist-500 transition-colors duration-300">
+                {pillar.quote}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Philosophical Statement */}
-        <div className="text-center py-12 border-t border-mist-700/10">
-          <p
-            className="text-mist-400/50 italic tracking-wide text-sm md:text-base"
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-          >
-            "We are building contributors, discoverers, explorers, and communities.
-            <br className="hidden md:block" />
-            <span className="text-mist-500/40">Not passive users.</span>"
-          </p>
+        {/* Stats strip */}
+        <div className="mt-16 pt-12 border-t border-forest-800 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl">
+          {[
+            { value: '847', label: 'Hidden Gems Mapped' },
+            { value: '3,240+', label: 'Field Notes Written' },
+            { value: '1,200+', label: 'Active Explorers' },
+            { value: '64', label: 'Guides Verified' },
+          ].map(({ value, label }) => (
+            <div key={label}>
+              <p className="font-display text-3xl font-light text-cream mb-1">{value}</p>
+              <p className="font-jetbrains text-[10px] text-mist-700 tracking-widest uppercase">{label}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

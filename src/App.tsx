@@ -14,10 +14,12 @@ import VanguardPage from './pages/VanguardPage';
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-forest-950">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-600 mx-auto mb-4"></div>
-        <p className="text-gray-600 text-lg">Loading...</p>
+        <div className="w-px h-16 bg-gradient-to-b from-transparent via-gold-400/60 to-transparent mx-auto mb-6 animate-pulse" />
+        <p className="font-jetbrains text-[10px] text-mist-700 tracking-widest uppercase">
+          Loading...
+        </p>
       </div>
     </div>
   );
@@ -40,6 +42,15 @@ function App() {
         <ScrollToTop />
         <Suspense fallback={<LoadingScreen />}>
           <AuthProvider>
+            {/* Film grain overlay — fixed, covers entire viewport */}
+            <div
+              className="fixed inset-0 pointer-events-none z-[9998]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+                opacity: 0.028,
+                mixBlendMode: 'overlay',
+              }}
+            />
             <div className="flex flex-col">
               <Header />
               <main>
