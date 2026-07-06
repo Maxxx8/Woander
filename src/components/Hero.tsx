@@ -12,6 +12,12 @@ const PHILOSOPHY_LINES = [
   "Travel slower. Discover deeper.",
 ];
 
+const loadingMessages = [
+  "Curiosity precedes discovery.",
+  "Some places are hidden for a reason.",
+  "Every destination was once undiscovered.",
+  "Explore beyond the algorithm.",
+  "Not all maps reveal the territory.",]
 const discoveryNodes = [
   { top: '22%', left: '14%', label: '10.8505° N, 76.2711° E' },
   { top: '38%', left: '78%', label: '9.9312° N, 76.2673° E' },
@@ -22,6 +28,8 @@ const discoveryNodes = [
 ];
 
 const Hero = () => {
+  const [currentMessage, setCurrentMessage] = useState(0);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

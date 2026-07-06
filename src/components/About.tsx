@@ -6,7 +6,7 @@ import { MapPin, Users, Award, Eye, Compass, BookOpen } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-import { TrendingUp, Recycle, Target, Globe, Lightbulb, Users as Users2, Eye } from 'lucide-react';
+import { TrendingUp, Recycle, Target, Globe, Lightbulb, Users as Users2 } from 'lucide-react';
 
 const principles = [
   {
@@ -150,9 +150,8 @@ const About = () => {
                 To empower travelers and local communities through innovative, hyper-local technology solutions and quality services that enhance travel experiences and support sustainable sector development.
               </p>
             </div>
-          ))}
         </div>
-
+</div>
         {/* Principles */}
         <div>
           <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-8">Core Principles</p>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowRight, MapPin, Compass } from 'lucide-react';
+import { ArrowRight, MapPin, Compass, Sparkles } from 'lucide-react';
 import Hero from '../components/Hero';
 import QuoteSection from '../components/QuoteSection';
 import Destinations from '../components/Destinations';
@@ -16,6 +16,7 @@ import { useRandomQuotes } from '../hooks/useRandomQuotes';
 import { useSearch } from '../hooks/useSearch';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SearchBar from '../components/SearchBar';
 
 gsap.registerPlugin(ScrollTrigger);
 
