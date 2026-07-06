@@ -12,12 +12,12 @@ import AdventuresPage from './pages/AdventuresPage';
 import HiddenGemsPage from './pages/HiddenGemsPage';
 import DashboardPage from './pages/DashboardPage';
 import VanguardPage from './pages/VanguardPage';
-import AdminLoginPage from './admin/pages/AdminLoginPage';
-import AdminDashboardPage from './admin/pages/AdminDashboardPage';
-import AdminUsersPage from './admin/pages/AdminUsersPage';
-import AdminInvitationsPage from './admin/pages/AdminInvitationsPage';
-import AdminActivityLogsPage from './admin/pages/AdminActivityLogsPage';
-import AdminAnalyticsPage from './admin/pages/AdminAnalyticsPage';
+const AdminLoginPage = React.lazy(() => import('./admin/pages/AdminLoginPage'));
+const AdminDashboardPage = React.lazy(() => import('./admin/pages/AdminDashboardPage'));
+const AdminUsersPage = React.lazy(() => import('./admin/pages/AdminUsersPage'));
+const AdminInvitationsPage = React.lazy(() => import('./admin/pages/AdminInvitationsPage'));
+const AdminActivityLogsPage = React.lazy(() => import('./admin/pages/AdminActivityLogsPage'));
+const AdminAnalyticsPage = React.lazy(() => import('./admin/pages/AdminAnalyticsPage'));
 
 function LoadingScreen() {
   return (
@@ -59,33 +59,35 @@ function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
 
 function AdminSection() {
   return (
-    <AdminAuthProvider>
-      <Routes>
-        <Route path="login" element={<AdminLoginPage />} />
-        <Route
-          path="dashboard"
-          element={<ProtectedAdminRoute><AdminDashboardPage /></ProtectedAdminRoute>}
-        />
-        <Route
-          path="users"
-          element={<ProtectedAdminRoute><AdminUsersPage /></ProtectedAdminRoute>}
-        />
-        <Route
-          path="invitations"
-          element={<ProtectedAdminRoute><AdminInvitationsPage /></ProtectedAdminRoute>}
-        />
-        <Route
-          path="activity"
-          element={<ProtectedAdminRoute><AdminActivityLogsPage /></ProtectedAdminRoute>}
-        />
-        <Route
-          path="analytics"
-          element={<ProtectedAdminRoute><AdminAnalyticsPage /></ProtectedAdminRoute>}
-        />
-        <Route index element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-      </Routes>
-    </AdminAuthProvider>
+    <Suspense fallback={<AdminLoadingScreen />}>
+      <AdminAuthProvider>
+        <Routes>
+          <Route path="login" element={<AdminLoginPage />} />
+          <Route
+            path="dashboard"
+            element={<ProtectedAdminRoute><AdminDashboardPage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="users"
+            element={<ProtectedAdminRoute><AdminUsersPage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="invitations"
+            element={<ProtectedAdminRoute><AdminInvitationsPage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="activity"
+            element={<ProtectedAdminRoute><AdminActivityLogsPage /></ProtectedAdminRoute>}
+          />
+          <Route
+            path="analytics"
+            element={<ProtectedAdminRoute><AdminAnalyticsPage /></ProtectedAdminRoute>}
+          />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+        </Routes>
+      </AdminAuthProvider>
+    </Suspense>
   );
 }
 
