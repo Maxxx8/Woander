@@ -12,6 +12,7 @@ import AdventuresPage from './pages/AdventuresPage';
 import HiddenGemsPage from './pages/HiddenGemsPage';
 import DashboardPage from './pages/DashboardPage';
 import VanguardPage from './pages/VanguardPage';
+const AdminLayout = React.lazy(() => import('./admin/components/AdminLayout'));
 const AdminLoginPage = React.lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = React.lazy(() => import('./admin/pages/AdminDashboardPage'));
 const AdminUsersPage = React.lazy(() => import('./admin/pages/AdminUsersPage'));
@@ -64,27 +65,20 @@ function AdminSection() {
         <Routes>
           <Route path="login" element={<AdminLoginPage />} />
           <Route
-            path="dashboard"
-            element={<ProtectedAdminRoute><AdminDashboardPage /></ProtectedAdminRoute>}
-          />
-          <Route
-            path="users"
-            element={<ProtectedAdminRoute><AdminUsersPage /></ProtectedAdminRoute>}
-          />
-          <Route
-            path="invitations"
-            element={<ProtectedAdminRoute><AdminInvitationsPage /></ProtectedAdminRoute>}
-          />
-          <Route
-            path="activity"
-            element={<ProtectedAdminRoute><AdminActivityLogsPage /></ProtectedAdminRoute>}
-          />
-          <Route
-            path="analytics"
-            element={<ProtectedAdminRoute><AdminAnalyticsPage /></ProtectedAdminRoute>}
-          />
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+            element={
+              <ProtectedAdminRoute>
+                <AdminLayout />
+              </ProtectedAdminRoute>
+            }
+          >
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="invitations" element={<AdminInvitationsPage />} />
+            <Route path="activity" element={<AdminActivityLogsPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+          </Route>
         </Routes>
       </AdminAuthProvider>
     </Suspense>
