@@ -23,7 +23,7 @@ function LoadingScreen() {
 function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
   const { isAdmin, loading } = useAdminAuth();
   if (loading) return <LoadingScreen />;
-  return isAdmin ? <>{children}</> : <Navigate to="/login" />;
+  return isAdmin ? <>{children}</> : <Navigate to="/admin/login" />;
 }
 
 function AdminApp() {
@@ -33,34 +33,34 @@ function AdminApp() {
         <Suspense fallback={<LoadingScreen />}>
           <AdminAuthProvider>
             <Routes>
-              <Route path="/login" element={<AdminLoginPage />} />
-              <Route path="/dashboard" element={
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/admin/dashboard" element={
                 <ProtectedAdminRoute>
                   <AdminDashboardPage />
                 </ProtectedAdminRoute>
               } />
-              <Route path="/users" element={
+              <Route path="/admin/users" element={
                 <ProtectedAdminRoute>
                   <AdminUsersPage />
                 </ProtectedAdminRoute>
               } />
-              <Route path="/invitations" element={
+              <Route path="/admin/invitations" element={
                 <ProtectedAdminRoute>
                   <AdminInvitationsPage />
                 </ProtectedAdminRoute>
               } />
-              <Route path="/activity" element={
+              <Route path="/admin/activity" element={
                 <ProtectedAdminRoute>
                   <AdminActivityLogsPage />
                 </ProtectedAdminRoute>
               } />
-              <Route path="/analytics" element={
+              <Route path="/admin/analytics" element={
                 <ProtectedAdminRoute>
                   <AdminAnalyticsPage />
                 </ProtectedAdminRoute>
               } />
-              <Route path="/" element={<Navigate to="/dashboard" />} />
-              <Route path="*" element={<Navigate to="/dashboard" />} />
+              <Route path="/" element={<Navigate to="/admin/dashboard" />} />
+              <Route path="*" element={<Navigate to="/admin/dashboard" />} />
             </Routes>
           </AdminAuthProvider>
         </Suspense>
