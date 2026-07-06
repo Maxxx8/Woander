@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
 
     try {
       await signIn(email, password);
-      navigate('/dashboard');
+      navigate('/admin/dashboard');
     } catch (err) {
       setError('Invalid credentials or not authorized');
     } finally {

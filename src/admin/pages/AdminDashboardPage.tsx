@@ -12,7 +12,7 @@ export default function AdminDashboardPage() {
 
   async function handleSignOut() {
     await signOut();
-    navigate('/login');
+    navigate('/admin/login');
   }
 
   const tabs = [
@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-2">
               {hasPermission(PERMISSIONS.VIEW_ANALYTICS) && (
                 <button
-                  onClick={() => navigate('/analytics')}
+                  onClick={() => navigate('/admin/analytics')}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                 >
                   <BarChart3 className="w-4 h-4" />
@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
               )}
               {hasPermission(PERMISSIONS.VIEW_LOGS) && (
                 <button
-                  onClick={() => navigate('/activity')}
+                  onClick={() => navigate('/admin/activity')}
                   className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                 >
                   <Activity className="w-4 h-4" />
@@ -58,14 +58,14 @@ export default function AdminDashboardPage() {
               {hasPermission(PERMISSIONS.MANAGE_ADMINS) && (
                 <>
                   <button
-                    onClick={() => navigate('/users')}
+                    onClick={() => navigate('/admin/users')}
                     className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                   >
                     <Settings className="w-4 h-4" />
                     Users
                   </button>
                   <button
-                    onClick={() => navigate('/invitations')}
+                    onClick={() => navigate('/admin/invitations')}
                     className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                   >
                     <Mail className="w-4 h-4" />
