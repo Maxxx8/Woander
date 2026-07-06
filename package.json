@@ -5,12 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:main": "vite --config vite.config.main.ts",
     "build": "vite build",
-    "build:main": "vite build --config vite.config.main.ts",
     "lint": "eslint .",
     "preview": "vite preview",
-    "preview:main": "vite preview --config vite.config.main.ts",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
