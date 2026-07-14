@@ -48,16 +48,25 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
       .select('*')
       .order('created_at', { ascending: false });
 
-    const mapped = (data || []).map(item => ({
-      id: item.id,
-      type,
-      title: item.title || item.name || item.full_name || 'Untitled',
-      description: item.description || item.bio || '',
-      status: item.status || 'pending',
-      created_at: item.created_at,
-      location: item.location || item.location_city || '',
-      rejection_reason: item.rejection_reason
-    }));
+    const mapped = (data || []).map(item => {
+      let displayStatus: string;
+      if (type === 'gem') {
+        const vs: string = item.verification_status || 'pending';
+        displayStatus = (vs === 'verified' || vs === 'featured') ? 'approved' : vs;
+      } else {
+        displayStatus = item.status || 'pending';
+      }
+      return {
+        id: item.id,
+        type,
+        title: item.title || item.name || item.full_name || 'Untitled',
+        description: item.description || item.bio || '',
+        status: displayStatus,
+        created_at: item.created_at,
+        location: item.location || item.location_city || '',
+        rejection_reason: item.rejection_reason,
+      };
+    });
 
     setItems(mapped);
     setLoading(false);
