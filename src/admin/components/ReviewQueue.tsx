@@ -74,8 +74,13 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                       type === 'gem' ? 'hidden_gems' :
                       type === 'adventure' ? 'adventures' : 'tour_guides';
 
-    const update: any = { status: action === 'approve' ? 'approved' : 'rejected' };
-    if (action === 'reject' && feedback) {
+    const isApprove = action === 'approve';
+    const update: any = { status: isApprove ? 'approved' : 'rejected' };
+
+    if (tableName === 'hidden_gems') {
+      update.verification_status = isApprove ? 'verified' : 'rejected';
+      update.rejection_reason = isApprove ? null : (feedback || null);
+    } else if (!isApprove && feedback) {
       update.rejection_reason = feedback;
     }
 
