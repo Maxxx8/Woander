@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+console.log("✅ Tailwind config loaded");
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
@@ -49,6 +50,7 @@ export default {
           50: '#f8f9fa',
         },
         cream: '#faf8f5',
+        charcoal: '#1a1f2e',
         spice: '#c45628',
         coral: {
           50: '#fff1f1',

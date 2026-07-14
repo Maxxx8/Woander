@@ -84,7 +84,6 @@ CREATE POLICY "Cache is publicly readable"
 -- Authenticated users can manage their cache entries
 CREATE POLICY "Authenticated users can manage cache"
   ON media_cache
-  AS RESTRICTIVE
   FOR ALL
   TO authenticated
   USING (true)
@@ -157,7 +156,6 @@ CREATE POLICY "Users can update own reviews"
 
 -- Guides can only update the response field (restrictive)
 CREATE POLICY "Guides can respond to reviews"
-  AS RESTRICTIVE
   ON tour_reviews FOR UPDATE
   TO authenticated
   USING (

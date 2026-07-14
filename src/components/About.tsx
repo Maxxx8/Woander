@@ -1,10 +1,12 @@
 import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { MapPin, Users, Award, Eye, Compass, BookOpen } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-import { TrendingUp, Recycle, Target, Globe, Lightbulb, Users as Users2, Eye } from 'lucide-react';
+import { TrendingUp, Recycle, Target, Globe, Lightbulb, Users as Users2 } from 'lucide-react';
 
 const principles = [
   {
@@ -47,6 +49,7 @@ const principles = [
 const About = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const principlesRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -111,6 +114,7 @@ const About = () => {
             </blockquote>
           </div>
 
+          {/* Right - Image with Overlay */}
           <div className="relative">
             <img
               src="https://images.pexels.com/photos/1660995/pexels-photo-1660995.jpeg?auto=compress&cs=tinysrgb&w=800"
@@ -146,9 +150,8 @@ const About = () => {
                 To empower travelers and local communities through innovative, hyper-local technology solutions and quality services that enhance travel experiences and support sustainable sector development.
               </p>
             </div>
-          </div>
         </div>
-
+</div>
         {/* Principles */}
         <div>
           <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-8">Core Principles</p>

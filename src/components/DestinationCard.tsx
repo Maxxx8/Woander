@@ -75,6 +75,9 @@ const DestinationCard: React.FC<DestinationCardProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Border Accent */}
+        <div className="absolute inset-0 border border-gold-500/5 group-hover:border-gold-500/15 transition-colors duration-300" />
       </div>
 
       <TouchGallery

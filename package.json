@@ -5,15 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:main": "vite --config vite.config.main.ts",
-    "dev:admin": "vite --config vite.config.admin.ts --port 3001",
-    "build": "npm run build:main && npm run build:admin",
-    "build:main": "vite build --config vite.config.main.ts",
-    "build:admin": "vite build --config vite.config.admin.ts",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "preview:main": "vite preview --config vite.config.main.ts",
-    "preview:admin": "vite preview --config vite.config.admin.ts --port 3001",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {

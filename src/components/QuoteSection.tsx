@@ -3,7 +3,12 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
-import { Quote } from '../data/quotes';
+
+interface Quote {
+  quote: string;
+  author: string;
+  backgroundImage?: string;
+}
 
 interface QuoteSectionProps {
   quote?: Quote;
@@ -12,7 +17,7 @@ interface QuoteSectionProps {
 
 const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const quoteRef = useRef<HTMLQuoteElement>(null);
+  const quoteRef = useRef<HTMLElement>(null);
   const authorRef = useRef<HTMLElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +36,7 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top 70%',
+              start: 'top 60%',
               toggleActions: 'play none none reverse',
             },
           }
@@ -49,7 +54,7 @@ const QuoteSection: React.FC<QuoteSectionProps> = ({ quote, loading = false }) =
             ease: 'power3.out',
             scrollTrigger: {
               trigger: sectionRef.current,
-              start: 'top 70%',
+              start: 'top 60%',
               toggleActions: 'play none none reverse',
             },
           }

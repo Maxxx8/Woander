@@ -110,6 +110,7 @@ const WhyChooseUs = () => {
       </div>
     </section>
   );
+
 };
 
 export default WhyChooseUs;

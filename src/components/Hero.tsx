@@ -12,6 +12,12 @@ const PHILOSOPHY_LINES = [
   "Travel slower. Discover deeper.",
 ];
 
+const loadingMessages = [
+  "Curiosity precedes discovery.",
+  "Some places are hidden for a reason.",
+  "Every destination was once undiscovered.",
+  "Explore beyond the algorithm.",
+  "Not all maps reveal the territory.",]
 const discoveryNodes = [
   { top: '22%', left: '14%', label: '10.8505° N, 76.2711° E' },
   { top: '38%', left: '78%', label: '9.9312° N, 76.2673° E' },
@@ -22,6 +28,8 @@ const discoveryNodes = [
 ];
 
 const Hero = () => {
+  const [currentMessage, setCurrentMessage] = useState(0);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -38,6 +46,13 @@ const Hero = () => {
       }, 600);
     }, 4000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setCurrentMessage(prev => (prev + 1) % loadingMessages.length);
+    }, 4000);
+    return () => clearInterval(messageInterval);
   }, []);
 
   useEffect(() => {
@@ -93,6 +108,19 @@ const Hero = () => {
             trigger: heroRef.current,
             start: 'top top',
             end: 'bottom top',
+            scrub: 1,
+          },
+        });
+      }
+
+      if (overlayRef.current) {
+        gsap.to(overlayRef.current, {
+          opacity: 0.95,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: 'top top',
+            end: '50% top',
             scrub: true,
           },
         });
@@ -243,6 +271,22 @@ const Hero = () => {
             Become a Gem Founder →
           </button>
         </div>
+
+        {/* "Discovered by" Badge */}
+        <div className="mt-16 md:mt-20 flex items-center justify-center gap-2 text-mist-500/40">
+          <div className="w-8 h-px bg-gradient-to-r from-transparent via-mist-500/30 to-transparent" />
+          <span className="text-[10px] uppercase tracking-[0.25em]">
+            discovered by curious explorers
+          </span>
+          <div className="w-8 h-px bg-gradient-to-r from-transparent via-mist-500/30 to-transparent" />
+        </div>
+      </div>
+
+      {/* Floating Philosophical Message */}
+      <div className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 text-center">
+        <p className="text-xs text-mist-500/50 tracking-widest uppercase text-philosophy">
+          {loadingMessages[currentMessage]}
+        </p>
       </div>
 
       {/* Rotating philosophy line */}

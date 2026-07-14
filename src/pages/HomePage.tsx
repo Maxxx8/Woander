@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight, MapPin, Compass, Sparkles } from 'lucide-react';
 import Hero from '../components/Hero';
 import QuoteSection from '../components/QuoteSection';
 import Destinations from '../components/Destinations';
@@ -10,13 +10,13 @@ import InstallPrompt from '../components/InstallPrompt';
 import OfflineIndicator from '../components/OfflineIndicator';
 import AdventureCreator from '../components/AdventureCreator';
 import MyAdventures from '../components/MyAdventures';
-import SearchBar from '../components/SearchBar';
 import SearchResults from '../components/SearchResults';
 import ScrollProgress from '../components/ScrollProgress';
 import { useRandomQuotes } from '../hooks/useRandomQuotes';
 import { useSearch } from '../hooks/useSearch';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SearchBar from '../components/SearchBar';
 
 gsap.registerPlugin(ScrollTrigger);
 

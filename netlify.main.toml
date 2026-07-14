@@ -1,6 +1,6 @@
 [build]
-  command = "npm run build:main"
-  publish = "dist/main"
+  command = "vite build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
