@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, Compass } from 'lucide-react';
 import Hero from '../components/Hero';
 import QuoteSection from '../components/QuoteSection';
-import Destinations from '../components/Destinations';
 import WhyChooseUs from '../components/WhyChooseUs';
 import About from '../components/About';
 import Footer from '../components/Footer';
@@ -363,10 +362,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Destinations in dark wrapper */}
-      <div className="bg-forest-950">
-        <Destinations />
-      </div>
 
       {/* Quote */}
       {!quotesLoading && randomQuotes[0] && (
