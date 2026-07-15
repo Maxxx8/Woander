@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowRight, MapPin, Compass, Sparkles } from 'lucide-react';
+import { MapPin, Compass } from 'lucide-react';
 import Hero from '../components/Hero';
 import QuoteSection from '../components/QuoteSection';
 import Destinations from '../components/Destinations';
@@ -8,8 +8,7 @@ import About from '../components/About';
 import Footer from '../components/Footer';
 import InstallPrompt from '../components/InstallPrompt';
 import OfflineIndicator from '../components/OfflineIndicator';
-import AdventureCreator from '../components/AdventureCreator';
-import MyAdventures from '../components/MyAdventures';
+
 import SearchResults from '../components/SearchResults';
 import ScrollProgress from '../components/ScrollProgress';
 import { useRandomQuotes } from '../hooks/useRandomQuotes';
@@ -295,8 +294,6 @@ const StoryBlock: React.FC<{ section: StorySection; index: number }> = ({ sectio
 };
 
 const HomePage = () => {
-  const [showAdventureCreator, setShowAdventureCreator] = useState(false);
-  const [refreshAdventures, setRefreshAdventures] = useState(0);
   const { quotes: randomQuotes, isLoading: quotesLoading } = useRandomQuotes(3);
   const { results, loading, error, searchContent } = useSearch();
   const [hasSearched, setHasSearched] = useState(false);
@@ -447,35 +444,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Adventures section */}
-      <section className="py-20 px-6 bg-forest-950 border-t border-forest-800">
-        <div id="adventures" className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Plan</p>
-            <h2 className="font-display text-3xl md:text-4xl font-light text-cream mb-3">
-              Create Your Adventure
-            </h2>
-            <p className="text-mist-600 text-sm font-light mb-8">
-              Detailed itineraries for off-the-beaten-path journeys
-            </p>
-            <button
-              onClick={() => setShowAdventureCreator(true)}
-              className="group inline-flex items-center gap-3 px-8 py-3 border border-gold-400/30 text-gold-300 text-sm tracking-widest uppercase hover:border-gold-400/70 transition-all duration-300"
-            >
-              <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-              Create New Adventure
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-          <div className="mt-10">
-            <p className="font-jetbrains text-[10px] text-mist-700 tracking-widest uppercase mb-6">My Adventures</p>
-            <MyAdventures
-              key={refreshAdventures}
-              onLoginRequired={() => alert('Please log in to create and view adventures')}
-            />
-          </div>
-        </div>
-      </section>
 
       {!quotesLoading && randomQuotes[1] && (
         <div className="bg-forest-950">
@@ -487,12 +455,6 @@ const HomePage = () => {
       <InstallPrompt />
       <OfflineIndicator />
 
-      {showAdventureCreator && (
-        <AdventureCreator
-          onClose={() => setShowAdventureCreator(false)}
-          onSuccess={() => setRefreshAdventures(prev => prev + 1)}
-        />
-      )}
     </div>
   );
 };
