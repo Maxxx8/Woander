@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin, Compass } from 'lucide-react';
+import AddGemModal from '../components/AddGemModal';
 import Hero from '../components/Hero';
 import QuoteSection from '../components/QuoteSection';
 import WhyChooseUs from '../components/WhyChooseUs';
@@ -168,7 +169,7 @@ const storySections: StorySection[] = [
   },
 ];
 
-const StoryBlock: React.FC<{ section: StorySection; index: number }> = ({ section, index }) => {
+const StoryBlock: React.FC<{ section: StorySection; index: number; onBecomeFounder?: () => void }> = ({ section, index, onBecomeFounder }) => {
   const blockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -273,12 +274,12 @@ const StoryBlock: React.FC<{ section: StorySection; index: number }> = ({ sectio
         {/* CTA on last section */}
         {isLast && (
           <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-center">
-            <a
-              href="/vanguard"
+            <button
+              onClick={onBecomeFounder}
               className="px-8 py-3 border border-gold-400/40 text-gold-300 text-sm tracking-widest uppercase hover:border-gold-400/80 hover:bg-gold-400/8 transition-all duration-500"
             >
               Become a Gem Founder
-            </a>
+            </button>
             <a
               href="/hidden-gems"
               className="text-mist-500 hover:text-mist-300 text-sm tracking-wide transition-colors duration-300"
@@ -296,6 +297,7 @@ const HomePage = () => {
   const { quotes: randomQuotes, isLoading: quotesLoading } = useRandomQuotes(3);
   const { results, loading, error, searchContent } = useSearch();
   const [hasSearched, setHasSearched] = useState(false);
+  const [showAddGem, setShowAddGem] = useState(false);
 
   const handleSearch = async (filters: any) => {
     setHasSearched(true);
@@ -309,7 +311,7 @@ const HomePage = () => {
 
       {/* Six storytelling scroll sections */}
       {storySections.map((section, i) => (
-        <StoryBlock key={i} section={section} index={i} />
+        <StoryBlock key={i} section={section} index={i} onBecomeFounder={() => setShowAddGem(true)} />
       ))}
 
       {/* Hidden Gems community section */}
@@ -449,6 +451,11 @@ const HomePage = () => {
       <Footer />
       <InstallPrompt />
       <OfflineIndicator />
+
+      <AddGemModal
+        isOpen={showAddGem}
+        onClose={() => setShowAddGem(false)}
+      />
 
     </div>
   );
