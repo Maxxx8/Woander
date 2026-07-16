@@ -143,10 +143,10 @@ const Hero = () => {
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
         <img
-          src="https://images.pexels.com/photos/2161467/pexels-photo-2161467.jpeg?auto=compress&cs=tinysrgb&w=1920"
-          alt="Misty Kerala forest"
+          src="https://images.pexels.com/photos/1287460/pexels-photo-1287460.jpeg?auto=compress&cs=tinysrgb&w=1920"
+          alt="Starlit mountain landscape"
           className="hero-bg-image w-full h-full object-cover object-center scale-110"
-          style={{ filter: 'grayscale(25%) brightness(0.55) saturate(0.8)' }}
+          style={{ filter: 'grayscale(15%) brightness(0.7) saturate(0.9)' }}
         />
       </div>
 
