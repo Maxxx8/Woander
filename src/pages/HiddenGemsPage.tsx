@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Plus, Eye, ChevronRight } from 'lucide-react';
 import Footer from '../components/Footer';
 import AddGemModal from '../components/AddGemModal';
+import GemDetailModal, { type GemDetail } from '../components/GemDetailModal';
 import { supabase } from '../shared/supabase';
 import { useAuth } from '../shared/AuthContext';
 import gsap from 'gsap';
@@ -135,6 +136,8 @@ const HiddenGemsPage = () => {
   const [gems, setGems] = useState<HiddenGem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedGem, setSelectedGem] = useState<GemDetail | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [activeNote, setActiveNote] = useState(0);
   const [archiveIndex, setArchiveIndex] = useState(0);
   const [archiveVisible, setArchiveVisible] = useState(true);
@@ -254,8 +257,29 @@ const HiddenGemsPage = () => {
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-l border-forest-800">
-            {FEATURED_DISCOVERIES.map((d, i) => (
-              <div key={i} className="border-b border-r border-forest-800 group overflow-hidden">
+            {FEATURED_DISCOVERIES.map((d, i) => {
+              const gemDetail: GemDetail = {
+                id: `featured-${i}`,
+                title: d.name,
+                description: `${d.name} in ${d.location}. ${d.reports} explorer reports filed, ${d.verification}% verified. Status: ${d.status}.`,
+                location: d.location,
+                category: 'viewpoint',
+                difficulty_level: 'moderate',
+                image_url: d.image,
+                total_votes: d.reports,
+                total_visits: Math.round(d.verification / 10),
+                verification_status: d.status.toLowerCase().replace(/\s/g, '_'),
+                best_time_to_visit: null,
+                tips: null,
+                latitude: null,
+                longitude: null,
+              };
+              return (
+              <div
+                key={i}
+                onClick={() => { setSelectedGem(gemDetail); setShowDetailModal(true); }}
+                className="border-b border-r border-forest-800 group overflow-hidden cursor-pointer hover:bg-forest-900/30 transition-colors duration-400"
+              >
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={d.image}
@@ -289,13 +313,14 @@ const HiddenGemsPage = () => {
                     <p className="font-jetbrains text-[9px] text-mist-700">
                       FOUNDER: <span className="text-gold-400/60">{d.founder}</span>
                     </p>
-                    <button className="font-jetbrains text-[9px] text-mist-500 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300">
+                    <span className="font-jetbrains text-[9px] text-mist-500 group-hover:text-gold-400 tracking-widest uppercase transition-colors duration-300">
                       Investigate Signal →
-                    </button>
+                    </span>
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -471,7 +496,14 @@ const HiddenGemsPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border-t border-l border-forest-800">
               {gems.map((gem) => (
-                <div key={gem.id} className="border-b border-r border-forest-800 group overflow-hidden">
+                <div
+                  key={gem.id}
+                  onClick={() => {
+                    setSelectedGem(gem as GemDetail);
+                    setShowDetailModal(true);
+                  }}
+                  className="border-b border-r border-forest-800 group overflow-hidden cursor-pointer hover:bg-forest-900/30 transition-colors duration-400"
+                >
                   <div className="relative h-40 overflow-hidden">
                     <img
                       src={gem.image_url || 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800'}
@@ -521,6 +553,12 @@ const HiddenGemsPage = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={fetchGems}
+      />
+
+      <GemDetailModal
+        gem={selectedGem}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
       />
 
       <style>{`
