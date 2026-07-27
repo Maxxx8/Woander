@@ -124,17 +124,19 @@ interface StorySection {
 
 const storySections: StorySection[] = [
   {
-    image: 'https://images.pexels.com/photos/1366909/pexels-photo-1366909.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // Heavy volumetric fog rolling through dense forest — something half-hidden
+    image: 'https://images.pexels.com/photos/1671325/pexels-photo-1671325.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'Some places reveal themselves slowly.',
     subtext: "A mist-covered ridge. A path with no name. You only find it if you're looking.",
     align: 'center',
-    overlay: 'from-forest-950/80 via-forest-950/50 to-forest-950/80',
+    overlay: 'from-forest-950/70 via-forest-950/40 to-forest-950/75',
     coordinate: '11.6854° N, 75.9912° E',
     caption: 'Wayanad Ridge — predawn mist',
     variant: 'full',
   },
   {
-    image: 'https://images.pexels.com/photos/1797121/pexels-photo-1797121.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // Long-exposure crowd motion — streaks of light, indistinct figures, energy without place
+    image: 'https://images.pexels.com/photos/1108089/pexels-photo-1108089.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'Tourism became visibility. Not discovery.',
     subtext: 'The algorithm optimized for crowds. The crowds optimized for the algorithm. Something was lost.',
     align: 'left',
@@ -143,40 +145,44 @@ const storySections: StorySection[] = [
     variant: 'panoramic',
   },
   {
-    image: 'https://images.pexels.com/photos/5273584/pexels-photo-5273584.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // Scattered gold bokeh in deep darkness — points of light held in shadow, like fireflies
+    image: 'https://images.pexels.com/photos/220067/pexels-photo-220067.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'The real places stayed hidden.',
     subtext: 'Waterfall paths. Village feasts. The elder who knows where the fireflies gather at dusk.',
     align: 'center',
-    overlay: 'from-forest-950/70 via-forest-950/40 to-forest-950/75',
+    overlay: 'from-forest-950/65 via-forest-950/30 to-forest-950/70',
     coordinate: '9.2648° N, 76.7870° E',
     caption: 'A trail with no signage',
     variant: 'full',
   },
   {
-    image: 'https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // A hand reaching from a dark silhouette — knowledge withdrawing, trust retreating
+    image: 'https://images.pexels.com/photos/167964/pexels-photo-167964.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'Trust disappeared first.',
     subtext: 'The guide who actually knows. The family who opens their home. The knowledge that cannot be Googled.',
     align: 'left',
-    overlay: 'from-forest-950/85 via-forest-950/55 to-transparent',
+    overlay: 'from-forest-950/85 via-forest-950/50 to-transparent',
     coordinate: undefined,
     variant: 'panoramic',
   },
   {
-    image: 'https://images.pexels.com/photos/2104152/pexels-photo-2104152.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // Star trails swirling overhead — the act of mapping the sky, a living record drawn over time
+    image: 'https://images.pexels.com/photos/924824/pexels-photo-924824.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'So we built Woander.',
     subtext: 'Not a platform. Not a marketplace. A living map — drawn by the people who actually know these places.',
     align: 'center',
-    overlay: 'from-forest-950/75 via-forest-950/50 to-forest-950/80',
+    overlay: 'from-forest-950/75 via-forest-950/45 to-forest-950/80',
     coordinate: '10.0159° N, 77.0648° E',
-    caption: 'Munnar highlands — field season',
+    caption: 'Charting the unknown',
     variant: 'full',
   },
   {
-    image: 'https://images.pexels.com/photos/1591382/pexels-photo-1591382.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // Warm amber and gold light — the feeling of arrival, first light on a summit earned
+    image: 'https://images.pexels.com/photos/1029611/pexels-photo-1029611.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'The people who discover value should benefit from it.',
     subtext: 'Every Hidden Gem Has A Founder.',
     align: 'center',
-    overlay: 'from-forest-950/90 via-forest-950/70 to-forest-950/90',
+    overlay: 'from-forest-950/80 via-forest-950/55 to-forest-950/85',
     coordinate: undefined,
     variant: 'full',
   },
