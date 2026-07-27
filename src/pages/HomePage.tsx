@@ -135,8 +135,8 @@ const storySections: StorySection[] = [
     variant: 'full',
   },
   {
-    // Long-exposure crowd motion — streaks of light, indistinct figures, energy without place
-    image: 'https://images.pexels.com/photos/1108089/pexels-photo-1108089.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    // Tourists faceless beneath cascading lanterns — spectacle without place, consumption without discovery
+    image: 'https://images.pexels.com/photos/1313814/pexels-photo-1313814.jpeg?auto=compress&cs=tinysrgb&w=1920',
     headline: 'Tourism became visibility. Not discovery.',
     subtext: 'The algorithm optimized for crowds. The crowds optimized for the algorithm. Something was lost.',
     align: 'left',
