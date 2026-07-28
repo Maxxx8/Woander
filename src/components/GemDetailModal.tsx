@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, MapPin, Mountain, Calendar, Lightbulb, Loader, ArrowUp, MessageSquare, Footprints, Check } from 'lucide-react';
+import { X, MapPin, Mountain, Calendar, Lightbulb, Loader, ArrowUp, MessageSquare, Footprints, Check, AlertCircle } from 'lucide-react';
 import { supabase } from '../shared/supabase';
 import { useAuth } from '../shared/AuthContext';
 
@@ -33,6 +33,10 @@ interface GemDetailModalProps {
   onClose: () => void;
 }
 
+// Featured gems have non-UUID ids (e.g. "featured-0") — DB actions are disabled for them.
+const isRealGem = (id: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
 const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -45,44 +49,68 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
   const [submittingComment, setSubmittingComment] = useState(false);
   const [voting, setVoting] = useState(false);
   const [loggingVisit, setLoggingVisit] = useState(false);
-  const [authPrompt, setAuthPrompt] = useState<string | null>(null);
+  // Separate state: auth nag vs action error
+  const [needsAuth, setNeedsAuth] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!gem) return;
     setLoading(true);
-    setAuthPrompt(null);
+    setNeedsAuth(false);
+    setActionError(null);
+
+    if (!isRealGem(gem.id)) {
+      // Featured gem — show static data, no DB queries needed
+      setVoteCount(gem.total_votes);
+      setVisitCount(gem.total_visits);
+      setHasVoted(false);
+      setHasVisited(false);
+      setComments([]);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const [commentsRes, voteRes, visitRes] = await Promise.all([
+      const queries: Promise<any>[] = [
         supabase
           .from('gem_comments')
           .select('id, comment_text, created_at, user_id')
           .eq('gem_id', gem.id)
           .order('created_at', { ascending: false }),
-        supabase
-          .from('gem_votes')
-          .select('id')
-          .eq('gem_id', gem.id)
-          .maybeSingle(),
-        supabase
-          .from('gem_visits')
-          .select('id')
-          .eq('gem_id', gem.id)
-          .maybeSingle(),
-      ]);
+      ];
+
+      if (user) {
+        queries.push(
+          supabase
+            .from('gem_votes')
+            .select('id')
+            .eq('gem_id', gem.id)
+            .eq('user_id', user.id)
+            .maybeSingle(),
+          supabase
+            .from('gem_visits')
+            .select('id')
+            .eq('gem_id', gem.id)
+            .eq('user_id', user.id)
+            .maybeSingle()
+        );
+      }
+
+      const [commentsRes, voteRes, visitRes] = await Promise.all(queries);
 
       setComments(commentsRes.data || []);
       setVoteCount(gem.total_votes);
       setVisitCount(gem.total_visits);
 
       if (user) {
-        setHasVoted(!!voteRes.data);
-        setHasVisited(!!visitRes.data);
+        setHasVoted(!!voteRes?.data);
+        setHasVisited(!!visitRes?.data);
       } else {
         setHasVoted(false);
         setHasVisited(false);
       }
     } catch {
-      // silent
+      // silent — display what we have
     } finally {
       setLoading(false);
     }
@@ -93,6 +121,15 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
       loadData();
     }
   }, [isOpen, gem, loadData]);
+
+  // Reset local state when a new gem opens
+  useEffect(() => {
+    if (isOpen) {
+      setCommentText('');
+      setNeedsAuth(false);
+      setActionError(null);
+    }
+  }, [isOpen, gem?.id]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -107,30 +144,29 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
     };
   }, [isOpen, onClose]);
 
-  const requireAuth = (action: string): boolean => {
-    if (!user) {
-      setAuthPrompt(action);
-      return false;
-    }
-    return true;
-  };
-
   const handleVote = async () => {
     if (!gem) return;
-    if (!requireAuth('vote')) return;
+    setActionError(null);
+    if (!user) { setNeedsAuth(true); return; }
+    if (!isRealGem(gem.id)) { setActionError('Signaling is not available for featured previews.'); return; }
     if (hasVoted || voting) return;
 
     setVoting(true);
     try {
       const { error } = await supabase
         .from('gem_votes')
-        .insert({ gem_id: gem.id, user_id: user!.id, vote_type: 'upvote' });
+        .insert({ gem_id: gem.id, user_id: user.id, vote_type: 'upvote' });
 
       if (error) throw error;
       setHasVoted(true);
       setVoteCount(c => c + 1);
-    } catch {
-      setAuthPrompt('Unable to register your vote. Please try again.');
+    } catch (err: any) {
+      // Unique violation means already voted — treat as success
+      if (err?.code === '23505') {
+        setHasVoted(true);
+      } else {
+        setActionError('Could not register your signal. Please try again.');
+      }
     } finally {
       setVoting(false);
     }
@@ -138,20 +174,26 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
 
   const handleLogVisit = async () => {
     if (!gem) return;
-    if (!requireAuth('log a visit')) return;
+    setActionError(null);
+    if (!user) { setNeedsAuth(true); return; }
+    if (!isRealGem(gem.id)) { setActionError('Visit logging is not available for featured previews.'); return; }
     if (hasVisited || loggingVisit) return;
 
     setLoggingVisit(true);
     try {
       const { error } = await supabase
         .from('gem_visits')
-        .insert({ gem_id: gem.id, user_id: user!.id });
+        .insert({ gem_id: gem.id, user_id: user.id });
 
       if (error) throw error;
       setHasVisited(true);
       setVisitCount(c => c + 1);
-    } catch {
-      setAuthPrompt('Unable to log your visit. Please try again.');
+    } catch (err: any) {
+      if (err?.code === '23505') {
+        setHasVisited(true);
+      } else {
+        setActionError('Could not log your visit. Please try again.');
+      }
     } finally {
       setLoggingVisit(false);
     }
@@ -160,7 +202,9 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!gem) return;
-    if (!requireAuth('leave a field note')) return;
+    setActionError(null);
+    if (!user) { setNeedsAuth(true); return; }
+    if (!isRealGem(gem.id)) { setActionError('Field notes are not available for featured previews.'); return; }
     if (!commentText.trim() || submittingComment) return;
 
     setSubmittingComment(true);
@@ -169,7 +213,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
         .from('gem_comments')
         .insert({
           gem_id: gem.id,
-          user_id: user!.id,
+          user_id: user.id,
           comment_text: commentText.trim(),
         })
         .select('id, comment_text, created_at, user_id')
@@ -179,7 +223,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
       setComments(prev => [data, ...prev]);
       setCommentText('');
     } catch {
-      setAuthPrompt('Unable to post your field note. Please try again.');
+      setActionError('Could not post your field note. Please try again.');
     } finally {
       setSubmittingComment(false);
     }
@@ -187,6 +231,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
 
   if (!isOpen || !gem) return null;
 
+  const isFeatured = !isRealGem(gem.id);
   const categoryLabel = gem.category.charAt(0).toUpperCase() + gem.category.slice(1);
   const difficultyLabel = (gem.difficulty_level || 'easy').charAt(0).toUpperCase() + (gem.difficulty_level || 'easy').slice(1);
   const fallbackImage = 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=1200';
@@ -220,7 +265,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-jetbrains text-[9px] text-gold-400/70 border border-gold-400/20 px-2 py-0.5 bg-forest-950/60">
-                  {gem.verification_status.toUpperCase()}
+                  {gem.verification_status.replace(/_/g, ' ').toUpperCase()}
                 </span>
                 <span className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase">
                   {categoryLabel}
@@ -242,13 +287,24 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
               </div>
             ) : (
               <>
-                {/* Auth prompt */}
-                {authPrompt && (
-                  <div className="border border-gold-400/20 bg-forest-900/40 p-4">
-                    <p className="font-jetbrains text-[10px] text-gold-400/70 tracking-widest uppercase mb-1">Sign In Required</p>
-                    <p className="text-mist-500 text-sm font-light">
-                      Please sign in to {authPrompt}. Your contributions help verify discoveries.
-                    </p>
+                {/* Sign-in nudge */}
+                {needsAuth && (
+                  <div className="border border-forest-700 bg-forest-900/60 p-4 flex items-start gap-3">
+                    <AlertCircle className="h-4 w-4 text-gold-400/60 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-jetbrains text-[10px] text-gold-400/70 tracking-widest uppercase mb-1">Sign In Required</p>
+                      <p className="text-mist-500 text-sm font-light">
+                        Sign in to signal gems, log visits, and leave field notes. Your contributions help verify discoveries.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action error */}
+                {actionError && (
+                  <div className="border border-red-900/40 bg-red-950/30 p-4 flex items-start gap-3">
+                    <AlertCircle className="h-4 w-4 text-red-400/60 mt-0.5 flex-shrink-0" />
+                    <p className="text-red-300/70 text-sm font-light">{actionError}</p>
                   </div>
                 )}
 
@@ -279,7 +335,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
                         : 'border-forest-700 text-mist-500 hover:border-gold-400/40 hover:text-gold-300'
                     }`}
                   >
-                    {hasVoted ? <Check className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
+                    {voting ? <Loader className="h-4 w-4 animate-spin" /> : hasVoted ? <Check className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
                     {hasVoted ? 'Signaled' : 'Signal This Gem'}
                   </button>
                   <button
@@ -291,7 +347,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
                         : 'border-forest-700 text-mist-500 hover:border-gold-400/40 hover:text-gold-300'
                     }`}
                   >
-                    {hasVisited ? <Check className="h-4 w-4" /> : <Footprints className="h-4 w-4" />}
+                    {loggingVisit ? <Loader className="h-4 w-4 animate-spin" /> : hasVisited ? <Check className="h-4 w-4" /> : <Footprints className="h-4 w-4" />}
                     {hasVisited ? 'Visited' : 'Log My Visit'}
                   </button>
                 </div>
@@ -347,26 +403,32 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
                     <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase">Field Notes</p>
                   </div>
 
-                  {/* Comment form */}
-                  <form onSubmit={handleSubmitComment} className="mb-5">
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Share your experience or add a field note..."
-                      rows={3}
-                      className="w-full bg-forest-900 border border-forest-700 text-cream px-4 py-3 font-light text-sm focus:outline-none focus:border-gold-400/40 transition-colors duration-300 resize-none placeholder:text-mist-800"
-                    />
-                    <button
-                      type="submit"
-                      disabled={submittingComment || !commentText.trim()}
-                      className="mt-2 px-6 py-2 border border-gold-400/30 text-gold-300 font-jetbrains text-[10px] tracking-widest uppercase hover:border-gold-400/60 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      {submittingComment ? 'Posting...' : 'Post Field Note'}
-                    </button>
-                  </form>
+                  {/* Comment form — only for real DB gems */}
+                  {!isFeatured && (
+                    <form onSubmit={handleSubmitComment} className="mb-5">
+                      <textarea
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Share your experience or add a field note..."
+                        rows={3}
+                        className="w-full bg-forest-900 border border-forest-700 text-cream px-4 py-3 font-light text-sm focus:outline-none focus:border-gold-400/40 transition-colors duration-300 resize-none placeholder:text-mist-800"
+                      />
+                      <button
+                        type="submit"
+                        disabled={submittingComment || !commentText.trim()}
+                        className="mt-2 px-6 py-2 border border-gold-400/30 text-gold-300 font-jetbrains text-[10px] tracking-widest uppercase hover:border-gold-400/60 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {submittingComment ? 'Posting...' : 'Post Field Note'}
+                      </button>
+                    </form>
+                  )}
 
-                  {/* Comment list */}
-                  {comments.length === 0 ? (
+                  {isFeatured ? (
+                    <div className="border border-forest-800 p-6 text-center">
+                      <p className="font-display text-base italic font-light text-mist-600 mb-1">Signal in progress.</p>
+                      <p className="text-mist-800 text-xs font-light">Field notes will be available once this discovery is fully verified.</p>
+                    </div>
+                  ) : comments.length === 0 ? (
                     <div className="border border-forest-800 p-6 text-center">
                       <p className="font-display text-base italic font-light text-mist-600 mb-1">No field notes yet.</p>
                       <p className="text-mist-800 text-xs font-light">Be the first to document this discovery.</p>
