@@ -48,25 +48,16 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
       .select('*')
       .order('created_at', { ascending: false });
 
-    const mapped = (data || []).map(item => {
-      let displayStatus: string;
-      if (type === 'gem') {
-        const vs: string = item.verification_status || 'pending';
-        displayStatus = (vs === 'verified' || vs === 'featured') ? 'approved' : vs;
-      } else {
-        displayStatus = item.status || 'pending';
-      }
-      return {
-        id: item.id,
-        type,
-        title: item.title || item.name || item.full_name || 'Untitled',
-        description: item.description || item.bio || '',
-        status: displayStatus,
-        created_at: item.created_at,
-        location: item.location || item.location_city || '',
-        rejection_reason: item.rejection_reason,
-      };
-    });
+    const mapped = (data || []).map(item => ({
+      id: item.id,
+      type,
+      title: item.title || item.name || item.full_name || 'Untitled',
+      description: item.description || item.bio || '',
+      status: item.status || 'pending',
+      created_at: item.created_at,
+      location: item.location || item.location_city || '',
+      rejection_reason: item.rejection_reason
+    }));
 
     setItems(mapped);
     setLoading(false);
@@ -83,13 +74,8 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                       type === 'gem' ? 'hidden_gems' :
                       type === 'adventure' ? 'adventures' : 'tour_guides';
 
-    const isApprove = action === 'approve';
-    const update: any = { status: isApprove ? 'approved' : 'rejected' };
-
-    if (tableName === 'hidden_gems') {
-      update.verification_status = isApprove ? 'verified' : 'rejected';
-      update.rejection_reason = isApprove ? null : (feedback || null);
-    } else if (!isApprove && feedback) {
+    const update: any = { status: action === 'approve' ? 'approved' : 'rejected' };
+    if (action === 'reject' && feedback) {
       update.rejection_reason = feedback;
     }
 

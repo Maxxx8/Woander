@@ -27,6 +27,246 @@ const discoveryNodes = [
   { top: '28%', left: '52%', label: '11.3000° N, 76.1000° E' },
 ];
 
+const GOLD = '#c9a84a';
+const GOLD_RGB = '201, 168, 74';
+
+/**
+ * Animated sacred-geometry canvas background.
+ * Draws a slowly rotating golden (Fibonacci) spiral overlaid with
+ * a Flower of Life ring pattern, all in hairline gold strokes on a
+ * deep forest-black canvas. Falls back to a single static frame on
+ * very small screens and pauses when scrolled out of view.
+ */
+const SacredGeometryCanvas: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let raf = 0;
+    let running = true;
+    let lastDraw = 0;
+    const THROTTLE_MS = 1000 / 30; // ~30 fps target
+    const isSmall = window.innerWidth < 640;
+
+    let rotation = 0;
+    let pulse = 0;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const resize = () => {
+      const { innerWidth: w, innerHeight: h } = window;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Pause when hero is off-screen
+    const io = new IntersectionObserver(
+      (entries) => {
+        running = entries[0]?.isIntersecting ?? false;
+        if (running && !isSmall) loop(0);
+      },
+      { threshold: 0 }
+    );
+    io.observe(canvas);
+
+    // ---- Drawing helpers ----
+
+    const drawGoldenSpiral = (
+      cx: number,
+      cy: number,
+      scale: number,
+      rot: number,
+      alpha: number
+    ) => {
+      // Logarithmic spiral: r = a * phi^(2θ/π) approximates the Fibonacci spiral
+      const phi = (1 + Math.sqrt(5)) / 2;
+      const a = 6 * scale; // base radius
+      const points = 240;
+      ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        const t = (i / points) * Math.PI * 6; // ~3 turns
+        const r = a * Math.pow(phi, (2 * t) / Math.PI) * 0.18;
+        const x = cx + r * Math.cos(t + rot);
+        const y = cy + r * Math.sin(t + rot);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha})`;
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+
+      // Fibonacci construction squares (faint)
+      const fib = [1, 1, 2, 3, 5, 8, 13, 21];
+      let dir = 0;
+      let px = cx;
+      let py = cy;
+      let cur = 8 * scale;
+      for (let i = 0; i < fib.length; i++) {
+        const s = fib[i] * 8 * scale;
+        ctx.beginPath();
+        ctx.rect(px - s / 2, py - s / 2, s, s);
+        ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha * 0.12})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+        // step to next square origin along spiral direction
+        const ang = (dir * Math.PI) / 2 + rot;
+        px += Math.cos(ang) * (s / 2 + cur / 2);
+        py += Math.sin(ang) * (s / 2 + cur / 2);
+        cur = s;
+        dir = (dir + 1) % 4;
+      }
+    };
+
+    const drawFlowerOfLife = (
+      cx: number,
+      cy: number,
+      radius: number,
+      rot: number,
+      alpha: number
+    ) => {
+      const r = radius;
+      ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha})`;
+      ctx.lineWidth = 0.7;
+
+      // Center circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // First ring — 6 circles
+      const ring1 = 6;
+      for (let i = 0; i < ring1; i++) {
+        const ang = (i / ring1) * Math.PI * 2 + rot;
+        const x = cx + r * Math.cos(ang);
+        const y = cy + r * Math.sin(ang);
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Second ring — 12 circles (outer Flower of Life completion)
+      const ring2 = 12;
+      for (let i = 0; i < ring2; i++) {
+        const ang = (i / ring2) * Math.PI * 2 + rot + Math.PI / 12;
+        const x = cx + r * Math.sqrt(3) * Math.cos(ang);
+        const y = cy + r * Math.sqrt(3) * Math.sin(ang);
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Outer bounding circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 2.62, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha * 0.5})`;
+      ctx.stroke();
+    };
+
+    const drawConcentricRings = (
+      cx: number,
+      cy: number,
+      maxR: number,
+      alpha: number
+    ) => {
+      const rings = 8;
+      for (let i = 1; i <= rings; i++) {
+        const r = (i / rings) * maxR;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha * (1 - i / (rings + 2))})`;
+        ctx.lineWidth = 0.4;
+        ctx.stroke();
+      }
+    };
+
+    const render = (now: number) => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const minDim = Math.min(w, h);
+
+      // Base pulse for subtle breathing effect
+      const pulseAlpha = 0.12 + 0.04 * Math.sin(pulse);
+
+      // Concentric guide rings (faintest, behind everything)
+      drawConcentricRings(cx, cy, minDim * 0.55, 0.05);
+
+      // Flower of Life — large, behind the spiral
+      drawFlowerOfLife(cx, cy, minDim * 0.09, rotation * 0.3, 0.08);
+
+      // Second smaller Flower of Life, counter-rotating
+      drawFlowerOfLife(cx, cy, minDim * 0.05, -rotation * 0.5, 0.1);
+
+      // Golden spiral on top
+      drawGoldenSpiral(cx, cy, minDim * 0.012, rotation, pulseAlpha);
+
+      // Mirror spiral (rotated 180°) for symmetry
+      drawGoldenSpiral(cx, cy, minDim * 0.012, rotation + Math.PI, pulseAlpha * 0.6);
+
+      // Radial accent lines from center (very faint)
+      const spokes = 12;
+      for (let i = 0; i < spokes; i++) {
+        const ang = (i / spokes) * Math.PI * 2 + rotation * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(
+          cx + minDim * 0.5 * Math.cos(ang),
+          cy + minDim * 0.5 * Math.sin(ang)
+        );
+        ctx.strokeStyle = `rgba(${GOLD_RGB}, 0.025)`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    };
+
+    // Static frame for small screens
+    if (isSmall) {
+      render(0);
+      return () => {
+        window.removeEventListener('resize', resize);
+        io.disconnect();
+      };
+    }
+
+    const loop = (now: number) => {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      if (now - lastDraw < THROTTLE_MS) return;
+      lastDraw = now;
+      rotation += 0.0015;
+      pulse += 0.02;
+      render(now);
+    };
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+      io.disconnect();
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full z-[1] pointer-events-none"
+      aria-hidden="true"
+    />
+  );
+};
+
 const Hero = () => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -99,10 +339,10 @@ const Hero = () => {
         '-=0.3'
       );
 
-      // Subtle parallax on scroll
+      // Subtle parallax on the geometry canvas
       if (heroRef.current) {
-        gsap.to('.hero-bg-image', {
-          yPercent: 25,
+        gsap.to('.hero-bg-canvas', {
+          yPercent: 12,
           ease: 'none',
           scrollTrigger: {
             trigger: heroRef.current,
@@ -140,25 +380,26 @@ const Hero = () => {
       id="home"
       className="relative h-screen min-h-screen flex items-center justify-center overflow-hidden bg-forest-950"
     >
-      {/* Background Image */}
+      {/* Sacred geometry canvas background */}
       <div className="absolute inset-0 w-full h-full">
-        <img
-          src="https://images.pexels.com/photos/2161467/pexels-photo-2161467.jpeg?auto=compress&cs=tinysrgb&w=1920"
-          alt="Misty Kerala forest"
-          className="hero-bg-image w-full h-full object-cover object-center scale-110"
-          style={{ filter: 'grayscale(25%) brightness(0.55) saturate(0.8)' }}
-        />
+        <SacredGeometryCanvas />
       </div>
 
-      {/* Cinematic dark gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-forest-950/50 via-forest-950/30 to-forest-950/90 z-[1]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-forest-950/60 via-transparent to-forest-950/40 z-[1]" />
+      {/* Radial vignette — keeps center text readable, darkens edges */}
+      <div
+        ref={overlayRef}
+        className="absolute inset-0 z-[2] pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, rgba(13,17,16,0.15) 0%, rgba(13,17,16,0.55) 55%, rgba(13,17,16,0.92) 100%)',
+        }}
+      />
 
-      {/* Topographic SVG pattern */}
+      {/* Topographic SVG pattern — subtle texture layer */}
       <svg
         className="absolute inset-0 w-full h-full z-[2] pointer-events-none"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ opacity: 0.06 }}
+        style={{ opacity: 0.08 }}
       >
         <defs>
           <pattern id="topo" x="0" y="0" width="300" height="300" patternUnits="userSpaceOnUse">

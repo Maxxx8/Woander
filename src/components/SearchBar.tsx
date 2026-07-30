@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, MapPin, DollarSign, Calendar, Filter, X } from 'lucide-react';
+import { Search, MapPin, DollarSign, Calendar, Filter, X, Compass } from 'lucide-react';
 
 interface SearchFilters {
   query: string;
@@ -63,40 +63,40 @@ export default function SearchBar({
     <div className="w-full max-w-4xl mx-auto">
       {/* Main Search Bar */}
       <div className="relative">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-white rounded-xl shadow-lg p-4">
-          <div className="flex items-center gap-2 flex-1">
-            <Search className="text-gray-400 flex-shrink-0" size={24} />
+        <div className="glass-card flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 sm:p-4">
+          <div className="flex items-center gap-3 flex-1 px-2">
+            <Compass className="text-gold-400/70 flex-shrink-0" size={20} />
             <input
               type="text"
               placeholder={placeholder}
               value={filters.query}
               onChange={(e) => setFilters({ ...filters, query: e.target.value })}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 outline-none text-gray-800 placeholder-gray-400 min-w-0"
+              className="flex-1 bg-transparent outline-none text-cream placeholder-mist-700 min-w-0 font-light text-sm tracking-wide"
             />
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
+              className={`flex items-center justify-center gap-2 px-4 py-2 border transition-all whitespace-nowrap text-xs tracking-widest uppercase ${
                 showFilters || hasActiveFilters
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'border-gold-400/50 text-gold-300 bg-gold-400/8'
+                  : 'border-forest-700 text-mist-500 hover:border-gold-400/30 hover:text-mist-300'
               }`}
             >
-              <Filter size={20} />
+              <Filter size={16} />
               <span className="hidden sm:inline">Filters</span>
               {hasActiveFilters && (
-                <span className="bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                <span className="bg-gold-400/30 text-gold-200 rounded-full w-4 h-4 flex items-center justify-center text-[9px]">
                   •
                 </span>
               )}
             </button>
             <button
               onClick={handleSearch}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium whitespace-nowrap flex-shrink-0"
+              className="bg-gold-400/15 border border-gold-400/40 text-gold-200 px-6 py-2 hover:bg-gold-400/25 hover:border-gold-400/70 transition-all font-light text-xs tracking-widest uppercase whitespace-nowrap flex-shrink-0"
             >
-              Search
+              Seek
             </button>
           </div>
         </div>
@@ -104,44 +104,44 @@ export default function SearchBar({
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="mt-4 bg-white rounded-xl shadow-lg p-6 animate-fadeIn">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Filter Results</h3>
+        <div className="mt-4 glass-card p-6 animate-fadeIn">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-jetbrains text-[10px] text-gold-400/70 tracking-widest uppercase">Refine The Search</h3>
             <button
               onClick={() => setShowFilters(false)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-mist-700 hover:text-mist-400 transition-colors"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Location Filter */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <MapPin size={16} />
+              <label className="flex items-center gap-2 text-xs font-medium text-mist-400 mb-2 tracking-wide">
+                <MapPin size={14} className="text-gold-400/50" />
                 Location
               </label>
               <input
                 type="text"
-                placeholder="e.g., Bali, Tokyo, Paris"
+                placeholder="e.g., Wayanad, Idukki, Kochi"
                 value={filters.location}
                 onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 bg-forest-900/60 border border-forest-700 text-cream placeholder-mist-700 outline-none focus:border-gold-400/40 transition-colors text-sm font-light"
               />
             </div>
 
             {/* Category Filter */}
             {showCategoryFilter && (
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Filter size={16} />
+                <label className="flex items-center gap-2 text-xs font-medium text-mist-400 mb-2 tracking-wide">
+                  <Filter size={14} className="text-gold-400/50" />
                   Category
                 </label>
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 bg-forest-900/60 border border-forest-700 text-cream outline-none focus:border-gold-400/40 transition-colors text-sm font-light"
                 >
                   <option value="">All Categories</option>
                   <option value="nature">Nature & Outdoors</option>
@@ -158,29 +158,29 @@ export default function SearchBar({
             {showBudgetFilter && (
               <>
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                    <DollarSign size={16} />
-                    Min Budget ($)
+                  <label className="flex items-center gap-2 text-xs font-medium text-mist-400 mb-2 tracking-wide">
+                    <DollarSign size={14} className="text-gold-400/50" />
+                    Min Budget (₹)
                   </label>
                   <input
                     type="number"
                     placeholder="0"
                     value={filters.minBudget}
                     onChange={(e) => setFilters({ ...filters, minBudget: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 bg-forest-900/60 border border-forest-700 text-cream placeholder-mist-700 outline-none focus:border-gold-400/40 transition-colors text-sm font-light"
                   />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                    <DollarSign size={16} />
-                    Max Budget ($)
+                  <label className="flex items-center gap-2 text-xs font-medium text-mist-400 mb-2 tracking-wide">
+                    <DollarSign size={14} className="text-gold-400/50" />
+                    Max Budget (₹)
                   </label>
                   <input
                     type="number"
                     placeholder="10000"
                     value={filters.maxBudget}
                     onChange={(e) => setFilters({ ...filters, maxBudget: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 bg-forest-900/60 border border-forest-700 text-cream placeholder-mist-700 outline-none focus:border-gold-400/40 transition-colors text-sm font-light"
                   />
                 </div>
               </>
@@ -189,14 +189,14 @@ export default function SearchBar({
             {/* Difficulty Level */}
             {showDifficultyFilter && (
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Calendar size={16} />
+                <label className="flex items-center gap-2 text-xs font-medium text-mist-400 mb-2 tracking-wide">
+                  <Calendar size={14} className="text-gold-400/50" />
                   Difficulty Level
                 </label>
                 <select
                   value={filters.difficulty}
                   onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 bg-forest-900/60 border border-forest-700 text-cream outline-none focus:border-gold-400/40 transition-colors text-sm font-light"
                 >
                   <option value="">All Levels</option>
                   <option value="easy">Easy</option>
@@ -211,18 +211,18 @@ export default function SearchBar({
           <div className="flex gap-3 mt-6">
             <button
               onClick={handleReset}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2 border border-forest-700 text-mist-500 hover:border-mist-700 hover:text-mist-300 transition-all text-xs tracking-widest uppercase font-light"
             >
-              Reset Filters
+              Reset
             </button>
             <button
               onClick={() => {
                 handleSearch();
                 setShowFilters(false);
               }}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="flex-1 px-4 py-2 bg-gold-400/15 border border-gold-400/40 text-gold-200 hover:bg-gold-400/25 hover:border-gold-400/70 transition-all text-xs tracking-widest uppercase font-light"
             >
-              Apply Filters
+              Apply
             </button>
           </div>
         </div>
