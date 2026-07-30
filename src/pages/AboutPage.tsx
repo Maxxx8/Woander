@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Award, MapPin, Heart, Target, Lightbulb, Globe, Recycle, Users2, Eye, TrendingUp, Compass, Mountain, Camera } from 'lucide-react';
+import { Users, Award, MapPin, Heart, Compass, Mountain, Camera } from 'lucide-react';
 import QuoteSection from '../components/QuoteSection';
 import Footer from '../components/Footer';
 import { useRandomQuotes } from '../hooks/useRandomQuotes';
@@ -9,44 +9,6 @@ const stats = [
   { icon: Award, label: "Years Experience", value: "15+" },
   { icon: MapPin, label: "Destinations", value: "100+" },
   { icon: Heart, label: "5-Star Reviews", value: "2,500+" }
-];
-
-const principles = [
-  {
-    icon: TrendingUp,
-    title: "Covariance",
-    description: "Ensuring that the efforts and outcomes of the collective's projects are interrelated and contribute to a common goal."
-  },
-  {
-    icon: Recycle,
-    title: "Continuous Improvement",
-    description: "No processes are perfect, iteration and implementing improvements at higher frequencies."
-  },
-  {
-    icon: Target,
-    title: "Alignment",
-    description: "All members and projects must adhere to a set of shared values and objectives to maintain coherence and maximize impact."
-  },
-  {
-    icon: Globe,
-    title: "Sustainability",
-    description: "Prioritizing projects that have long-term benefits for the environment, society, and economy."
-  },
-  {
-    icon: Lightbulb,
-    title: "Innovation",
-    description: "Encouraging creativity and technological advancements to solve complex problems."
-  },
-  {
-    icon: Users2,
-    title: "Community Engagement",
-    description: "Actively involving local communities in project development and implementation."
-  },
-  {
-    icon: Eye,
-    title: "Transparency",
-    description: "Maintaining open communication and accountability in all activities."
-  }
 ];
 
 const teamMembers = [
@@ -148,81 +110,6 @@ const AboutPage = () => {
       </section>
 
       <QuoteSection quote={randomQuotes[1]} />
-
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Our Vision & Mission
-            </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Guided by purpose, driven by passion
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-20">
-            <div className="bg-gradient-to-br from-coral-50 to-sunset-100 rounded-2xl p-8 border border-coral-200 transform hover:scale-105 transition-all duration-300 hover:shadow-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-coral-500 rounded-full p-3 transition-transform duration-300 hover:rotate-12">
-                  <Eye className="h-6 w-6 text-white" />
-                </div>
-                <h4 className="text-2xl font-bold text-gray-900">Vision</h4>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                To create a world where Coherent and Coordinated efforts lead to Sustainable Development,
-                Social Equity, and Technological Innovation.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-2xl p-8 border border-teal-200 transform hover:scale-105 transition-all duration-300 hover:shadow-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-teal-500 rounded-full p-3 transition-transform duration-300 hover:rotate-12">
-                  <Target className="h-6 w-6 text-white" />
-                </div>
-                <h4 className="text-2xl font-bold text-gray-900">Mission</h4>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                To Empower Travelers and Local Communities through Innovative, Hyper-local Technology solutions
-                and Quality Services that enhance Travel Experiences and support sustainable Sector development.
-              </p>
-            </div>
-          </div>
-
-          <div className="mb-20">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Core Principles & Values
-              </h3>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Our principles guide every decision we make and every experience we create
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {principles.map((principle, index) => (
-                <div
-                  key={index}
-                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:border-coral-300 hover:-translate-y-2"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="bg-coral-100 rounded-lg p-3 flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
-                      <principle.icon className="h-6 w-6 text-coral-500" />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">
-                        {principle.title}
-                      </h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        {principle.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
