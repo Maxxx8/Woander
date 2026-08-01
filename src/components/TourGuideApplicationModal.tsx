@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Upload, Plus, Trash2, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Upload, Plus, Trash2, CheckCircle, AlertCircle, Loader, Clock, XCircle } from 'lucide-react';
 import { useAuth } from '../shared/AuthContext';
 import { vanguardService } from '../services/vanguardService';
 
@@ -18,6 +18,9 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [existingApp, setExistingApp] = useState<any | null>(null);
+  const [checkingExisting, setCheckingExisting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -55,6 +58,24 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
     'Architect', 'Storykeeper', 'Photographer', 'Adventure Specialist',
   ];
 
+  // Check for existing application when modal opens
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    let cancelled = false;
+    setCheckingExisting(true);
+    vanguardService.getTourGuideByUserId(user.id)
+      .then((existing) => {
+        if (!cancelled) setExistingApp(existing);
+      })
+      .catch(() => {
+        if (!cancelled) setExistingApp(null);
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingExisting(false);
+      });
+    return () => { cancelled = true; };
+  }, [isOpen, user]);
+
   if (!isOpen) return null;
 
   if (!user) {
@@ -71,6 +92,103 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
           >
             Close
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Checking for existing application
+  if (checkingExisting) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center">
+          <Loader className="w-8 h-8 text-teal-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Checking your application status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // User already has an application on file
+  if (existingApp) {
+    const status = existingApp.status;
+    const statusConfig: Record<string, { icon: React.ReactNode; color: string; label: string; message: string }> = {
+      pending: {
+        icon: <Clock className="w-10 h-10 text-amber-500" />,
+        color: 'amber',
+        label: 'Application Under Review',
+        message: 'Your application is being reviewed by our team. You will be notified within 2-3 business days.',
+      },
+      approved: {
+        icon: <CheckCircle className="w-10 h-10 text-green-600" />,
+        color: 'green',
+        label: 'Application Approved!',
+        message: 'Congratulations! You are now a verified Vanguard local expert. Travelers can discover and book you.',
+      },
+      rejected: {
+        icon: <XCircle className="w-10 h-10 text-red-500" />,
+        color: 'red',
+        label: 'Application Not Approved',
+        message: 'Your application was not approved at this time. You can update your profile and apply again in the future.',
+      },
+      suspended: {
+        icon: <AlertCircle className="w-10 h-10 text-orange-500" />,
+        color: 'orange',
+        label: 'Account Suspended',
+        message: 'Your guide account has been suspended. Please contact support for more information.',
+      },
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            {config.icon}
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">{config.label}</h3>
+          <p className="text-gray-600 mb-2">{config.message}</p>
+          {existingApp.full_name && (
+            <p className="text-sm text-gray-500 mb-6">Application for: <span className="font-semibold">{existingApp.full_name}</span></p>
+          )}
+          {status === 'rejected' && (
+            <button
+              onClick={() => {
+                setExistingApp(null);
+                // Pre-fill form with previous data so they can edit and resubmit
+                setFormData(prev => ({
+                  ...prev,
+                  full_name: existingApp.full_name || '',
+                  bio: existingApp.bio || '',
+                  profile_image: existingApp.profile_image || '',
+                  phone: existingApp.phone || '',
+                  email: existingApp.email || user?.email || '',
+                  location_city: existingApp.location_city || '',
+                  location_state: existingApp.location_state || '',
+                  location_country: existingApp.location_country || 'India',
+                  years_experience: existingApp.years_experience || 1,
+                  archetype: existingApp.archetype || '',
+                  languages: existingApp.languages || [],
+                  specialties: existingApp.specialties || [],
+                  certifications: existingApp.certifications || [],
+                }));
+                setStep(1);
+                setErrorMsg(null);
+              }}
+              className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold mb-3"
+            >
+              Edit & Resubmit
+            </button>
+          )}
+          <div>
+            <button
+              onClick={onClose}
+              className="px-6 py-2 text-gray-700 hover:text-gray-900 transition-colors font-semibold"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -134,11 +252,12 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
 
   const handleSubmit = async () => {
     if (!user) {
-      alert('Please sign in to apply as a tour guide');
+      setErrorMsg('Please sign in to apply as a tour guide');
       return;
     }
 
     setLoading(true);
+    setErrorMsg(null);
     try {
       await vanguardService.createTourGuide({
         user_id: user.id,
@@ -165,36 +284,49 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
         onClose();
       }, 3000);
     } catch (error: any) {
-      console.error('Error submitting application:', error);
-      alert(error.message || 'Failed to submit application. Please try again.');
+      // 23505 = unique_violation — user already has an application
+      if (error?.code === '23505' || error?.message?.includes('duplicate') || error?.message?.includes('unique')) {
+        setErrorMsg('You have already submitted an application. We are checking your existing application status...');
+        // Re-check for the existing app
+        try {
+          const existing = await vanguardService.getTourGuideByUserId(user.id);
+          if (existing) setExistingApp(existing);
+        } catch { /* ignore */ }
+      } else {
+        setErrorMsg(error.message || 'Failed to submit application. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const nextStep = () => {
+    setErrorMsg(null);
     if (step === 1) {
       if (!formData.full_name || !formData.email || !formData.phone) {
-        alert('Please fill in all required fields');
+        setErrorMsg('Please fill in all required fields');
         return;
       }
     }
     if (step === 2) {
       if (!formData.location_city || !formData.location_state) {
-        alert('Please fill in your location details');
+        setErrorMsg('Please fill in your location details');
         return;
       }
     }
     if (step === 3) {
       if (formData.languages.length === 0 || formData.specialties.length === 0) {
-        alert('Please add at least one language and one specialty');
+        setErrorMsg('Please add at least one language and one specialty');
         return;
       }
     }
     setStep(prev => prev + 1);
   };
 
-  const prevStep = () => setStep(prev => prev - 1);
+  const prevStep = () => {
+    setErrorMsg(null);
+    setStep(prev => prev - 1);
+  };
 
   if (submitted) {
     return (
@@ -243,6 +375,13 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
               />
             ))}
           </div>
+
+          {errorMsg && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{errorMsg}</p>
+            </div>
+          )}
 
           {step === 1 && (
             <div className="space-y-4">
