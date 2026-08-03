@@ -369,9 +369,9 @@ const HomePage = () => {
 
           {/* Featured panoramic gem — large */}
           <div className="mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 relative overflow-hidden group cursor-pointer min-h-[340px]">
+            <a href="/hidden-gems" className="lg:col-span-2 relative overflow-hidden group cursor-pointer min-h-[340px] block">
               <img
-                src="https://images.pexels.com/photos/2406730/pexels-photo-2406730.jpeg?auto=compress&cs=tinysrgb&w=1600"
+                src="https://images.pexels.com/photos/5429543/pexels-photo-5429543.jpeg?auto=compress&cs=tinysrgb&w=1600"
                 alt="Nelliyampathy Mist Trail"
                 className="absolute inset-0 w-full h-full object-cover field-image group-hover:scale-105 transition-transform duration-700"
               />
@@ -385,12 +385,12 @@ const HomePage = () => {
                   <span className="font-jetbrains text-[9px] text-mist-700">12 notes · 43 visits</span>
                 </div>
               </div>
-            </div>
+            </a>
 
             {/* Medium stacked gem */}
-            <div className="relative overflow-hidden group cursor-pointer min-h-[340px]">
+            <a href="/hidden-gems" className="relative overflow-hidden group cursor-pointer min-h-[340px] block">
               <img
-                src="https://images.pexels.com/photos/2406730/pexels-photo-2406730.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="https://images.pexels.com/photos/12233685/pexels-photo-12233685.jpeg?auto=compress&cs=tinysrgb&w=800"
                 alt="Kadalar Cave Springs"
                 className="absolute inset-0 w-full h-full object-cover field-image group-hover:scale-105 transition-transform duration-700"
               />
@@ -404,17 +404,17 @@ const HomePage = () => {
                   <span className="font-jetbrains text-[9px] text-mist-700">7 notes</span>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
 
           {/* Smaller gems — offset grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: 'Vellarimala Summit Path', location: 'Wayanad, Kerala', founder: 'Rahul K.', notes: 19, visits: 61, verified: false, coord: '11.6854° N', img: 'https://images.pexels.com/photos/1366909/pexels-photo-1366909.jpeg?auto=compress&cs=tinysrgb&w=800' },
-              { name: 'Pookode Lake Inlet', location: 'Wayanad, Kerala', founder: 'Divya R.', notes: 5, visits: 22, verified: true, coord: '11.5100° N', img: 'https://images.pexels.com/photos/2104152/pexels-photo-2104152.jpeg?auto=compress&cs=tinysrgb&w=800' },
-              { name: 'Athirappilly Upper Falls', location: 'Thrissur, Kerala', founder: 'Santhosh M.', notes: 9, visits: 37, verified: true, coord: '10.2833° N', img: 'https://images.pexels.com/photos/1591382/pexels-photo-1591382.jpeg?auto=compress&cs=tinysrgb&w=800' },
+              { name: 'Vellarimala Summit Path', location: 'Wayanad, Kerala', founder: 'Rahul K.', notes: 19, visits: 61, verified: false, coord: '11.6854° N', img: 'https://images.pexels.com/photos/34954441/pexels-photo-34954441.jpeg?auto=compress&cs=tinysrgb&w=800' },
+              { name: 'Pookode Lake Inlet', location: 'Wayanad, Kerala', founder: 'Divya R.', notes: 5, visits: 22, verified: true, coord: '11.5100° N', img: 'https://images.pexels.com/photos/32942923/pexels-photo-32942923.jpeg?auto=compress&cs=tinysrgb&w=800' },
+              { name: 'Athirappilly Upper Falls', location: 'Thrissur, Kerala', founder: 'Santhosh M.', notes: 9, visits: 37, verified: true, coord: '10.2833° N', img: 'https://images.pexels.com/photos/14020875/pexels-photo-14020875.jpeg?auto=compress&cs=tinysrgb&w=800' },
             ].map((gem, i) => (
-              <div key={i} className="relative overflow-hidden group cursor-pointer min-h-[260px]" style={{ marginTop: i === 1 ? '24px' : '0' }}>
+              <a href="/hidden-gems" key={i} className="relative overflow-hidden group cursor-pointer min-h-[260px] block" style={{ marginTop: i === 1 ? '24px' : '0' }}>
                 <img
                   src={gem.img}
                   alt={gem.name}
@@ -432,7 +432,7 @@ const HomePage = () => {
                     <span className="font-jetbrains text-[9px] text-mist-700">{gem.notes} notes · {gem.visits} visits</span>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
