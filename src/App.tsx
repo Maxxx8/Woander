@@ -1,6 +1,7 @@
 import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './shared/AuthContext';
+import { ThemeProvider } from './shared/ThemeContext';
 import { AdminAuthProvider, useAdminAuth } from './admin/contexts/AdminAuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
@@ -91,6 +92,7 @@ function AppLayout() {
 
   return (
     <AuthProvider>
+      <ThemeProvider>
       {!isAdminRoute && (
         <div
           className="fixed inset-0 pointer-events-none z-[9998]"
@@ -119,6 +121,7 @@ function AppLayout() {
         </main>
         {!isAdminRoute && <MobileNavigation />}
       </div>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

@@ -14,7 +14,7 @@ const MobileNavigation: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 bg-forest-900/95 backdrop-blur-md border-t border-gold-400/10 z-50 md:hidden">
       <div className="flex justify-around items-center px-2 py-2 safe-area-bottom">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -26,8 +26,8 @@ const MobileNavigation: React.FC = () => {
               to={item.path}
               className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg min-w-[60px] transition-colors ${
                 isActive
-                  ? 'text-teal-600 bg-teal-50'
-                  : 'text-gray-500 active:bg-gray-100'
+                  ? 'text-gold-400 bg-gold-400/10'
+                  : 'text-mist-500 active:bg-mist-500/10'
               }`}
             >
               <Icon className="h-6 w-6 mb-1" strokeWidth={isActive ? 2.5 : 2} />

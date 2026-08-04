@@ -5,9 +5,145 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Theme CSS Variables ===== */
+/* Night (default) — deep forest, cream text, gold accents */
+:root {
+  --color-forest-950: #060d06;
+  --color-forest-900: #0a120a;
+  --color-forest-800: #0f1a0f;
+  --color-forest-700: #162116;
+  --color-forest-600: #1e2e1e;
+  --color-forest-500: #243524;
+  --color-forest-400: #2e4a2e;
+  --color-forest-300: #3d6b3d;
+  --color-forest-200: #5a8c5a;
+  --color-forest-100: #8ab88a;
+  --color-forest-50:  #c5d9c5;
+
+  --color-earth-900: #2a1a0a;
+  --color-earth-800: #3d2410;
+  --color-earth-700: #5a3820;
+  --color-earth-600: #6b4423;
+  --color-earth-500: #7a5030;
+  --color-earth-400: #9a6b45;
+  --color-earth-300: #b8895f;
+  --color-earth-200: #d4aa85;
+  --color-earth-100: #ecd5ba;
+  --color-earth-50:  #f7ede0;
+
+  --color-gold-600: #7a5c1e;
+  --color-gold-500: #9a7b32;
+  --color-gold-400: #c9a84a;
+  --color-gold-300: #e5c96e;
+  --color-gold-200: #f0dea0;
+  --color-gold-100: #f8f0cc;
+  --color-gold-50:  #fdf9ee;
+
+  --color-mist-700: #495057;
+  --color-mist-600: #6c757d;
+  --color-mist-500: #868e96;
+  --color-mist-400: #adb5bd;
+  --color-mist-300: #ced4da;
+  --color-mist-200: #dee2e6;
+  --color-mist-100: #e9ecef;
+  --color-mist-50:  #f8f9fa;
+
+  --color-cream: #faf8f5;
+  --color-charcoal: #1a1f2e;
+
+  --color-bg-base: var(--color-forest-900);
+  --color-text-base: var(--color-mist-100);
+  --color-field-image-filter: grayscale(18%) brightness(0.78) saturate(0.82) contrast(1.02);
+  --color-glass-bg: rgba(10, 18, 10, 0.55);
+  --color-glass-border: rgba(201, 168, 74, 0.12);
+  --color-glass-shadow: rgba(0, 0, 0, 0.35);
+  --color-cinematic-overlay-1: rgba(6, 13, 6, 0.4);
+  --color-cinematic-overlay-2: rgba(6, 13, 6, 0.6);
+  --color-cinematic-overlay-3: rgba(6, 13, 6, 0.85);
+  --color-fog-overlay: rgba(15, 26, 15, 0.4);
+  --color-paper-grain-bg: #0a120a;
+  --color-paper-grain-gold: rgba(201, 168, 74, 0.04);
+  --color-paper-grain-earth: rgba(154, 107, 69, 0.05);
+  --color-topo-stroke: %23c9a84a;
+  --color-discovery-node: #c9a84a;
+  --color-discovery-glow: rgba(201, 168, 74, 0.4);
+  --color-coord-text: rgba(201, 168, 74, 0.4);
+  --color-grain-opacity: 0.028;
+  --color-grain-blend: overlay;
+}
+
+/* Day — warm paper, dark ink, deeper gold for sunlight contrast */
+[data-theme="day"] {
+  --color-forest-950: #e8e0d0;
+  --color-forest-900: #f2ece0;
+  --color-forest-800: #eae2d2;
+  --color-forest-700: #ddd3bf;
+  --color-forest-600: #ccc1a8;
+  --color-forest-500: #b8ad92;
+  --color-forest-400: #9a8e72;
+  --color-forest-300: #7a6e54;
+  --color-forest-200: #5a4f3a;
+  --color-forest-100: #3d3528;
+  --color-forest-50:  #2a2418;
+
+  --color-earth-900: #f7ede0;
+  --color-earth-800: #ecd5ba;
+  --color-earth-700: #d4aa85;
+  --color-earth-600: #b8895f;
+  --color-earth-500: #9a6b45;
+  --color-earth-400: #7a5030;
+  --color-earth-300: #6b4423;
+  --color-earth-200: #5a3820;
+  --color-earth-100: #3d2410;
+  --color-earth-50:  #2a1a0a;
+
+  --color-gold-600: #9a7b32;
+  --color-gold-500: #b88a3a;
+  --color-gold-400: #8a6a1e;
+  --color-gold-300: #7a5c1e;
+  --color-gold-200: #6a4e1a;
+  --color-gold-100: #5a4216;
+  --color-gold-50:  #4a3612;
+
+  --color-mist-700: #c4bba8;
+  --color-mist-600: #a89e88;
+  --color-mist-500: #8a8070;
+  --color-mist-400: #6a6258;
+  --color-mist-300: #4a443c;
+  --color-mist-200: #3a352e;
+  --color-mist-100: #2a2620;
+  --color-mist-50:  #1a1814;
+
+  --color-cream: #1a1610;
+  --color-charcoal: #f5f0e6;
+
+  --color-bg-base: var(--color-forest-900);
+  --color-text-base: var(--color-forest-50);
+  --color-field-image-filter: grayscale(5%) brightness(1.0) saturate(0.95) contrast(1.0);
+  --color-glass-bg: rgba(242, 236, 224, 0.82);
+  --color-glass-border: rgba(138, 106, 30, 0.18);
+  --color-glass-shadow: rgba(120, 100, 60, 0.15);
+  --color-cinematic-overlay-1: rgba(245, 240, 230, 0.3);
+  --color-cinematic-overlay-2: rgba(245, 240, 230, 0.45);
+  --color-cinematic-overlay-3: rgba(245, 240, 230, 0.65);
+  --color-fog-overlay: rgba(245, 240, 230, 0.3);
+  --color-paper-grain-bg: #f2ece0;
+  --color-paper-grain-gold: rgba(138, 106, 30, 0.06);
+  --color-paper-grain-earth: rgba(122, 80, 48, 0.05);
+  --color-topo-stroke: %238a6a1e;
+  --color-discovery-node: #8a6a1e;
+  --color-discovery-glow: rgba(138, 106, 30, 0.4);
+  --color-coord-text: rgba(90, 66, 22, 0.5);
+  --color-grain-opacity: 0.02;
+  --color-grain-blend: multiply;
+}
+
 @layer base {
   body {
-    @apply bg-charcoal text-mist-100 font-sans antialiased;
+    @apply font-sans antialiased;
+    background-color: var(--color-bg-base);
+    color: var(--color-text-base);
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -53,11 +189,11 @@
   }
 
   .glow-gold {
-    filter: drop-shadow(0 0 8px rgba(201, 168, 74, 0.4));
+    filter: drop-shadow(0 0 8px var(--color-discovery-glow));
   }
 
   .fog-overlay {
-    background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 26, 15, 0.4) 100%);
+    background: radial-gradient(ellipse at center, transparent 0%, var(--color-fog-overlay) 100%);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -165,24 +301,24 @@
 
 /* Warm adventure palette — paper grain + sand undertone */
 .paper-grain {
-  background-color: #0a120a;
+  background-color: var(--color-paper-grain-bg);
   background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(201, 168, 74, 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 100%, rgba(154, 107, 69, 0.05) 0%, transparent 55%);
+    radial-gradient(ellipse at 20% 0%, var(--color-paper-grain-gold) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, var(--color-paper-grain-earth) 0%, transparent 55%);
 }
 
 /* Soft depth shadow for glass cards */
 .glass-card {
-  background: rgba(10, 18, 10, 0.55);
+  background: var(--color-glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(201, 168, 74, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 8px 32px var(--color-glass-shadow);
 }
 
 /* Field-journal image treatment */
 .field-image {
-  filter: grayscale(18%) brightness(0.78) saturate(0.82) contrast(1.02);
+  filter: var(--color-field-image-filter);
 }
 
 /* Mist drift — slow ambient motion */
@@ -197,7 +333,7 @@
 
 /* Glowing map pin pulse */
 @keyframes pinGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 168, 74, 0.4); }
+  0%, 100% { box-shadow: 0 0 0 0 var(--color-discovery-glow); }
   50% { box-shadow: 0 0 0 8px rgba(201, 168, 74, 0); }
 }
 .animate-pin {
@@ -207,11 +343,11 @@
 /* Discovery Node Glow */
 @keyframes nodeGlow {
   0%, 100% {
-    box-shadow: 0 0 4px rgba(201, 168, 74, 0.3), 0 0 8px rgba(201, 168, 74, 0.1);
+    box-shadow: 0 0 4px var(--color-discovery-glow), 0 0 8px var(--color-discovery-glow);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 12px rgba(201, 168, 74, 0.5), 0 0 24px rgba(201, 168, 74, 0.2);
+    box-shadow: 0 0 12px var(--color-discovery-glow), 0 0 24px var(--color-discovery-glow);
     transform: scale(1.2);
   }
 }
@@ -329,14 +465,14 @@
 .cinematic-overlay {
   background: linear-gradient(
     to bottom,
-    rgba(6, 13, 6, 0.4) 0%,
-    rgba(6, 13, 6, 0.6) 40%,
-    rgba(6, 13, 6, 0.85) 100%
+    var(--color-cinematic-overlay-1) 0%,
+    var(--color-cinematic-overlay-2) 40%,
+    var(--color-cinematic-overlay-3) 100%
   );
 }
 
 .topo-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='200' cy='200' r='160' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.15'/%3E%3Ccircle cx='200' cy='200' r='120' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='80' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='40' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='200' cy='200' r='160' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.15'/%3E%3Ccircle cx='200' cy='200' r='120' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='80' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='40' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
   background-size: 400px 400px;
 }
 
@@ -345,8 +481,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #c9a84a;
-  box-shadow: 0 0 12px 4px rgba(201, 168, 74, 0.4);
+  background: var(--color-discovery-node);
+  box-shadow: 0 0 12px 4px var(--color-discovery-glow);
 }
 
 .discovery-node::after {
@@ -354,7 +490,7 @@
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 1px solid rgba(201, 168, 74, 0.3);
+  border: 1px solid var(--color-discovery-glow);
   animation: discoveryRing 3s ease-out infinite;
 }
 
@@ -379,7 +515,7 @@
   width: 200%;
   height: 200%;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-  opacity: 0.035;
+  opacity: var(--color-grain-opacity);
   pointer-events: none;
   animation: grain 8s steps(10) infinite;
   z-index: 9999;
@@ -397,7 +533,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.15em;
-  color: rgba(201, 168, 74, 0.4);
+  color: var(--color-coord-text);
   user-select: none;
 }
 

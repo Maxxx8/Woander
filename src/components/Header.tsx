@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LogOut, User, Search } from 'lucide-react';
+import { Menu, X, LogOut, User, Search, Sun, Moon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../shared/AuthContext';
+import { useTheme } from '../shared/ThemeContext';
 import AuthModal from './AuthModal';
 import SearchModal from './SearchModal';
 
@@ -11,6 +12,7 @@ const Header = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, signOut } = useAuth();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +63,15 @@ const Header = () => {
               ))}
 
               <button
+                onClick={toggle}
+                className="text-mist-500 hover:text-gold-300 transition-colors duration-300 relative"
+                type="button"
+                aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
+              >
+                {theme === 'night' ? <Sun size={17} strokeWidth={1.5} /> : <Moon size={17} strokeWidth={1.5} />}
+              </button>
+
+              <button
                 onClick={() => setIsSearchModalOpen(true)}
                 className="text-mist-500 hover:text-cream transition-colors duration-300"
                 type="button"
@@ -96,14 +107,24 @@ const Header = () => {
               )}
             </nav>
 
-            {/* Mobile menu toggle */}
-            <button
-              className="md:hidden text-mist-400 hover:text-cream transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            {/* Mobile: theme toggle + menu button */}
+            <div className="flex items-center gap-4 md:hidden">
+              <button
+                onClick={toggle}
+                className="text-mist-400 hover:text-gold-300 transition-colors duration-300"
+                type="button"
+                aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
+              >
+                {theme === 'night' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
+              </button>
+              <button
+                className="text-mist-400 hover:text-cream transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
 
           {/* Mobile menu */}
@@ -126,6 +147,13 @@ const Header = () => {
                     {label}
                   </Link>
                 ))}
+                <button
+                  onClick={() => { toggle(); }}
+                  className="flex items-center gap-2 text-mist-400 hover:text-cream text-sm transition-colors text-left"
+                >
+                  {theme === 'night' ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
+                  {theme === 'night' ? 'Day Mode' : 'Night Mode'}
+                </button>
                 <button
                   onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }}
                   className="flex items-center gap-2 text-mist-400 hover:text-cream text-sm transition-colors text-left"
