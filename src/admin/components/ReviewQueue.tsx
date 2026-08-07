@@ -20,6 +20,13 @@ interface ReviewQueueProps {
   type: 'property' | 'gem' | 'adventure' | 'guide';
 }
 
+// Maps a DB row (which may use different status column names per table) to a unified ReviewItem.
+// hidden_gems uses `verification_status`; property_listings and others use `status`.
+function getRowStatus(item: any, type: string): string {
+  if (type === 'gem') return item.verification_status || 'pending';
+  return item.status || 'pending';
+}
+
 export default function ReviewQueue({ type }: ReviewQueueProps) {
   const { permissions, user: currentUser } = useAdminAuth();
   const [items, setItems] = useState<ReviewItem[]>([]);
@@ -43,17 +50,25 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                       type === 'gem' ? 'hidden_gems' :
                       type === 'adventure' ? 'adventures' : 'tour_guides';
 
-    const { data } = await supabase
+    console.log(`[ReviewQueue] Querying ${tableName} for type="${type}"`);
+
+    const { data, error } = await supabase
       .from(tableName)
       .select('*')
       .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error(`[ReviewQueue] Error fetching from ${tableName}:`, error);
+    } else {
+      console.log(`[ReviewQueue] Fetched ${data?.length || 0} items from ${tableName}`, data);
+    }
 
     const mapped = (data || []).map(item => ({
       id: item.id,
       type,
       title: item.title || item.name || item.full_name || 'Untitled',
       description: item.description || item.bio || '',
-      status: item.status || 'pending',
+      status: getRowStatus(item, type),
       created_at: item.created_at,
       location: item.location || item.location_city || '',
       rejection_reason: item.rejection_reason
@@ -74,46 +89,77 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                       type === 'gem' ? 'hidden_gems' :
                       type === 'adventure' ? 'adventures' : 'tour_guides';
 
-    const update: any = { status: action === 'approve' ? 'approved' : 'rejected' };
+    // hidden_gems uses `verification_status` with values 'verified'/'featured'/'pending'/'rejected'.
+    // Other tables use `status` with 'approved'/'rejected'/'pending'.
+    const update: any = {};
+    if (type === 'gem') {
+      update.verification_status = action === 'approve' ? 'verified' : 'rejected';
+    } else {
+      update.status = action === 'approve' ? 'approved' : 'rejected';
+    }
     if (action === 'reject' && feedback) {
       update.rejection_reason = feedback;
     }
+    update.updated_at = new Date().toISOString();
 
-    await supabase.from(tableName).update(update).eq('id', itemId);
+    console.log(`[ReviewQueue] Updating ${tableName} id=${itemId}`, update);
 
-    await supabase.from('admin_logs').insert({
-      admin_id: currentUser?.id,
-      action,
-      content_type: type,
-      content_id: itemId,
-      details: { feedback }
-    });
+    const { error: updateError } = await supabase.from(tableName).update(update).eq('id', itemId);
 
-    const today = new Date().toISOString().split('T')[0];
-    const { data: existingStat } = await supabase
-      .from('admin_activity_stats')
-      .select('*')
-      .eq('admin_id', currentUser?.id)
-      .eq('date', today)
-      .maybeSingle();
-
-    if (existingStat) {
-      await supabase
-        .from('admin_activity_stats')
-        .update({
-          items_reviewed: existingStat.items_reviewed + 1,
-          approvals_count: existingStat.approvals_count + (action === 'approve' ? 1 : 0),
-          rejections_count: existingStat.rejections_count + (action === 'reject' ? 1 : 0)
-        })
-        .eq('id', existingStat.id);
+    if (updateError) {
+      console.error(`[ReviewQueue] Error updating ${tableName}:`, updateError);
     } else {
-      await supabase.from('admin_activity_stats').insert({
+      console.log(`[ReviewQueue] Successfully updated ${tableName} id=${itemId}`);
+    }
+
+    // Log to admin_logs if the table exists (non-blocking — don't fail the action if logging fails)
+    try {
+      const { error: logError } = await supabase.from('admin_logs').insert({
         admin_id: currentUser?.id,
-        date: today,
-        items_reviewed: 1,
-        approvals_count: action === 'approve' ? 1 : 0,
-        rejections_count: action === 'reject' ? 1 : 0
+        action,
+        content_type: type,
+        content_id: itemId,
+        details: { feedback }
       });
+      if (logError) {
+        console.warn('[ReviewQueue] Could not write to admin_logs (table may not exist):', logError.message);
+      }
+    } catch (e) {
+      console.warn('[ReviewQueue] admin_logs insert failed:', e);
+    }
+
+    // Update activity stats if the table exists (non-blocking)
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const { data: existingStat, error: statError } = await supabase
+        .from('admin_activity_stats')
+        .select('*')
+        .eq('admin_id', currentUser?.id)
+        .eq('date', today)
+        .maybeSingle();
+
+      if (statError && statError.code !== '42P01') {
+        console.warn('[ReviewQueue] admin_activity_stats query failed:', statError.message);
+      } else if (existingStat) {
+        await supabase
+          .from('admin_activity_stats')
+          .update({
+            items_reviewed: existingStat.items_reviewed + 1,
+            approvals_count: existingStat.approvals_count + (action === 'approve' ? 1 : 0),
+            rejections_count: existingStat.rejections_count + (action === 'reject' ? 1 : 0)
+          })
+          .eq('id', existingStat.id);
+      } else {
+        await supabase.from('admin_activity_stats').insert({
+          admin_id: currentUser?.id,
+          date: today,
+          items_reviewed: 1,
+          approvals_count: action === 'approve' ? 1 : 0,
+          rejections_count: action === 'reject' ? 1 : 0
+        });
+      }
+    } catch (e) {
+      console.warn('[ReviewQueue] admin_activity_stats update failed:', e);
     }
 
     setSelectedItem(null);
@@ -133,7 +179,7 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
   if (loading) return <div className="text-center py-8">Loading...</div>;
 
   const pending = items.filter(i => i.status === 'pending');
-  const approved = items.filter(i => i.status === 'approved');
+  const approved = items.filter(i => i.status === 'approved' || i.status === 'verified' || i.status === 'featured');
   const rejected = items.filter(i => i.status === 'rejected');
 
   return (
@@ -161,6 +207,11 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
 
       <div className="bg-white rounded-lg shadow">
         <div className="divide-y">
+          {items.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              No {type === 'gem' ? 'hidden gems' : type + 's'} found.
+            </div>
+          )}
           {items.map(item => (
             <div key={item.id} className="p-4 hover:bg-gray-50">
               <div className="flex justify-between items-start">
@@ -187,7 +238,7 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                 </div>
                 <div className="flex items-center gap-2 ml-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    item.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    item.status === 'approved' || item.status === 'verified' || item.status === 'featured' ? 'bg-green-100 text-green-800' :
                     item.status === 'rejected' ? 'bg-red-100 text-red-800' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
