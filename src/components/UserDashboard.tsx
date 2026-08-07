@@ -3,24 +3,7 @@ import { supabase } from '../shared/supabase';
 import { useAuth } from '../shared/AuthContext';
 import MyProperties from './MyProperties';
 import AddPropertyModal from './AddPropertyModal';
-import {
-  User,
-  MapPin,
-  Calendar,
-  Award,
-  TrendingUp,
-  Star,
-  Eye,
-  ThumbsUp,
-  Edit2,
-  Save,
-  X,
-  Trophy,
-  Sparkles,
-  Camera,
-  Home,
-  Plus
-} from 'lucide-react';
+import { User, MapPin, Calendar, Award, TrendingUp, Star, Eye, ThumbsUp, CreditCard as Edit2, Save, X, Trophy, Sparkles, Camera, Home, Plus } from 'lucide-react';
 
 interface UserProfile {
   display_name: string | null;
@@ -105,19 +88,26 @@ export default function UserDashboard() {
       ]);
 
       if (profileRes.error) {
-        console.error('Profile error:', profileRes.error);
+        console.error('[UserDashboard] Profile error:', profileRes.error);
       }
 
       if (contributionsRes.error) {
-        console.error('Contributions error:', contributionsRes.error);
+        console.error('[UserDashboard] Contributions error:', contributionsRes.error);
       }
 
       if (profileRes.data) {
-        setProfile(profileRes.data);
+        const p = profileRes.data as any;
+        setProfile({
+          display_name: p.display_name || null,
+          bio: p.bio || '',
+          avatar_url: p.avatar_url || null,
+          location: p.location || '',
+          joined_at: p.joined_at || new Date().toISOString()
+        });
         setEditForm({
-          display_name: profileRes.data.display_name || '',
-          bio: profileRes.data.bio || '',
-          location: profileRes.data.location || ''
+          display_name: p.display_name || '',
+          bio: p.bio || '',
+          location: p.location || ''
         });
       } else {
         const defaultProfile: UserProfile = {

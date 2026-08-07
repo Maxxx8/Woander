@@ -50,22 +50,38 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function loadPermissions(role: string) {
-    const { data } = await supabase
-      .from('admin_role_permissions')
-      .select('permission_key')
-      .eq('role', role);
+    try {
+      const { data, error } = await supabase
+        .from('admin_role_permissions')
+        .select('permission_key')
+        .eq('role', role);
 
-    if (data) {
-      setPermissions(data.map(p => p.permission_key));
+      if (error) {
+        console.error('[AdminAuth] Error loading permissions:', error);
+      } else if (data) {
+        setPermissions(data.map(p => p.permission_key));
+      }
+    } catch (e) {
+      console.error('[AdminAuth] Failed to load permissions:', e);
     }
   }
 
   async function checkAdminRole(authUser: User) {
-    const { data } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', authUser.id)
-      .maybeSingle();
+    let data: any = null;
+    try {
+      const result = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', authUser.id)
+        .maybeSingle();
+
+      if (result.error) {
+        console.error('[AdminAuth] Error querying admin_users:', result.error);
+      }
+      data = result.data;
+    } catch (e) {
+      console.error('[AdminAuth] Failed to query admin_users:', e);
+    }
 
     if (data) {
       if (!data.is_active) {
@@ -99,14 +115,18 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       setUser(adminUser);
       await loadPermissions(data.role);
 
-      await supabase
-        .from('admin_users')
-        .update({
-          last_login: new Date().toISOString(),
-          failed_login_attempts: 0,
-          locked_until: null
-        })
-        .eq('id', authUser.id);
+      try {
+        await supabase
+          .from('admin_users')
+          .update({
+            last_login: new Date().toISOString(),
+            failed_login_attempts: 0,
+            locked_until: null
+          })
+          .eq('id', authUser.id);
+      } catch (e) {
+        console.warn('[AdminAuth] Could not update last_login:', e);
+      }
     } else {
       await supabase.auth.signOut();
     }
@@ -116,24 +136,29 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      const { data: adminData } = await supabase
-        .from('admin_users')
-        .select('id, failed_login_attempts')
-        .eq('id', error.message)
-        .maybeSingle();
-
-      if (adminData) {
-        const attempts = (adminData.failed_login_attempts || 0) + 1;
-        const updates: any = { failed_login_attempts: attempts };
-
-        if (attempts >= 5) {
-          updates.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-        }
-
-        await supabase
+      console.error('[AdminAuth] Sign-in error:', error);
+      try {
+        const { data: adminData } = await supabase
           .from('admin_users')
-          .update(updates)
-          .eq('id', adminData.id);
+          .select('id, failed_login_attempts')
+          .eq('id', error.message)
+          .maybeSingle();
+
+        if (adminData) {
+          const attempts = (adminData.failed_login_attempts || 0) + 1;
+          const updates: any = { failed_login_attempts: attempts };
+
+          if (attempts >= 5) {
+            updates.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+          }
+
+          await supabase
+            .from('admin_users')
+            .update(updates)
+            .eq('id', adminData.id);
+        }
+      } catch (e) {
+        console.warn('[AdminAuth] Could not update failed login attempts:', e);
       }
       throw error;
     }
