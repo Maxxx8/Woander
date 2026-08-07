@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../shared/supabase';
-import { CheckCircle, XCircle, Clock, MapPin, Calendar } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, MapPin, Calendar, User } from 'lucide-react';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { canManageContent, canViewContent } from '../adminPermissions';
 
@@ -11,8 +11,9 @@ interface ReviewItem {
   description: string;
   status: string;
   created_at: string;
-  user_email?: string;
+  submitted_by_name?: string;
   location?: string;
+  category?: string;
   rejection_reason?: string;
 }
 
@@ -20,12 +21,18 @@ interface ReviewQueueProps {
   type: 'property' | 'gem' | 'adventure' | 'guide';
 }
 
-// Maps a DB row (which may use different status column names per table) to a unified ReviewItem.
-// hidden_gems uses `verification_status`; property_listings and others use `status`.
+// hidden_gems uses `verification_status`; other tables use `status`.
 function getRowStatus(item: any, type: string): string {
   if (type === 'gem') return item.verification_status || 'pending';
   return item.status || 'pending';
 }
+
+const STATUS_TABLE: Record<ReviewQueueProps['type'], string> = {
+  property: 'property_listings',
+  gem: 'hidden_gems',
+  adventure: 'adventures',
+  guide: 'tour_guides',
+};
 
 export default function ReviewQueue({ type }: ReviewQueueProps) {
   const { permissions, user: currentUser } = useAdminAuth();
@@ -38,45 +45,59 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
   const canView = canViewContent(permissions, type);
   const canManage = canManageContent(permissions, type);
 
-  useEffect(() => {
-    if (canView) {
-      loadItems();
-    }
-  }, [type, canView]);
-
-  async function loadItems() {
+  const loadItems = useCallback(async () => {
     setLoading(true);
-    const tableName = type === 'property' ? 'property_listings' :
-                      type === 'gem' ? 'hidden_gems' :
-                      type === 'adventure' ? 'adventures' : 'tour_guides';
+    const tableName = STATUS_TABLE[type];
+
+    // hidden_gems joins user_profiles for the submitter's display name.
+    const select =
+      type === 'gem'
+        ? `*, user_profiles!hidden_gems_submitted_by_fkey(display_name, avatar_url)`
+        : '*';
 
     console.log(`[ReviewQueue] Querying ${tableName} for type="${type}"`);
 
     const { data, error } = await supabase
       .from(tableName)
-      .select('*')
+      .select(select)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error(`[ReviewQueue] Error fetching from ${tableName}:`, error);
+      console.error(`[ReviewQueue] Supabase error fetching from ${tableName}:`, error);
     } else {
-      console.log(`[ReviewQueue] Fetched ${data?.length || 0} items from ${tableName}`, data);
+      console.log(`[ReviewQueue] Row count returned from ${tableName}: ${data?.length || 0}`);
+      console.log(`[ReviewQueue] Returned data:`, data);
     }
 
-    const mapped = (data || []).map(item => ({
-      id: item.id,
-      type,
-      title: item.title || item.name || item.full_name || 'Untitled',
-      description: item.description || item.bio || '',
-      status: getRowStatus(item, type),
-      created_at: item.created_at,
-      location: item.location || item.location_city || '',
-      rejection_reason: item.rejection_reason
-    }));
+    const mapped = (data || []).map((item: any) => {
+      const profile = item.user_profiles;
+      return {
+        id: item.id,
+        type,
+        title: item.title || item.name || item.full_name || 'Untitled',
+        description: item.description || item.bio || '',
+        status: getRowStatus(item, type),
+        created_at: item.created_at,
+        submitted_by_name:
+          profile?.display_name ||
+          item.submitted_by_name ||
+          item.user_email ||
+          undefined,
+        location: item.location || item.location_city || '',
+        category: item.category || '',
+        rejection_reason: item.rejection_reason,
+      } as ReviewItem;
+    });
 
     setItems(mapped);
     setLoading(false);
-  }
+  }, [type]);
+
+  useEffect(() => {
+    if (canView) {
+      loadItems();
+    }
+  }, [canView, loadItems]);
 
   async function handleAction(itemId: string, action: 'approve' | 'reject') {
     if (!canManage) {
@@ -85,12 +106,8 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
     }
 
     setProcessing(true);
-    const tableName = type === 'property' ? 'property_listings' :
-                      type === 'gem' ? 'hidden_gems' :
-                      type === 'adventure' ? 'adventures' : 'tour_guides';
+    const tableName = STATUS_TABLE[type];
 
-    // hidden_gems uses `verification_status` with values 'verified'/'featured'/'pending'/'rejected'.
-    // Other tables use `status` with 'approved'/'rejected'/'pending'.
     const update: any = {};
     if (type === 'gem') {
       update.verification_status = action === 'approve' ? 'verified' : 'rejected';
@@ -104,31 +121,37 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
 
     console.log(`[ReviewQueue] Updating ${tableName} id=${itemId}`, update);
 
-    const { error: updateError } = await supabase.from(tableName).update(update).eq('id', itemId);
+    const { error: updateError } = await supabase
+      .from(tableName)
+      .update(update)
+      .eq('id', itemId);
 
     if (updateError) {
-      console.error(`[ReviewQueue] Error updating ${tableName}:`, updateError);
-    } else {
-      console.log(`[ReviewQueue] Successfully updated ${tableName} id=${itemId}`);
+      console.error(`[ReviewQueue] Supabase error updating ${tableName}:`, updateError);
+      alert('Failed to update item. Please try again.');
+      setProcessing(false);
+      return;
     }
 
-    // Log to admin_logs if the table exists (non-blocking — don't fail the action if logging fails)
+    console.log(`[ReviewQueue] Successfully updated ${tableName} id=${itemId}`);
+
+    // Log to admin_logs (non-blocking)
     try {
       const { error: logError } = await supabase.from('admin_logs').insert({
         admin_id: currentUser?.id,
         action,
         content_type: type,
         content_id: itemId,
-        details: { feedback }
+        details: { feedback },
       });
       if (logError) {
-        console.warn('[ReviewQueue] Could not write to admin_logs (table may not exist):', logError.message);
+        console.warn('[ReviewQueue] Could not write to admin_logs:', logError.message);
       }
     } catch (e) {
       console.warn('[ReviewQueue] admin_logs insert failed:', e);
     }
 
-    // Update activity stats if the table exists (non-blocking)
+    // Update activity stats (non-blocking)
     try {
       const today = new Date().toISOString().split('T')[0];
       const { data: existingStat, error: statError } = await supabase
@@ -146,7 +169,7 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
           .update({
             items_reviewed: existingStat.items_reviewed + 1,
             approvals_count: existingStat.approvals_count + (action === 'approve' ? 1 : 0),
-            rejections_count: existingStat.rejections_count + (action === 'reject' ? 1 : 0)
+            rejections_count: existingStat.rejections_count + (action === 'reject' ? 1 : 0),
           })
           .eq('id', existingStat.id);
       } else {
@@ -155,17 +178,35 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
           date: today,
           items_reviewed: 1,
           approvals_count: action === 'approve' ? 1 : 0,
-          rejections_count: action === 'reject' ? 1 : 0
+          rejections_count: action === 'reject' ? 1 : 0,
         });
       }
     } catch (e) {
       console.warn('[ReviewQueue] admin_activity_stats update failed:', e);
     }
 
+    // Optimistically remove from pending list immediately
+    if (action === 'approve') {
+      setItems(prev =>
+        prev.map(it =>
+          it.id === itemId
+            ? { ...it, status: type === 'gem' ? 'verified' : 'approved' }
+            : it,
+        ),
+      );
+    } else {
+      setItems(prev =>
+        prev.map(it =>
+          it.id === itemId
+            ? { ...it, status: 'rejected', rejection_reason: feedback || undefined }
+            : it,
+        ),
+      );
+    }
+
     setSelectedItem(null);
     setFeedback('');
     setProcessing(false);
-    loadItems();
   }
 
   if (!canView) {
@@ -179,7 +220,9 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
   if (loading) return <div className="text-center py-8">Loading...</div>;
 
   const pending = items.filter(i => i.status === 'pending');
-  const approved = items.filter(i => i.status === 'approved' || i.status === 'verified' || i.status === 'featured');
+  const approved = items.filter(
+    i => i.status === 'approved' || i.status === 'verified' || i.status === 'featured',
+  );
   const rejected = items.filter(i => i.status === 'rejected');
 
   return (
@@ -218,11 +261,24 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg">{item.title}</h3>
                   <p className="text-gray-600 text-sm mt-1 line-clamp-2">{item.description}</p>
-                  <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                  <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
                     {item.location && (
                       <span className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
                         {item.location}
+                      </span>
+                    )}
+                    {item.category && (
+                      <span className="flex items-center gap-1">
+                        <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">
+                          {item.category}
+                        </span>
+                      </span>
+                    )}
+                    {item.submitted_by_name && (
+                      <span className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        {item.submitted_by_name}
                       </span>
                     )}
                     <span className="flex items-center gap-1">
@@ -237,11 +293,17 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                   )}
                 </div>
                 <div className="flex items-center gap-2 ml-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    item.status === 'approved' || item.status === 'verified' || item.status === 'featured' ? 'bg-green-100 text-green-800' :
-                    item.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'approved' ||
+                      item.status === 'verified' ||
+                      item.status === 'featured'
+                        ? 'bg-green-100 text-green-800'
+                        : item.status === 'rejected'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
                     {item.status}
                   </span>
                   {item.status === 'pending' && canManage && (
@@ -263,9 +325,20 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-2xl font-bold mb-4">Review Item</h2>
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-2">{selectedItem.title}</h3>
+            <div className="mb-6 space-y-2">
+              <h3 className="font-semibold text-lg">{selectedItem.title}</h3>
               <p className="text-gray-600">{selectedItem.description}</p>
+              {selectedItem.submitted_by_name && (
+                <p className="text-sm text-gray-500">
+                  Submitted by: {selectedItem.submitted_by_name}
+                </p>
+              )}
+              {selectedItem.location && (
+                <p className="text-sm text-gray-500">Location: {selectedItem.location}</p>
+              )}
+              {selectedItem.category && (
+                <p className="text-sm text-gray-500">Category: {selectedItem.category}</p>
+              )}
             </div>
 
             <div className="mb-6">
@@ -274,7 +347,7 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
               </label>
               <textarea
                 value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
+                onChange={e => setFeedback(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg"
                 rows={4}
                 placeholder="Provide feedback or reason for rejection..."
