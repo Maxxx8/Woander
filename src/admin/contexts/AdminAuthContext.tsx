@@ -29,7 +29,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   // read current values without depending on the state variable.
   const currentUserId = useRef<string | null>(null);
   const currentUser = useRef<AdminUser | null>(null);
+  // Prevents concurrent checkAdminRole calls (signIn vs onAuthStateChange).
   const checkInProgress = useRef(false);
+  // Blocks onAuthStateChange from doing anything until the initial
+  // getSession + checkAdminRole sequence has completed.
+  const initialized = useRef(false);
 
   async function loadPermissions(role: string) {
     try {
@@ -38,14 +42,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         .select('permission_key')
         .eq('role', role);
 
-      if (error) {
-        console.error('[AdminAuth] Error loading permissions:', error);
-        return;
-      }
+      if (error) return;
       const keys = data?.map(p => p.permission_key) ?? [];
       setPermissions(keys);
     } catch (e) {
-      console.error('[AdminAuth] Failed to load permissions:', e);
+      // Non-critical — permissions will be empty
     }
   }
 
@@ -59,11 +60,20 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       if (result.error) {
-        console.error('[AdminAuth] Error querying admin_users:', result.error);
+        // Don't sign out on query error — could be transient
+        setUser(null);
+        currentUser.current = null;
+        setPermissions([]);
+        setLoading(false);
+        return false;
       }
       data = result.data;
     } catch (e) {
-      console.error('[AdminAuth] Failed to query admin_users:', e);
+      setUser(null);
+      currentUser.current = null;
+      setPermissions([]);
+      setLoading(false);
+      return false;
     }
 
     if (data) {
@@ -101,27 +111,30 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         last_login: data.last_login
       };
 
+      // Set user and refs BEFORE loading permissions so that
+      // isAdmin is true as soon as possible.
       setUser(adminUser);
       currentUser.current = adminUser;
       currentUserId.current = authUser.id;
+
       await loadPermissions(data.role);
 
-      try {
-        await supabase
-          .from('admin_users')
-          .update({
-            last_login: new Date().toISOString(),
-            failed_login_attempts: 0,
-            locked_until: null
-          })
-          .eq('id', authUser.id);
-      } catch (e) {
-        // Non-critical
-      }
+      // Update last_login in the background — don't block on it.
+      supabase
+        .from('admin_users')
+        .update({
+          last_login: new Date().toISOString(),
+          failed_login_attempts: 0,
+          locked_until: null
+        })
+        .eq('id', authUser.id)
+        .then(() => {}, () => {});
 
+      // loading is set to false ONLY after user + permissions are set.
       setLoading(false);
       return true;
     } else {
+      // No admin record — sign out.
       await supabase.auth.signOut();
       setUser(null);
       currentUser.current = null;
@@ -132,8 +145,13 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // 1. Restore any existing session on mount.
     supabase.auth.getSession().then(async ({ data: { session }, error }) => {
-      if (error) console.error('[AdminAuth] getSession error:', error);
+      if (error) {
+        setLoading(false);
+        initialized.current = true;
+        return;
+      }
       if (session?.user) {
         checkInProgress.current = true;
         await checkAdminRole(session.user);
@@ -141,10 +159,15 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       } else {
         setLoading(false);
       }
+      // Mark initialized AFTER getSession completes so onAuthStateChange
+      // doesn't race with it.
+      initialized.current = true;
     });
 
+    // 2. Subscribe to auth state changes.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       (async () => {
+        // SIGNED_OUT always resets, regardless of initialization state.
         if (event === 'SIGNED_OUT') {
           setUser(null);
           currentUser.current = null;
@@ -154,17 +177,23 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        // Ignore all other events until the initial getSession completes.
+        // This prevents INITIAL_SESSION from racing with getSession.
+        if (!initialized.current) {
+          return;
+        }
+
+        // Ignore events with no session.
         if (!session?.user) {
           return;
         }
 
-        // Skip if a check is already in progress (e.g., signIn called checkAdminRole
-        // directly, or getSession is still running).
+        // Skip if a check is already in progress (e.g., signIn is handling it).
         if (checkInProgress.current) {
           return;
         }
 
-        // Skip if this is the same user we already loaded.
+        // Skip if this is the same user we already have loaded.
         if (session.user.id === currentUserId.current && currentUser.current) {
           return;
         }
@@ -182,14 +211,20 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string) {
     setLoading(true);
 
+    // Set the guard BEFORE calling signInWithPassword. Supabase fires the
+    // SIGNED_IN event during signInWithPassword, before this function
+    // continues. If the guard isn't set yet, onAuthStateChange will start
+    // a concurrent checkAdminRole call that races with ours.
+    checkInProgress.current = true;
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      checkInProgress.current = false;
       setLoading(false);
       throw error;
     }
 
-    // Set the guard BEFORE checkAdminRole so onAuthStateChange doesn't race.
-    checkInProgress.current = true;
+    // checkAdminRole sets user, permissions, and loading=false.
     const isAdmin = await checkAdminRole(data.user!);
     checkInProgress.current = false;
 
@@ -199,12 +234,14 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    checkInProgress.current = true;
     await supabase.auth.signOut();
     setUser(null);
     currentUser.current = null;
     setPermissions([]);
     currentUserId.current = null;
     setLoading(false);
+    checkInProgress.current = false;
   }
 
   async function refreshPermissions() {

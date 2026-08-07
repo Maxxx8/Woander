@@ -56,17 +56,8 @@ function ScrollToTop() {
 function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
   const { isAdmin, loading } = useAdminAuth();
 
-  if (loading) {
-    console.log('[ProtectedAdminRoute] loading=true — showing loading screen (no redirect)');
-    return <AdminLoadingScreen />;
-  }
-
-  if (isAdmin) {
-    console.log('[ProtectedAdminRoute] isAdmin=true — rendering dashboard');
-    return <>{children}</>;
-  }
-
-  console.warn('[ProtectedAdminRoute] isAdmin=false, loading=false — redirecting to /admin/login');
+  if (loading) return <AdminLoadingScreen />;
+  if (isAdmin) return <>{children}</>;
   return <Navigate to="/admin/login" replace />;
 }
 

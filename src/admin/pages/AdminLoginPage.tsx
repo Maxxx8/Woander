@@ -17,12 +17,9 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      console.log('[AdminLogin] Calling signIn...');
       await signIn(email, password);
-      console.log('[AdminLogin] signIn resolved, navigating to /admin/dashboard');
       navigate('/admin/dashboard');
     } catch (err) {
-      console.error('[AdminLogin] Sign-in failed:', err);
       setError('Invalid credentials or not authorized');
     } finally {
       setLoading(false);
