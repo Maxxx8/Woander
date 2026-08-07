@@ -72,8 +72,8 @@ function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
 
 function AdminSection() {
   return (
-    <Suspense fallback={<AdminLoadingScreen />}>
-      <AdminAuthProvider>
+    <AdminAuthProvider>
+      <Suspense fallback={<AdminLoadingScreen />}>
         <Routes>
           <Route path="login" element={<AdminLoginPage />} />
           <Route
@@ -92,8 +92,8 @@ function AdminSection() {
             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
         </Routes>
-      </AdminAuthProvider>
-    </Suspense>
+      </Suspense>
+    </AdminAuthProvider>
   );
 }
 
