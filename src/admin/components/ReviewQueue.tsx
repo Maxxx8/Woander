@@ -49,28 +49,57 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
     setLoading(true);
     const tableName = STATUS_TABLE[type];
 
-    // hidden_gems joins user_profiles for the submitter's display name.
-    const select =
-      type === 'gem'
-        ? `*, user_profiles!hidden_gems_submitted_by_fkey(display_name, avatar_url)`
-        : '*';
-
     console.log(`[ReviewQueue] Querying ${tableName} for type="${type}"`);
 
+    // Fetch content rows first (no embedded join — hidden_gems.submitted_by
+    // references auth.users, not user_profiles, so PostgREST cannot resolve
+    // a nested select between them).
     const { data, error } = await supabase
       .from(tableName)
-      .select(select)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error(`[ReviewQueue] Supabase error fetching from ${tableName}:`, error);
-    } else {
-      console.log(`[ReviewQueue] Row count returned from ${tableName}: ${data?.length || 0}`);
-      console.log(`[ReviewQueue] Returned data:`, data);
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+
+    console.log(`[ReviewQueue] Row count returned from ${tableName}: ${data?.length || 0}`);
+    console.log(`[ReviewQueue] Returned data:`, data);
+
+    // For hidden gems, fetch submitter profiles separately and merge.
+    let profileMap: Record<string, { display_name?: string; avatar_url?: string }> = {};
+    if (type === 'gem') {
+      const userIds = (data || [])
+        .map((item: any) => item.submitted_by)
+        .filter((id: any) => id != null) as string[];
+
+      if (userIds.length > 0) {
+        console.log(`[ReviewQueue] Fetching user_profiles for user_ids:`, userIds);
+        const { data: profiles, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+
+        if (profileError) {
+          console.error(`[ReviewQueue] Supabase error fetching user_profiles:`, profileError);
+        } else {
+          console.log(`[ReviewQueue] user_profiles row count: ${profiles?.length || 0}`);
+          profileMap = {};
+          for (const p of profiles || []) {
+            profileMap[p.user_id] = {
+              display_name: p.display_name,
+              avatar_url: p.avatar_url,
+            };
+          }
+        }
+      }
     }
 
     const mapped = (data || []).map((item: any) => {
-      const profile = item.user_profiles;
+      const profile = item.submitted_by ? profileMap[item.submitted_by] : undefined;
       return {
         id: item.id,
         type,
