@@ -1,34 +1,17 @@
-const CACHE_NAME = 'waking-life-v1';
-const urlsToCache = [
+const CACHE_NAME = 'woander-v2';
+const PRECACHE_URLS = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/manifest.json'
 ];
 
-// Install event
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Fetch event
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      }
-    )
-  );
-});
-
-// Activate event
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -39,16 +22,55 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Push notification event
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Never intercept build assets — Vite gives them content-hashed filenames
+  // so they're safe to cache by the browser's HTTP cache. Intercepting them
+  // here risks serving stale chunks from a previous deploy.
+  if (url.pathname.startsWith('/assets/')) {
+    return;
+  }
+
+  // For navigation requests (HTML pages), use network-first so the latest
+  // index.html is always fetched. Fall back to cache only when offline.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+    );
+    return;
+  }
+
+  // For other same-origin GET requests, cache-first with network fallback.
+  if (request.method === 'GET' && url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        return cached || fetch(request).then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          return response;
+        });
+      })
+    );
+  }
+});
+
 self.addEventListener('push', (event) => {
   const options = {
-    body: event.data ? event.data.text() : 'New update from Waking Life!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    body: event.data ? event.data.text() : 'New update from Woander!',
+    icon: '/icons/icon-192x192.svg',
+    badge: '/icons/icon-192x192.svg',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -58,22 +80,21 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'Explore Destinations',
-        icon: '/icons/icon-192x192.png'
+        icon: '/icons/icon-192x192.svg'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icons/icon-192x192.png'
+        icon: '/icons/icon-192x192.svg'
       }
     ]
   };
 
   event.waitUntil(
-    self.registration.showNotification('Waking Life Tourism', options)
+    self.registration.showNotification('Woander', options)
   );
 });
 
-// Notification click event
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
