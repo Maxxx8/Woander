@@ -25,30 +25,6 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        checkAdminRole(session.user);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        if (session?.user) {
-          await checkAdminRole(session.user);
-        } else {
-          setUser(null);
-          setPermissions([]);
-          setLoading(false);
-        }
-      })();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   async function loadPermissions(role: string) {
     try {
       const { data, error } = await supabase
@@ -59,14 +35,18 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('[AdminAuth] Error loading permissions:', error);
       } else if (data) {
-        setPermissions(data.map(p => p.permission_key));
+        const keys = data.map(p => p.permission_key);
+        console.log('[AdminAuth] Permissions loaded:', keys);
+        setPermissions(keys);
       }
     } catch (e) {
       console.error('[AdminAuth] Failed to load permissions:', e);
     }
   }
 
-  async function checkAdminRole(authUser: User) {
+  async function checkAdminRole(authUser: User): Promise<boolean> {
+    console.log('[AdminAuth] Authenticated user:', authUser.id, authUser.email);
+
     let data: any = null;
     try {
       const result = await supabase
@@ -83,17 +63,25 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       console.error('[AdminAuth] Failed to query admin_users:', e);
     }
 
+    console.log('[AdminAuth] Admin lookup result:', data);
+
     if (data) {
       if (!data.is_active) {
+        console.warn('[AdminAuth] Account is deactivated, signing out');
         await supabase.auth.signOut();
+        setUser(null);
+        setPermissions([]);
         setLoading(false);
-        throw new Error('Account is deactivated');
+        return false;
       }
 
       if (data.locked_until && new Date(data.locked_until) > new Date()) {
+        console.warn('[AdminAuth] Account is locked until:', data.locked_until);
         await supabase.auth.signOut();
+        setUser(null);
+        setPermissions([]);
         setLoading(false);
-        throw new Error('Account is temporarily locked');
+        return false;
       }
 
       const adminUser: AdminUser = {
@@ -113,6 +101,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(adminUser);
+      console.log('[AdminAuth] Admin user set:', adminUser.role);
       await loadPermissions(data.role);
 
       try {
@@ -127,41 +116,63 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         console.warn('[AdminAuth] Could not update last_login:', e);
       }
+
+      setLoading(false);
+      return true;
     } else {
+      console.warn('[AdminAuth] No admin record found for user, signing out');
       await supabase.auth.signOut();
+      setUser(null);
+      setPermissions([]);
+      setLoading(false);
+      return false;
     }
-    setLoading(false);
   }
 
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        await checkAdminRole(session.user);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      (async () => {
+        if (session?.user) {
+          // Re-check admin role on session changes (e.g., token refresh).
+          // The signIn function also calls checkAdminRole directly to avoid
+          // a race between navigation and the admin lookup.
+          await checkAdminRole(session.user);
+        } else {
+          setUser(null);
+          setPermissions([]);
+          setLoading(false);
+        }
+      })();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    console.log('[AdminAuth] Attempting sign-in for:', email);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.error('[AdminAuth] Sign-in error:', error);
-      try {
-        const { data: adminData } = await supabase
-          .from('admin_users')
-          .select('id, failed_login_attempts')
-          .eq('id', error.message)
-          .maybeSingle();
-
-        if (adminData) {
-          const attempts = (adminData.failed_login_attempts || 0) + 1;
-          const updates: any = { failed_login_attempts: attempts };
-
-          if (attempts >= 5) {
-            updates.locked_until = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-          }
-
-          await supabase
-            .from('admin_users')
-            .update(updates)
-            .eq('id', adminData.id);
-        }
-      } catch (e) {
-        console.warn('[AdminAuth] Could not update failed login attempts:', e);
-      }
       throw error;
     }
+
+    console.log('[AdminAuth] Auth succeeded for user:', data.user?.id);
+    // Directly run the admin check instead of waiting for onAuthStateChange.
+    // This eliminates the race between navigation and the admin lookup.
+    const isAdmin = await checkAdminRole(data.user!);
+    console.log('[AdminAuth] Permission decision: isAdmin =', isAdmin);
+    if (!isAdmin) {
+      throw new Error('Not authorized as admin');
+    }
+    console.log('[AdminAuth] Sign-in complete, redirecting to /admin/dashboard');
   }
 
   async function signOut() {
@@ -175,6 +186,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       await loadPermissions(user.role);
     }
   }
+
+  console.log('[AdminAuth] State:', { isAdmin: !!user, loading, userRole: user?.role });
 
   return (
     <AdminAuthContext.Provider value={{

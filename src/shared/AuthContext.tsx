@@ -19,9 +19,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) console.error('[Auth] getSession error:', error);
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((e) => {
+      console.error('[Auth] getSession failed:', e);
       setLoading(false);
     });
 
