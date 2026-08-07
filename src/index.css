@@ -6,50 +6,51 @@
 @tailwind utilities;
 
 /* ===== Theme CSS Variables ===== */
+/* Colors are stored as space-separated RGB channels so Tailwind can apply opacity modifiers. */
 /* Night (default) — deep forest, cream text, gold accents */
 :root {
-  --color-forest-950: #060d06;
-  --color-forest-900: #0a120a;
-  --color-forest-800: #0f1a0f;
-  --color-forest-700: #162116;
-  --color-forest-600: #1e2e1e;
-  --color-forest-500: #243524;
-  --color-forest-400: #2e4a2e;
-  --color-forest-300: #3d6b3d;
-  --color-forest-200: #5a8c5a;
-  --color-forest-100: #8ab88a;
-  --color-forest-50:  #c5d9c5;
+  --color-forest-950: 6 13 6;
+  --color-forest-900: 10 18 10;
+  --color-forest-800: 15 26 15;
+  --color-forest-700: 22 33 22;
+  --color-forest-600: 30 46 30;
+  --color-forest-500: 36 53 36;
+  --color-forest-400: 46 74 46;
+  --color-forest-300: 61 107 61;
+  --color-forest-200: 90 140 90;
+  --color-forest-100: 138 184 138;
+  --color-forest-50:  197 217 197;
 
-  --color-earth-900: #2a1a0a;
-  --color-earth-800: #3d2410;
-  --color-earth-700: #5a3820;
-  --color-earth-600: #6b4423;
-  --color-earth-500: #7a5030;
-  --color-earth-400: #9a6b45;
-  --color-earth-300: #b8895f;
-  --color-earth-200: #d4aa85;
-  --color-earth-100: #ecd5ba;
-  --color-earth-50:  #f7ede0;
+  --color-earth-900: 42 26 10;
+  --color-earth-800: 61 36 16;
+  --color-earth-700: 90 56 32;
+  --color-earth-600: 107 68 35;
+  --color-earth-500: 122 80 48;
+  --color-earth-400: 154 107 69;
+  --color-earth-300: 184 137 95;
+  --color-earth-200: 212 170 133;
+  --color-earth-100: 236 213 186;
+  --color-earth-50:  247 237 224;
 
-  --color-gold-600: #7a5c1e;
-  --color-gold-500: #9a7b32;
-  --color-gold-400: #c9a84a;
-  --color-gold-300: #e5c96e;
-  --color-gold-200: #f0dea0;
-  --color-gold-100: #f8f0cc;
-  --color-gold-50:  #fdf9ee;
+  --color-gold-600: 122 92 30;
+  --color-gold-500: 154 123 50;
+  --color-gold-400: 201 168 74;
+  --color-gold-300: 229 201 110;
+  --color-gold-200: 240 222 160;
+  --color-gold-100: 248 240 204;
+  --color-gold-50:  253 249 238;
 
-  --color-mist-700: #495057;
-  --color-mist-600: #6c757d;
-  --color-mist-500: #868e96;
-  --color-mist-400: #adb5bd;
-  --color-mist-300: #ced4da;
-  --color-mist-200: #dee2e6;
-  --color-mist-100: #e9ecef;
-  --color-mist-50:  #f8f9fa;
+  --color-mist-700: 73 80 87;
+  --color-mist-600: 108 117 125;
+  --color-mist-500: 134 142 150;
+  --color-mist-400: 173 181 189;
+  --color-mist-300: 206 212 218;
+  --color-mist-200: 222 226 230;
+  --color-mist-100: 233 236 239;
+  --color-mist-50:  248 249 250;
 
-  --color-cream: #faf8f5;
-  --color-charcoal: #1a1f2e;
+  --color-cream: 250 248 245;
+  --color-charcoal: 26 31 46;
 
   --color-bg-base: var(--color-forest-900);
   --color-text-base: var(--color-mist-100);
@@ -64,58 +65,57 @@
   --color-paper-grain-bg: #0a120a;
   --color-paper-grain-gold: rgba(201, 168, 74, 0.04);
   --color-paper-grain-earth: rgba(154, 107, 69, 0.05);
-  --color-topo-stroke: %23c9a84a;
   --color-discovery-node: #c9a84a;
   --color-discovery-glow: rgba(201, 168, 74, 0.4);
   --color-coord-text: rgba(201, 168, 74, 0.4);
   --color-grain-opacity: 0.028;
-  --color-grain-blend: overlay;
+  --topo-pattern-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='200' cy='200' r='160' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.15'/%3E%3Ccircle cx='200' cy='200' r='120' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='80' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='40' fill='none' stroke='%23c9a84a' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 /* Day — warm paper, dark ink, deeper gold for sunlight contrast */
 [data-theme="day"] {
-  --color-forest-950: #e8e0d0;
-  --color-forest-900: #f2ece0;
-  --color-forest-800: #eae2d2;
-  --color-forest-700: #ddd3bf;
-  --color-forest-600: #ccc1a8;
-  --color-forest-500: #b8ad92;
-  --color-forest-400: #9a8e72;
-  --color-forest-300: #7a6e54;
-  --color-forest-200: #5a4f3a;
-  --color-forest-100: #3d3528;
-  --color-forest-50:  #2a2418;
+  --color-forest-950: 232 224 208;
+  --color-forest-900: 242 236 224;
+  --color-forest-800: 234 226 210;
+  --color-forest-700: 221 211 191;
+  --color-forest-600: 204 193 168;
+  --color-forest-500: 184 173 146;
+  --color-forest-400: 154 142 114;
+  --color-forest-300: 122 110 84;
+  --color-forest-200: 90 79 58;
+  --color-forest-100: 61 53 40;
+  --color-forest-50:  42 36 24;
 
-  --color-earth-900: #f7ede0;
-  --color-earth-800: #ecd5ba;
-  --color-earth-700: #d4aa85;
-  --color-earth-600: #b8895f;
-  --color-earth-500: #9a6b45;
-  --color-earth-400: #7a5030;
-  --color-earth-300: #6b4423;
-  --color-earth-200: #5a3820;
-  --color-earth-100: #3d2410;
-  --color-earth-50:  #2a1a0a;
+  --color-earth-900: 247 237 224;
+  --color-earth-800: 236 213 186;
+  --color-earth-700: 212 170 133;
+  --color-earth-600: 184 137 95;
+  --color-earth-500: 154 107 69;
+  --color-earth-400: 122 80 48;
+  --color-earth-300: 107 68 35;
+  --color-earth-200: 90 56 32;
+  --color-earth-100: 61 36 16;
+  --color-earth-50:  42 26 10;
 
-  --color-gold-600: #9a7b32;
-  --color-gold-500: #b88a3a;
-  --color-gold-400: #8a6a1e;
-  --color-gold-300: #7a5c1e;
-  --color-gold-200: #6a4e1a;
-  --color-gold-100: #5a4216;
-  --color-gold-50:  #4a3612;
+  --color-gold-600: 154 123 50;
+  --color-gold-500: 184 138 58;
+  --color-gold-400: 138 106 30;
+  --color-gold-300: 122 92 30;
+  --color-gold-200: 106 78 26;
+  --color-gold-100: 90 66 22;
+  --color-gold-50:  74 54 18;
 
-  --color-mist-700: #c4bba8;
-  --color-mist-600: #a89e88;
-  --color-mist-500: #8a8070;
-  --color-mist-400: #6a6258;
-  --color-mist-300: #4a443c;
-  --color-mist-200: #3a352e;
-  --color-mist-100: #2a2620;
-  --color-mist-50:  #1a1814;
+  --color-mist-700: 196 187 168;
+  --color-mist-600: 168 158 136;
+  --color-mist-500: 138 128 112;
+  --color-mist-400: 106 98 88;
+  --color-mist-300: 74 68 60;
+  --color-mist-200: 58 53 46;
+  --color-mist-100: 42 38 32;
+  --color-mist-50:  26 24 20;
 
-  --color-cream: #1a1610;
-  --color-charcoal: #f5f0e6;
+  --color-cream: 26 22 16;
+  --color-charcoal: 245 240 230;
 
   --color-bg-base: var(--color-forest-900);
   --color-text-base: var(--color-forest-50);
@@ -130,19 +130,18 @@
   --color-paper-grain-bg: #f2ece0;
   --color-paper-grain-gold: rgba(138, 106, 30, 0.06);
   --color-paper-grain-earth: rgba(122, 80, 48, 0.05);
-  --color-topo-stroke: %238a6a1e;
   --color-discovery-node: #8a6a1e;
   --color-discovery-glow: rgba(138, 106, 30, 0.4);
   --color-coord-text: rgba(90, 66, 22, 0.5);
   --color-grain-opacity: 0.02;
-  --color-grain-blend: multiply;
+  --topo-pattern-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='200' cy='200' r='160' fill='none' stroke='%238a6a1e' stroke-width='0.5' opacity='0.15'/%3E%3Ccircle cx='200' cy='200' r='120' fill='none' stroke='%238a6a1e' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='80' fill='none' stroke='%238a6a1e' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='40' fill='none' stroke='%238a6a1e' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
 }
 
 @layer base {
   body {
     @apply font-sans antialiased;
-    background-color: var(--color-bg-base);
-    color: var(--color-text-base);
+    background-color: rgb(var(--color-bg-base));
+    color: rgb(var(--color-text-base));
     transition: background-color 0.4s ease, color 0.4s ease;
   }
 
@@ -472,7 +471,7 @@
 }
 
 .topo-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='200' cy='200' r='160' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.15'/%3E%3Ccircle cx='200' cy='200' r='120' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='200' r='80' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.1'/%3E%3Ccircle cx='200' cy='200' r='40' fill='none' stroke='var(--color-topo-stroke)' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E");
+  background-image: var(--topo-pattern-bg);
   background-size: 400px 400px;
 }
 
