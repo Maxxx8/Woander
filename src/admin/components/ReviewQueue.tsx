@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../shared/supabase';
-import { CheckCircle, XCircle, Clock, MapPin, Calendar, User } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, MapPin, Calendar, User, Mail, Phone, Globe, Award, Briefcase } from 'lucide-react';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { canManageContent, canViewContent } from '../adminPermissions';
 
@@ -15,6 +15,13 @@ interface ReviewItem {
   location?: string;
   category?: string;
   rejection_reason?: string;
+  // Guide-specific fields
+  email?: string;
+  phone?: string;
+  languages?: string[];
+  specialties?: string[];
+  years_experience?: number;
+  certifications?: any;
 }
 
 interface ReviewQueueProps {
@@ -34,6 +41,48 @@ const STATUS_TABLE: Record<ReviewQueueProps['type'], string> = {
   guide: 'tour_guides',
 };
 
+function mapItem(item: any, type: ReviewQueueProps['type']): ReviewItem {
+  if (type === 'guide') {
+    return {
+      id: item.id,
+      type: 'guide',
+      title: item.full_name || 'Unnamed Guide',
+      description: item.bio || '',
+      status: item.status || 'pending',
+      created_at: item.created_at,
+      submitted_by_name: item.full_name,
+      location: [
+        item.location_city,
+        item.location_state,
+        item.location_country,
+      ]
+        .filter(Boolean)
+        .join(', '),
+      category: 'Tour Guide',
+      rejection_reason: item.rejection_reason,
+      email: item.email,
+      phone: item.phone,
+      languages: item.languages || [],
+      specialties: item.specialties || [],
+      years_experience: item.years_experience,
+      certifications: item.certifications || [],
+    };
+  }
+
+  return {
+    id: item.id,
+    type,
+    title: item.title || item.name || item.full_name || 'Untitled',
+    description: item.description || item.bio || '',
+    status: getRowStatus(item, type),
+    created_at: item.created_at,
+    submitted_by_name: item.submitted_by_name || item.user_email || undefined,
+    location: item.location || item.location_city || '',
+    category: item.category || '',
+    rejection_reason: item.rejection_reason,
+  };
+}
+
 export default function ReviewQueue({ type }: ReviewQueueProps) {
   const { permissions, user: currentUser } = useAdminAuth();
   const [items, setItems] = useState<ReviewItem[]>([]);
@@ -51,13 +100,13 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
 
     console.log(`[ReviewQueue] Querying ${tableName} for type="${type}"`);
 
-    // Fetch content rows first (no embedded join — hidden_gems.submitted_by
-    // references auth.users, not user_profiles, so PostgREST cannot resolve
-    // a nested select between them).
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('*')
-      .order('created_at', { ascending: false });
+    let query = supabase.from(tableName).select('*');
+
+    if (type === 'guide') {
+      query = query.eq('status', 'pending');
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error(`[ReviewQueue] Supabase error fetching from ${tableName}:`, error);
@@ -67,7 +116,6 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
     }
 
     console.log(`[ReviewQueue] Row count returned from ${tableName}: ${data?.length || 0}`);
-    console.log(`[ReviewQueue] Returned data:`, data);
 
     // For hidden gems, fetch submitter profiles separately and merge.
     let profileMap: Record<string, { display_name?: string; avatar_url?: string }> = {};
@@ -77,7 +125,6 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
         .filter((id: any) => id != null) as string[];
 
       if (userIds.length > 0) {
-        console.log(`[ReviewQueue] Fetching user_profiles for user_ids:`, userIds);
         const { data: profiles, error: profileError } = await supabase
           .from('user_profiles')
           .select('user_id, display_name, avatar_url')
@@ -86,8 +133,6 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
         if (profileError) {
           console.error(`[ReviewQueue] Supabase error fetching user_profiles:`, profileError);
         } else {
-          console.log(`[ReviewQueue] user_profiles row count: ${profiles?.length || 0}`);
-          profileMap = {};
           for (const p of profiles || []) {
             profileMap[p.user_id] = {
               display_name: p.display_name,
@@ -99,23 +144,22 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
     }
 
     const mapped = (data || []).map((item: any) => {
-      const profile = item.submitted_by ? profileMap[item.submitted_by] : undefined;
-      return {
-        id: item.id,
-        type,
-        title: item.title || item.name || item.full_name || 'Untitled',
-        description: item.description || item.bio || '',
-        status: getRowStatus(item, type),
-        created_at: item.created_at,
-        submitted_by_name:
-          profile?.display_name ||
-          item.submitted_by_name ||
-          item.user_email ||
-          undefined,
-        location: item.location || item.location_city || '',
-        category: item.category || '',
-        rejection_reason: item.rejection_reason,
-      } as ReviewItem;
+      if (type === 'gem') {
+        const profile = item.submitted_by ? profileMap[item.submitted_by] : undefined;
+        return {
+          id: item.id,
+          type,
+          title: item.title || item.name || 'Untitled',
+          description: item.description || '',
+          status: getRowStatus(item, type),
+          created_at: item.created_at,
+          submitted_by_name: profile?.display_name || item.submitted_by_name || undefined,
+          location: item.location || '',
+          category: item.category || '',
+          rejection_reason: item.rejection_reason,
+        } as ReviewItem;
+      }
+      return mapItem(item, type);
     });
 
     setItems(mapped);
@@ -140,11 +184,18 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
     const update: any = {};
     if (type === 'gem') {
       update.verification_status = action === 'approve' ? 'verified' : 'rejected';
+    } else if (type === 'guide') {
+      if (action === 'approve') {
+        update.status = 'approved';
+        update.approval_date = new Date().toISOString();
+        update.is_active = true;
+      } else {
+        update.status = 'rejected';
+        update.rejection_reason = feedback || null;
+        update.is_active = false;
+      }
     } else {
       update.status = action === 'approve' ? 'approved' : 'rejected';
-    }
-    if (action === 'reject' && feedback) {
-      update.rejection_reason = feedback;
     }
     update.updated_at = new Date().toISOString();
 
@@ -214,28 +265,12 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
       console.warn('[ReviewQueue] admin_activity_stats update failed:', e);
     }
 
-    // Optimistically remove from pending list immediately
-    if (action === 'approve') {
-      setItems(prev =>
-        prev.map(it =>
-          it.id === itemId
-            ? { ...it, status: type === 'gem' ? 'verified' : 'approved' }
-            : it,
-        ),
-      );
-    } else {
-      setItems(prev =>
-        prev.map(it =>
-          it.id === itemId
-            ? { ...it, status: 'rejected', rejection_reason: feedback || undefined }
-            : it,
-        ),
-      );
-    }
-
     setSelectedItem(null);
     setFeedback('');
     setProcessing(false);
+
+    // Reload from Supabase so counts and status reflect the database
+    await loadItems();
   }
 
   if (!canView) {
@@ -353,20 +388,96 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
       {selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <h2 className="text-2xl font-bold mb-4">Review Item</h2>
-            <div className="mb-6 space-y-2">
+            <h2 className="text-2xl font-bold mb-4">Review {selectedItem.type === 'guide' ? 'Guide Application' : 'Item'}</h2>
+            <div className="mb-6 space-y-3">
               <h3 className="font-semibold text-lg">{selectedItem.title}</h3>
-              <p className="text-gray-600">{selectedItem.description}</p>
-              {selectedItem.submitted_by_name && (
-                <p className="text-sm text-gray-500">
-                  Submitted by: {selectedItem.submitted_by_name}
-                </p>
+              {selectedItem.description && (
+                <p className="text-gray-600">{selectedItem.description}</p>
               )}
-              {selectedItem.location && (
-                <p className="text-sm text-gray-500">Location: {selectedItem.location}</p>
+
+              {selectedItem.type === 'guide' && (
+                <div className="space-y-2 text-sm border-t pt-3">
+                  {selectedItem.email && (
+                    <p className="flex items-center gap-2 text-gray-700">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      {selectedItem.email}
+                    </p>
+                  )}
+                  {selectedItem.phone && (
+                    <p className="flex items-center gap-2 text-gray-700">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      {selectedItem.phone}
+                    </p>
+                  )}
+                  {selectedItem.location && (
+                    <p className="flex items-center gap-2 text-gray-700">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      {selectedItem.location}
+                    </p>
+                  )}
+                  {selectedItem.languages && selectedItem.languages.length > 0 && (
+                    <p className="flex items-center gap-2 text-gray-700">
+                      <Globe className="w-4 h-4 text-gray-400" />
+                      {selectedItem.languages.join(', ')}
+                    </p>
+                  )}
+                  {selectedItem.specialties && selectedItem.specialties.length > 0 && (
+                    <p className="flex items-center gap-2 text-gray-700">
+                      <Award className="w-4 h-4 text-gray-400" />
+                      {selectedItem.specialties.join(', ')}
+                    </p>
+                  )}
+                  {selectedItem.years_experience != null && (
+                    <p className="flex items-center gap-2 text-gray-700">
+                      <Briefcase className="w-4 h-4 text-gray-400" />
+                      {selectedItem.years_experience} year{selectedItem.years_experience !== 1 ? 's' : ''} of experience
+                    </p>
+                  )}
+                  {selectedItem.certifications && (
+                    <div className="flex items-start gap-2 text-gray-700">
+                      <Award className="w-4 h-4 text-gray-400 mt-0.5" />
+                      <div>
+                        {Array.isArray(selectedItem.certifications)
+                          ? selectedItem.certifications.length > 0
+                            ? selectedItem.certifications.map((c: any, i: number) => (
+                                <span key={i} className="inline-block px-2 py-0.5 bg-gray-100 rounded text-xs mr-1 mb-1">
+                                  {typeof c === 'string' ? c : c?.name || JSON.stringify(c)}
+                                </span>
+                              ))
+                            : 'None'
+                          : typeof selectedItem.certifications === 'object'
+                            ? Object.keys(selectedItem.certifications).length > 0
+                              ? JSON.stringify(selectedItem.certifications)
+                              : 'None'
+                            : String(selectedItem.certifications)}
+                      </div>
+                    </div>
+                  )}
+                  <p className="flex items-center gap-2 text-gray-500">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    Applied on {new Date(selectedItem.created_at).toLocaleDateString()}
+                  </p>
+                  <p className="flex items-center gap-2 text-gray-500">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    Status: <span className="font-medium capitalize">{selectedItem.status}</span>
+                  </p>
+                </div>
               )}
-              {selectedItem.category && (
-                <p className="text-sm text-gray-500">Category: {selectedItem.category}</p>
+
+              {selectedItem.type !== 'guide' && (
+                <>
+                  {selectedItem.submitted_by_name && (
+                    <p className="text-sm text-gray-500">
+                      Submitted by: {selectedItem.submitted_by_name}
+                    </p>
+                  )}
+                  {selectedItem.location && (
+                    <p className="text-sm text-gray-500">Location: {selectedItem.location}</p>
+                  )}
+                  {selectedItem.category && (
+                    <p className="text-sm text-gray-500">Category: {selectedItem.category}</p>
+                  )}
+                </>
               )}
             </div>
 
@@ -389,14 +500,14 @@ export default function ReviewQueue({ type }: ReviewQueueProps) {
                 disabled={processing}
                 className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50"
               >
-                Approve
+                {processing ? 'Processing...' : 'Approve'}
               </button>
               <button
                 onClick={() => handleAction(selectedItem.id, 'reject')}
                 disabled={processing}
                 className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50"
               >
-                Reject
+                {processing ? 'Processing...' : 'Reject'}
               </button>
               <button
                 onClick={() => {
