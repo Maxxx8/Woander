@@ -73,7 +73,6 @@ export const vanguardService = {
       location_state: guideData.location_state ?? '',
       location_country: guideData.location_country ?? 'India',
       years_experience: guideData.years_experience ?? 0,
-      archetype: guideData.archetype ?? null,
       languages: guideData.languages ?? [],
       specialties: guideData.specialties ?? [],
       certifications: guideData.certifications ?? [],
@@ -88,11 +87,11 @@ export const vanguardService = {
       .single();
 
     if (error) {
-      console.error('[GuideApplication] Supabase insert failed:', error.code, error.message, error.details);
+      console.error('Guide application submission failed:', error);
       throw error;
     }
 
-    console.log('[GuideApplication] Inserted row:', data?.id, 'status:', (data as any)?.status);
+    console.log('Guide application saved:', data);
     return data as TourGuide;
   },
 

@@ -168,7 +168,6 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
                   location_state: existingApp.location_state || '',
                   location_country: existingApp.location_country || 'India',
                   years_experience: existingApp.years_experience || 1,
-                  archetype: existingApp.archetype || '',
                   languages: existingApp.languages || [],
                   specialties: existingApp.specialties || [],
                   certifications: existingApp.certifications || [],
@@ -259,6 +258,10 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
     setLoading(true);
     setErrorMsg(null);
     try {
+      const specialties = formData.archetype
+        ? Array.from(new Set([...formData.specialties, formData.archetype]))
+        : formData.specialties;
+
       const saved = await vanguardService.createTourGuide({
         user_id: user.id,
         full_name: formData.full_name,
@@ -270,9 +273,8 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
         location_state: formData.location_state,
         location_country: formData.location_country,
         years_experience: formData.years_experience,
-        archetype: formData.archetype || null,
         languages: formData.languages,
-        specialties: formData.specialties,
+        specialties,
         certifications: formData.certifications,
       });
 
