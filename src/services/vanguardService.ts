@@ -68,7 +68,12 @@ export const vanguardService = {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[GuideApplication] Supabase insert failed:', error.code, error.message, error.details);
+      throw error;
+    }
+
+    console.log('[GuideApplication] Inserted row:', data?.id, 'status:', (data as any)?.status);
     return data as TourGuide;
   },
 

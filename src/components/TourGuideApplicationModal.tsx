@@ -259,7 +259,7 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
     setLoading(true);
     setErrorMsg(null);
     try {
-      await vanguardService.createTourGuide({
+      const saved = await vanguardService.createTourGuide({
         user_id: user.id,
         full_name: formData.full_name,
         bio: formData.bio,
@@ -278,12 +278,14 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
         is_active: true,
       });
 
+      console.log('[GuideApplication] Submission confirmed by Supabase, row id:', saved.id);
       setSubmitted(true);
       setTimeout(() => {
         onSuccess();
         onClose();
       }, 3000);
     } catch (error: any) {
+      console.error('[GuideApplication] Submission failed:', error?.code, error?.message);
       // 23505 = unique_violation — user already has an application
       if (error?.code === '23505' || error?.message?.includes('duplicate') || error?.message?.includes('unique')) {
         setErrorMsg('You have already submitted an application. We are checking your existing application status...');
