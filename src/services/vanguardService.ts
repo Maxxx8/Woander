@@ -62,9 +62,28 @@ export const vanguardService = {
   },
 
   async createTourGuide(guideData: Partial<TourGuide>) {
+    const payload = {
+      user_id: guideData.user_id,
+      full_name: guideData.full_name,
+      bio: guideData.bio ?? '',
+      profile_image: guideData.profile_image ?? null,
+      phone: guideData.phone ?? null,
+      email: guideData.email ?? null,
+      location_city: guideData.location_city ?? '',
+      location_state: guideData.location_state ?? '',
+      location_country: guideData.location_country ?? 'India',
+      years_experience: guideData.years_experience ?? 0,
+      archetype: guideData.archetype ?? null,
+      languages: guideData.languages ?? [],
+      specialties: guideData.specialties ?? [],
+      certifications: guideData.certifications ?? [],
+      status: 'pending',
+      is_active: true,
+    };
+
     const { data, error } = await supabase
       .from('tour_guides')
-      .insert([guideData])
+      .insert([payload])
       .select()
       .single();
 

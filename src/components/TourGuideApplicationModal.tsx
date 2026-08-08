@@ -274,8 +274,6 @@ const TourGuideApplicationModal: React.FC<TourGuideApplicationModalProps> = ({
         languages: formData.languages,
         specialties: formData.specialties,
         certifications: formData.certifications,
-        status: 'pending',
-        is_active: true,
       });
 
       console.log('[GuideApplication] Submission confirmed by Supabase, row id:', saved.id);
