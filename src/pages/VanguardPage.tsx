@@ -78,7 +78,7 @@ const VanguardPage = () => {
     try {
       setLoading(true);
       const data = await vanguardService.getTourGuides();
-      setGuides(data || []);
+      setGuides(data ?? []);
     } catch (err) {
       console.error('Failed to load tour guides:', err);
       setGuides([]);

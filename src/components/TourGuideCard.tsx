@@ -33,16 +33,8 @@ const TourGuideCard: React.FC<TourGuideCardProps> = ({ guide, onBook }) => {
     'Local Expert';
 
   // Deterministic sample metrics when DB values are zero
-  const gemsCount =
-    guide.hidden_gems_count && guide.hidden_gems_count > 0
-      ? guide.hidden_gems_count
-      : deterministicNum(guide.id, 12, 28);
-
-  const notesCount =
-    guide.field_notes_count && guide.field_notes_count > 0
-      ? guide.field_notes_count
-      : deterministicNum(guide.id + 'n', 45, 124);
-
+ const gemsCount = guide.hidden_gems_count ?? 0;
+const notesCount = guide.field_notes_count ?? 0;
   // "Why They Explore" — bio first sentence, then archetype-based fallback
   const whyExplore = (() => {
     if (guide.bio && guide.bio.trim().length > 0) {
@@ -53,15 +45,10 @@ const TourGuideCard: React.FC<TourGuideCardProps> = ({ guide, onBook }) => {
   })();
 
   // Known For — hosted_gems from DB, fallback to archetype-based samples
-  const knownFor: string[] =
-    guide.hosted_gems && guide.hosted_gems.length > 0
-      ? guide.hosted_gems.slice(0, 3)
-      : (SAMPLE_GEMS_BY_ARCHETYPE[archetype] || SAMPLE_GEMS_BY_ARCHETYPE['default']).slice(0, 3);
+  const knownFor: string[] = guide.hosted_gems?.slice(0, 3) ?? [];
 
   // Field Notes — sample_field_notes from DB, fallback to index-based samples
-  const noteSet = guide.sample_field_notes && guide.sample_field_notes.length > 0
-    ? guide.sample_field_notes.slice(0, 2)
-    : SAMPLE_FIELD_NOTES[deterministicNum(guide.id, 0, SAMPLE_FIELD_NOTES.length - 1)].slice(0, 2);
+  const noteSet = guide.sample_field_notes?.slice(0, 2) ?? [];
 
   return (
     <div className="group border-b border-r border-forest-800 flex flex-col overflow-hidden">
@@ -134,35 +121,44 @@ const TourGuideCard: React.FC<TourGuideCardProps> = ({ guide, onBook }) => {
         </div>
 
         {/* Known For */}
-        <div className="mb-4">
-          <p className="font-mono text-[8px] text-gold-400/40 tracking-widest uppercase mb-2">
-            Known For
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {knownFor.map((gem, i) => (
-              <span
-                key={i}
-                className="font-mono text-[8px] text-mist-600 border border-forest-700 px-2 py-0.5 hover:border-gold-400/20 hover:text-mist-500 transition-colors duration-300"
-              >
-                {gem}
-              </span>
-            ))}
-          </div>
-        </div>
+        {knownFor.length > 0 && (
+  <div className="mb-4">
+    <p className="font-mono text-[8px] text-gold-400/40 tracking-widest uppercase mb-2">
+      Known For
+    </p>
+
+    <div className="flex flex-wrap gap-1">
+      {knownFor.map((gem, i) => (
+        <span
+          key={i}
+          className="font-mono text-[8px] text-mist-600 border border-forest-700 px-2 py-0.5"
+        >
+          {gem}
+        </span>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Field Notes */}
-        <div className="mb-5 flex-1">
-          <p className="font-mono text-[8px] text-gold-400/40 tracking-widest uppercase mb-2">
-            Field Notes
-          </p>
-          <div className="space-y-1.5">
-            {noteSet.map((note, i) => (
-              <p key={i} className="font-display italic text-xs text-mist-700 font-light leading-relaxed">
-                "{note}"
-              </p>
-            ))}
-          </div>
-        </div>
+        {noteSet.length > 0 && (
+  <div className="mb-5 flex-1">
+    <p className="font-mono text-[8px] text-gold-400/40 tracking-widest uppercase mb-2">
+      Field Notes
+    </p>
+
+    <div className="space-y-1.5">
+      {noteSet.map((note, i) => (
+        <p
+          key={i}
+          className="font-display italic text-xs text-mist-700 font-light leading-relaxed"
+        >
+          "{note}"
+        </p>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* CTA */}
         <button
