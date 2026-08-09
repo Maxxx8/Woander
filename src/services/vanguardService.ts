@@ -33,7 +33,12 @@ export const vanguardService = {
 
     const { data, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error('[vanguardService.getTourGuides] Supabase error:', error);
+      throw error;
+    }
+
+    console.log('[vanguardService.getTourGuides] Rows returned:', data?.length || 0);
     return data as TourGuide[];
   },
 
