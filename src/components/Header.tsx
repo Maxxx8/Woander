@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, LogOut, User, Search, Sun, Moon } from 'lucide-react';
+import { Menu, X, LogOut, User, Search, Sun, Moon, Compass } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../shared/AuthContext';
 import { useTheme } from '../shared/ThemeContext';
@@ -83,6 +83,13 @@ const Header = () => {
               {user ? (
                 <div className="flex items-center space-x-5">
                   <Link
+                    to="/guide/dashboard"
+                    className="flex items-center space-x-2 text-mist-400 hover:text-gold-300 text-sm transition-colors duration-300"
+                  >
+                    <Compass className="h-4 w-4" />
+                    <span>Guide</span>
+                  </Link>
+                  <Link
                     to="/dashboard"
                     className="flex items-center space-x-2 text-mist-400 hover:text-cream text-sm transition-colors duration-300"
                   >
@@ -163,6 +170,10 @@ const Header = () => {
                 </button>
                 {user ? (
                   <>
+                    <Link to="/guide/dashboard" className="flex items-center gap-2 text-mist-400 hover:text-gold-300 text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
+                      <Compass className="h-4 w-4" />
+                      Guide Dashboard
+                    </Link>
                     <Link to="/dashboard" className="text-mist-400 hover:text-cream text-sm transition-colors" onClick={() => setIsMenuOpen(false)}>
                       Dashboard
                     </Link>

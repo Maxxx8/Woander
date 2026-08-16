@@ -13,6 +13,7 @@ import AdventuresPage from './pages/AdventuresPage';
 import HiddenGemsPage from './pages/HiddenGemsPage';
 import DashboardPage from './pages/DashboardPage';
 import VanguardPage from './pages/VanguardPage';
+import GuideDashboardPage from './pages/GuideDashboardPage';
 const AdminLayout = React.lazy(() => import('./admin/components/AdminLayout'));
 const AdminLoginPage = React.lazy(() => import('./admin/pages/AdminLoginPage'));
 const AdminDashboardPage = React.lazy(() => import('./admin/pages/AdminDashboardPage'));
@@ -117,6 +118,7 @@ function AppLayout() {
               <Route path="/adventures" element={<AdventuresPage />} />
               <Route path="/hidden-gems" element={<HiddenGemsPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/guide/dashboard" element={<GuideDashboardPage />} />
               <Route path="/admin/*" element={<AdminSection />} />
             </Routes>
           </ErrorBoundary>
