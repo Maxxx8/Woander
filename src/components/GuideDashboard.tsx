@@ -6,6 +6,7 @@ import { useAuth } from '../shared/AuthContext';
 import type { TourGuide, Tour } from '../shared/supabase';
 import GuideExperienceModal from './GuideExperienceModal';
 import GuideBookings from './GuideBookings';
+import GuideAvailability from './GuideAvailability';
 
 interface GuideStats {
   activeExperiences: number;
@@ -580,6 +581,9 @@ const GuideDashboard: React.FC = () => {
 
         {/* Bookings */}
         <GuideBookings guideId={guide.id} onStatsChange={loadGuideData} />
+
+        {/* Availability */}
+        <GuideAvailability guideId={guide.id} />
 
         {/* My Experiences */}
         <div className="mb-8">

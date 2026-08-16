@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronRight, ChevronLeft, Check, Minus, Plus, MapPin, Star, Globe } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Check, Minus, Plus, MapPin, Star, Globe, AlertCircle } from 'lucide-react';
 import type { TourGuide, Tour } from '../shared/supabase';
 import { vanguardService } from '../services/vanguardService';
 import { useAuth } from '../shared/AuthContext';
+import { supabase } from '../shared/supabase';
 
 const ARCHETYPE_FALLBACK: Record<string, string> = {
   cultural: 'Storykeeper',
@@ -42,16 +43,57 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
   const [contactPhone, setContactPhone] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
   const [error, setError] = useState('');
+  const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       loadTours();
+      loadAvailability();
       if (user?.email) setContactEmail(user.email);
       if (user?.user_metadata?.full_name) setContactName(user.user_metadata.full_name);
       if (user?.user_metadata?.name) setContactName(user.user_metadata.name);
       if (user?.user_metadata?.phone) setContactPhone(user.user_metadata.phone);
     }
   }, [isOpen, guide.id]);
+
+  const loadAvailability = async () => {
+    setAvailabilityLoading(true);
+    try {
+      const now = new Date();
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endDate = new Date(now.getFullYear() + 1, now.getMonth(), 0);
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+
+      const { data, error: availError } = await supabase
+        .from('tour_guide_availability')
+        .select('date, is_available')
+        .eq('guide_id', guide.id)
+        .gte('date', startDateStr)
+        .lte('date', endDateStr);
+
+      if (availError) {
+        console.error('[BookingModal] Availability query error:', {
+          code: availError.code, message: availError.message,
+          details: availError.details, hint: availError.hint,
+        });
+        return;
+      }
+
+      const unavailable = new Set<string>();
+      (data || []).forEach((rec: any) => {
+        if (!rec.is_available) {
+          unavailable.add(rec.date);
+        }
+      });
+      setUnavailableDates(unavailable);
+    } catch (err) {
+      console.error('[BookingModal] Failed to load availability:', err);
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  };
 
   const loadTours = async () => {
     setToursLoading(true);
@@ -72,9 +114,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
 
   const canAdvance = () => {
     if (step === 1) return selectedTour !== null;
-    if (step === 2) return bookingDate !== '' && groupSize >= 1;
+    if (step === 2) return bookingDate !== '' && groupSize >= 1 && !isDateUnavailable(bookingDate);
     if (step === 3) return contactName.trim() !== '' && contactEmail.trim() !== '' && contactPhone.trim() !== '';
     return false;
+  };
+
+  const isDateUnavailable = (dateStr: string): boolean => {
+    return unavailableDates.has(dateStr);
   };
 
   const handleNext = () => {
@@ -363,6 +409,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
                   onChange={(e) => setBookingDate(e.target.value)}
                   className="w-full bg-[#0a150a] border border-[#1a3020] text-[#f5f0e8] px-4 py-3 font-jetbrains text-sm focus:outline-none focus:border-[#c9a84a]/40 transition-colors duration-300"
                 />
+                {bookingDate && isDateUnavailable(bookingDate) && (
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-3 h-3 text-red-400/60 flex-shrink-0" />
+                    <p className="font-jetbrains text-[9px] text-red-400/70 tracking-widest uppercase">
+                      This date is unavailable. Please select another date.
+                    </p>
+                  </div>
+                )}
+                {availabilityLoading && (
+                  <p className="mt-2 font-jetbrains text-[8px] text-[#3a5a3a] tracking-widest uppercase">
+                    Loading availability...
+                  </p>
+                )}
               </div>
 
               <div>
