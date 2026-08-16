@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronRight, ChevronLeft, Check, Minus, Plus } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Check, Minus, Plus, MapPin, Star, Globe } from 'lucide-react';
 import type { TourGuide, Tour } from '../shared/supabase';
 import { vanguardService } from '../services/vanguardService';
 import { useAuth } from '../shared/AuthContext';
+
+const ARCHETYPE_FALLBACK: Record<string, string> = {
+  cultural: 'Storykeeper',
+  adventure: 'Pathfinder',
+  food: 'Food Explorer',
+  history: 'Historian',
+  nature: 'Naturalist',
+  photography: 'Photographer',
+  walking: 'Pathfinder',
+  cycling: 'Adventure Specialist',
+  wildlife: 'Naturalist',
+  spiritual: 'Storykeeper',
+};
 
 interface BookingModalProps {
   guide: TourGuide;
@@ -135,7 +148,16 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     );
   }
 
-  const stepLabels = ['Choose Experience', 'Date & Group', 'Your Details', 'Confirm'];
+  const stepLabels = ['Guide Details', 'Date & Group', 'Your Details', 'Confirm'];
+
+  const archetypeLabel =
+    guide.specialties.length > 0
+      ? ARCHETYPE_FALLBACK[guide.specialties[0]] || guide.specialties[0]
+      : 'Local Expert';
+
+  const locationString = [guide.location_city, guide.location_state, guide.location_country]
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -167,17 +189,109 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
 
         <div className="p-6">
 
-          {/* Step 1: Choose Experience */}
+          {/* Step 1: Guide Details + Choose Experience */}
           {step === 1 && (
             <div>
+              {/* Guide Details */}
+              <div className="border border-[#1a3020] p-5 mb-6">
+                <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-4">Guide Details</p>
+
+                <div className="flex gap-5">
+                  {/* Profile image */}
+                  <div className="flex-shrink-0 w-20 h-20 overflow-hidden">
+                    <img
+                      src={
+                        guide.profile_image ||
+                        'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg?auto=compress&cs=tinysrgb&w=200'
+                      }
+                      alt={guide.full_name}
+                      className="w-full h-full object-cover"
+                      style={{ filter: 'grayscale(20%) brightness(0.7) saturate(0.8)' }}
+                    />
+                  </div>
+
+                  {/* Name + archetype + location */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display text-xl font-light text-[#f5f0e8] mb-1">{guide.full_name}</h3>
+                    <span className="inline-block font-jetbrains text-[8px] text-[#c9a84a]/70 border border-[#c9a84a]/20 px-2 py-0.5 tracking-widest uppercase mb-2">
+                      {archetypeLabel}
+                    </span>
+                    {locationString && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-[#c9a84a]/40 flex-shrink-0" />
+                        <span className="font-jetbrains text-[8px] text-[#7a9a7a] tracking-widest uppercase">{locationString}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Specialty tags */}
+                {guide.specialties.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    {guide.specialties.map((s, i) => (
+                      <span key={i} className="font-jetbrains text-[8px] text-[#7a9a7a] border border-[#1a3020] px-2 py-0.5 tracking-widest uppercase">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* About */}
+                {guide.bio && guide.bio.trim() && (
+                  <div className="mt-4 pt-4 border-t border-[#1a3020]">
+                    <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-2">About</p>
+                    <p className="text-[#7a9a7a] text-sm font-light leading-relaxed">{guide.bio}</p>
+                  </div>
+                )}
+
+                {/* Languages */}
+                {guide.languages.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-[#1a3020]">
+                    <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-2">Languages</p>
+                    <div className="flex items-center gap-1.5">
+                      <Globe className="h-3 w-3 text-[#c9a84a]/30 flex-shrink-0" />
+                      <p className="text-[#7a9a7a] text-sm font-light">{guide.languages.join(' · ')}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Experience + Rating row */}
+                <div className="mt-4 pt-4 border-t border-[#1a3020] flex gap-8">
+                  <div>
+                    <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-1">Experience</p>
+                    <p className="font-display text-base font-light text-[#f5f0e8]">
+                      {guide.years_experience} {guide.years_experience === 1 ? 'year' : 'years'}
+                    </p>
+                  </div>
+                  {guide.total_reviews > 0 && (
+                    <div>
+                      <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-1">Rating</p>
+                      <div className="flex items-center gap-1.5">
+                        <Star className="h-3 w-3 text-[#c9a84a]/60 fill-[#c9a84a]/60" />
+                        <span className="font-display text-base font-light text-[#f5f0e8]">
+                          {guide.average_rating > 0 ? guide.average_rating.toFixed(1) : 'New'}
+                        </span>
+                        <span className="font-jetbrains text-[8px] text-[#7a9a7a] tracking-widest">
+                          · {guide.total_reviews} {guide.total_reviews === 1 ? 'review' : 'reviews'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Experiences section */}
+              <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-3">Choose Experience</p>
               {toursLoading ? (
-                <div className="flex items-center justify-center py-16">
+                <div className="flex items-center justify-center py-12">
                   <div className="w-6 h-6 border border-[#c9a84a]/30 border-t-[#c9a84a] rounded-full animate-spin" />
                 </div>
               ) : tours.length === 0 ? (
-                <div className="text-center py-12 border border-[#1a3020]">
-                  <p className="font-display text-lg italic font-light text-[#f5f0e8] mb-2">No experiences listed yet.</p>
-                  <p className="text-[#7a9a7a] text-xs font-light">This local expert is preparing their offerings. Check back soon.</p>
+                <div className="text-center py-10 border border-[#1a3020]">
+                  <p className="font-display text-base italic font-light text-[#f5f0e8] mb-2">No bookable experiences yet</p>
+                  <p className="text-[#7a9a7a] text-xs font-light max-w-xs mx-auto">
+                    {guide.full_name} hasn't added any experiences yet. You can still learn more about this local expert.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-0 border border-[#1a3020]">
