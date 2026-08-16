@@ -47,6 +47,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     if (isOpen) {
       loadTours();
       if (user?.email) setContactEmail(user.email);
+      if (user?.user_metadata?.full_name) setContactName(user.user_metadata.full_name);
+      if (user?.user_metadata?.name) setContactName(user.user_metadata.name);
+      if (user?.user_metadata?.phone) setContactPhone(user.user_metadata.phone);
     }
   }, [isOpen, guide.id]);
 
@@ -111,7 +114,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
       setConfirmationCode(booking.confirmation_code || 'VG-' + Math.random().toString(36).slice(2, 8).toUpperCase());
       setStep(4 as Step);
     } catch (err: any) {
-      setError(err.message || 'Failed to create booking. Please try again.');
+      console.error('[Booking] Failed to create booking:', {
+        code: err?.code,
+        message: err?.message,
+        details: err?.details,
+        hint: err?.hint,
+      });
+      const userMsg = err?.code === '42501'
+        ? 'You do not have permission to create this booking. Please ensure you are signed in.'
+        : err?.code === '23505'
+        ? 'This booking already exists. Please try again.'
+        : 'Something went wrong while submitting your booking. Please try again.';
+      setError(userMsg);
     } finally {
       setSubmitting(false);
     }
@@ -311,6 +325,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
                             {tour.tour_type} · {tour.duration_hours}h · {tour.difficulty_level}
                           </p>
                           <p className="text-[#7a9a7a] text-xs font-light line-clamp-2">{tour.description}</p>
+                          {tour.meeting_point && (
+                            <p className="font-jetbrains text-[8px] text-[#3a5a3a] tracking-widest uppercase mt-2">
+                              MEETS AT: {tour.meeting_point}
+                            </p>
+                          )}
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="font-display text-lg font-light text-[#c9a84a]">
@@ -373,7 +392,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
                     <Plus className="w-4 h-4" />
                   </button>
                   <span className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest">
-                    {selectedTour.currency || '₹'}{totalPrice.toLocaleString()} total
+                    {selectedTour.currency || '₹'}{selectedTour.price_per_person.toLocaleString()} × {groupSize} = {selectedTour.currency || '₹'}{totalPrice.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -416,42 +435,85 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
           {step === 3 && selectedTour && (
             <div className="mt-6 p-4 border border-[#1a3020]">
               <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-3">Booking Summary</p>
-              <div className="space-y-1 text-xs font-light">
-                {[
-                  ['Experience', selectedTour.title],
-                  ['Date', bookingDate],
-                  ['Time', bookingTime],
-                  ['Group', `${groupSize} ${groupSize === 1 ? 'person' : 'people'}`],
-                  ['Total', `${selectedTour.currency || '₹'}${totalPrice.toLocaleString()}`],
-                ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between">
-                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">{k}</span>
-                    <span className="text-[#f5f0e8]">{v}</span>
-                  </div>
-                ))}
+              <div className="space-y-1.5 text-xs font-light">
+                <div className="flex justify-between">
+                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Experience</span>
+                  <span className="text-[#f5f0e8]">{selectedTour.title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guide</span>
+                  <span className="text-[#f5f0e8]">{guide.full_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Date</span>
+                  <span className="text-[#f5f0e8]">{bookingDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Time</span>
+                  <span className="text-[#f5f0e8]">{bookingTime}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guests</span>
+                  <span className="text-[#f5f0e8]">{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Contact</span>
+                  <span className="text-[#f5f0e8] text-right max-w-[60%]">{contactName} · {contactEmail} · {contactPhone}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-[#1a3020] mt-2">
+                  <span className="text-[#c9a84a]/60 font-jetbrains text-[9px] tracking-widest uppercase">Total</span>
+                  <span className="text-[#c9a84a] font-display text-base">{selectedTour.currency || '₹'}{totalPrice.toLocaleString()}</span>
+                </div>
               </div>
             </div>
           )}
 
           {/* Step 4: Confirmed */}
           {step === 4 && (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 border border-[#c9a84a]/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Check className="w-5 h-5 text-[#c9a84a]" />
+            <div className="py-6">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 border border-[#c9a84a]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check className="w-5 h-5 text-[#c9a84a]" />
+                </div>
+                <p className="font-jetbrains text-[9px] text-[#c9a84a]/60 tracking-widest uppercase mb-2">Booking Request Submitted</p>
+                <h3 className="font-display text-2xl font-light text-[#f5f0e8] mb-2">Your booking request has been submitted successfully.</h3>
+                <p className="text-[#7a9a7a] text-sm font-light">
+                  {guide.full_name} will be in touch within 24 hours to confirm your expedition.
+                </p>
               </div>
-              <p className="font-jetbrains text-[9px] text-[#c9a84a]/60 tracking-widest uppercase mb-2">Booking Received</p>
-              <h3 className="font-display text-2xl font-light text-[#f5f0e8] mb-2">You're confirmed.</h3>
-              <p className="text-[#7a9a7a] text-sm font-light mb-6">
-                {guide.full_name} will be in touch within 24 hours to confirm your expedition.
-              </p>
-              <div className="border border-[#1a3020] p-4 mb-6 inline-block">
-                <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-1">Confirmation Code</p>
-                <p className="font-jetbrains text-lg text-[#c9a84a] tracking-widest">{confirmationCode}</p>
+
+              <div className="border border-[#1a3020] p-5">
+                <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-3">Booking Details</p>
+                <div className="space-y-1.5 text-xs font-light">
+                  <div className="flex justify-between">
+                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guide</span>
+                    <span className="text-[#f5f0e8]">{guide.full_name}</span>
+                  </div>
+                  {selectedTour && (
+                    <div className="flex justify-between">
+                      <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Experience</span>
+                      <span className="text-[#f5f0e8]">{selectedTour.title}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Date</span>
+                    <span className="text-[#f5f0e8]">{bookingDate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guests</span>
+                    <span className="text-[#f5f0e8]">{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-[#1a3020] mt-2">
+                    <span className="text-[#c9a84a]/60 font-jetbrains text-[9px] tracking-widest uppercase">Reference</span>
+                    <span className="text-[#c9a84a] font-jetbrains tracking-widest">{confirmationCode}</span>
+                  </div>
+                </div>
               </div>
-              <p className="text-[#3a5a3a] text-xs font-light">A confirmation has been sent to {contactEmail}</p>
+
+              <p className="text-[#3a5a3a] text-xs font-light text-center mt-4">A confirmation has been sent to {contactEmail}</p>
               <button
                 onClick={handleClose}
-                className="mt-6 font-jetbrains text-[10px] tracking-widest text-[#c9a84a]/70 border border-[#c9a84a]/20 px-6 py-2 hover:border-[#c9a84a]/50 transition-colors duration-300 block mx-auto"
+                className="mt-4 font-jetbrains text-[10px] tracking-widest text-[#c9a84a]/70 border border-[#c9a84a]/20 px-6 py-2 hover:border-[#c9a84a]/50 transition-colors duration-300 block mx-auto"
               >
                 DONE
               </button>
