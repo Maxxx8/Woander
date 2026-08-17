@@ -195,13 +195,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
 
   if (!user) {
     return (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-[#0d1a0d] border border-[#1a3020] max-w-md w-full p-8 text-center">
-          <p className="font-jetbrains text-[9px] text-[#c9a84a]/60 tracking-widest uppercase mb-4">Access Required</p>
-          <h3 className="font-display text-2xl font-light text-[#f5f0e8] mb-4">Sign In to Book</h3>
-          <p className="text-[#7a9a7a] text-sm font-light mb-6">You need to be signed in to book an experience with a local expert.</p>
-          <button onClick={handleClose} className="font-jetbrains text-[10px] tracking-widest text-[#c9a84a]/70 border border-[#c9a84a]/20 px-6 py-2 hover:border-[#c9a84a]/50 transition-colors duration-300">
-            CLOSE
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(38,61,53,0.6)', backdropFilter: 'blur(6px)' }}>
+        <div className="max-w-md w-full p-10 text-center" style={{ backgroundColor: '#FBF8F1', borderRadius: '12px', border: '1px solid rgba(38,61,53,0.08)' }}>
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'rgba(48,51,47,0.5)' }}>Access Required</p>
+          <h3 className="font-display text-2xl font-light mb-4" style={{ color: '#263D35' }}>Sign In to Book</h3>
+          <p className="text-sm font-light mb-8" style={{ color: 'rgba(48,51,47,0.6)' }}>You need to be signed in to book an experience with a local expert.</p>
+          <button onClick={handleClose} className="px-6 py-2.5 text-xs tracking-[0.15em] uppercase transition-all duration-300" style={{ border: '1px solid rgba(38,61,53,0.2)', color: '#263D35', borderRadius: '999px' }}>
+            Close
           </button>
         </div>
       </div>
@@ -219,29 +219,55 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     .filter(Boolean)
     .join(', ');
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    backgroundColor: '#F6F2E9',
+    border: '1px solid rgba(38,61,53,0.12)',
+    color: '#263D35',
+    padding: '0.75rem 1rem',
+    fontSize: '0.875rem',
+    borderRadius: '8px',
+    outline: 'none',
+    transition: 'border-color 0.3s',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: '9px',
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
+    color: 'rgba(48,51,47,0.5)',
+    display: 'block',
+    marginBottom: '0.5rem',
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-[#0d1a0d] border border-[#1a3020] max-w-2xl w-full my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(38,61,53,0.5)', backdropFilter: 'blur(6px)' }}>
+      <div className="max-w-2xl w-full my-8" style={{ backgroundColor: '#FBF8F1', borderRadius: '12px', border: '1px solid rgba(38,61,53,0.08)', boxShadow: '0 8px 40px rgba(38,61,53,0.12)' }}>
 
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-[#1a3020]">
+        <div className="flex items-start justify-between p-6" style={{ borderBottom: '1px solid rgba(38,61,53,0.08)' }}>
           <div>
-            <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-1">Booking — {guide.full_name}</p>
+            <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-1" style={{ color: 'rgba(48,51,47,0.4)' }}>Booking — {guide.full_name}</p>
             {step < 4 && (
-              <p className="font-display text-lg font-light text-[#f5f0e8]">{stepLabels[step - 1]}</p>
+              <p className="font-display text-lg font-light" style={{ color: '#263D35' }}>{stepLabels[step - 1]}</p>
             )}
           </div>
-          <button onClick={handleClose} className="text-[#7a9a7a] hover:text-[#f5f0e8] transition-colors duration-300 mt-1">
+          <button onClick={handleClose} className="transition-colors duration-300 mt-1" style={{ color: 'rgba(48,51,47,0.4)' }}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress */}
         {step < 4 && (
-          <div className="flex border-b border-[#1a3020]">
+          <div className="flex" style={{ borderBottom: '1px solid rgba(38,61,53,0.08)' }}>
             {stepLabels.slice(0, 3).map((label, i) => (
-              <div key={i} className={`flex-1 py-2 text-center font-jetbrains text-[8px] tracking-widest ${i + 1 === step ? 'text-[#c9a84a]/80 border-b border-[#c9a84a]/40' : i + 1 < step ? 'text-[#c9a84a]/40' : 'text-[#3a5a3a]'}`}>
-                {label.toUpperCase()}
+              <div key={i} className="flex-1 py-3 text-center font-mono text-[8px] tracking-[0.15em] uppercase transition-colors duration-300"
+                style={{
+                  color: i + 1 === step ? '#B69A63' : i + 1 < step ? 'rgba(182,154,99,0.5)' : 'rgba(48,51,47,0.25)',
+                  borderBottom: i + 1 === step ? '2px solid #B69A63' : '2px solid transparent',
+                }}>
+                {label}
               </div>
             ))}
           </div>
@@ -253,85 +279,76 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
           {step === 1 && (
             <div>
               {/* Guide Details */}
-              <div className="border border-[#1a3020] p-5 mb-6">
-                <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-4">Guide Details</p>
+              <div className="p-5 mb-6" style={{ border: '1px solid rgba(38,61,53,0.08)', borderRadius: '8px' }}>
+                <p style={labelStyle} className="mb-4">Guide Details</p>
 
                 <div className="flex gap-5">
-                  {/* Profile image */}
-                  <div className="flex-shrink-0 w-20 h-20 overflow-hidden">
+                  <div className="flex-shrink-0 w-20 h-20 overflow-hidden" style={{ borderRadius: '8px' }}>
                     <img
-                      src={
-                        guide.profile_image ||
-                        'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg?auto=compress&cs=tinysrgb&w=200'
-                      }
+                      src={guide.profile_image || 'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg?auto=compress&cs=tinysrgb&w=200'}
                       alt={guide.full_name}
                       className="w-full h-full object-cover"
-                      style={{ filter: 'grayscale(20%) brightness(0.7) saturate(0.8)' }}
+                      style={{ filter: 'brightness(1.1) saturate(1.05) sepia(0.05)' }}
                     />
                   </div>
 
-                  {/* Name + archetype + location */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-display text-xl font-light text-[#f5f0e8] mb-1">{guide.full_name}</h3>
-                    <span className="inline-block font-jetbrains text-[8px] text-[#c9a84a]/70 border border-[#c9a84a]/20 px-2 py-0.5 tracking-widest uppercase mb-2">
+                    <h3 className="font-display text-xl font-light mb-1" style={{ color: '#263D35' }}>{guide.full_name}</h3>
+                    <span className="inline-block font-mono text-[8px] tracking-[0.15em] uppercase px-2.5 py-1 mb-2" style={{ color: '#B69A63', border: '1px solid rgba(182,154,99,0.2)', borderRadius: '999px' }}>
                       {archetypeLabel}
                     </span>
                     {locationString && (
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3 text-[#c9a84a]/40 flex-shrink-0" />
-                        <span className="font-jetbrains text-[8px] text-[#7a9a7a] tracking-widest uppercase">{locationString}</span>
+                        <MapPin className="h-3 w-3 flex-shrink-0" style={{ color: 'rgba(48,51,47,0.35)' }} strokeWidth={1.5} />
+                        <span className="font-mono text-[8px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.5)' }}>{locationString}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Specialty tags */}
                 {guide.specialties.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-4">
                     {guide.specialties.map((s, i) => (
-                      <span key={i} className="font-jetbrains text-[8px] text-[#7a9a7a] border border-[#1a3020] px-2 py-0.5 tracking-widest uppercase">
+                      <span key={i} className="font-mono text-[8px] tracking-[0.15em] uppercase px-2.5 py-1" style={{ color: 'rgba(48,51,47,0.5)', border: '1px solid rgba(38,61,53,0.08)', borderRadius: '999px' }}>
                         {s}
                       </span>
                     ))}
                   </div>
                 )}
 
-                {/* About */}
                 {guide.bio && guide.bio.trim() && (
-                  <div className="mt-4 pt-4 border-t border-[#1a3020]">
-                    <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-2">About</p>
-                    <p className="text-[#7a9a7a] text-sm font-light leading-relaxed">{guide.bio}</p>
+                  <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
+                    <p style={labelStyle} className="mb-2">About</p>
+                    <p className="text-sm font-light leading-relaxed" style={{ color: 'rgba(48,51,47,0.65)' }}>{guide.bio}</p>
                   </div>
                 )}
 
-                {/* Languages */}
                 {guide.languages.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-[#1a3020]">
-                    <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-2">Languages</p>
+                  <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
+                    <p style={labelStyle} className="mb-2">Languages</p>
                     <div className="flex items-center gap-1.5">
-                      <Globe className="h-3 w-3 text-[#c9a84a]/30 flex-shrink-0" />
-                      <p className="text-[#7a9a7a] text-sm font-light">{guide.languages.join(' · ')}</p>
+                      <Globe className="h-3 w-3 flex-shrink-0" style={{ color: 'rgba(48,51,47,0.3)' }} strokeWidth={1.5} />
+                      <p className="text-sm font-light" style={{ color: 'rgba(48,51,47,0.65)' }}>{guide.languages.join(' · ')}</p>
                     </div>
                   </div>
                 )}
 
-                {/* Experience + Rating row */}
-                <div className="mt-4 pt-4 border-t border-[#1a3020] flex gap-8">
+                <div className="mt-4 pt-4 flex gap-8" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
                   <div>
-                    <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-1">Experience</p>
-                    <p className="font-display text-base font-light text-[#f5f0e8]">
+                    <p style={labelStyle} className="mb-1">Experience</p>
+                    <p className="font-display text-base font-light" style={{ color: '#263D35' }}>
                       {guide.years_experience} {guide.years_experience === 1 ? 'year' : 'years'}
                     </p>
                   </div>
                   {guide.total_reviews > 0 && (
                     <div>
-                      <p className="font-jetbrains text-[8px] text-[#c9a84a]/40 tracking-widest uppercase mb-1">Rating</p>
+                      <p style={labelStyle} className="mb-1">Rating</p>
                       <div className="flex items-center gap-1.5">
-                        <Star className="h-3 w-3 text-[#c9a84a]/60 fill-[#c9a84a]/60" />
-                        <span className="font-display text-base font-light text-[#f5f0e8]">
+                        <Star className="h-3 w-3" style={{ color: '#B69A63', fill: '#B69A63' }} />
+                        <span className="font-display text-base font-light" style={{ color: '#263D35' }}>
                           {guide.average_rating > 0 ? guide.average_rating.toFixed(1) : 'New'}
                         </span>
-                        <span className="font-jetbrains text-[8px] text-[#7a9a7a] tracking-widest">
+                        <span className="font-mono text-[8px] tracking-[0.15em]" style={{ color: 'rgba(48,51,47,0.45)' }}>
                           · {guide.total_reviews} {guide.total_reviews === 1 ? 'review' : 'reviews'}
                         </span>
                       </div>
@@ -340,49 +357,54 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
                 </div>
               </div>
 
-              {/* Experiences section */}
-              <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-3">Choose Experience</p>
+              {/* Experiences */}
+              <p style={labelStyle} className="mb-3">Choose Experience</p>
               {toursLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-6 h-6 border border-[#c9a84a]/30 border-t-[#c9a84a] rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(182,154,99,0.2)', borderTopColor: '#B69A63' }} />
                 </div>
               ) : tours.length === 0 ? (
-                <div className="text-center py-10 border border-[#1a3020]">
-                  <p className="font-display text-base italic font-light text-[#f5f0e8] mb-2">No bookable experiences yet</p>
-                  <p className="text-[#7a9a7a] text-xs font-light max-w-xs mx-auto">
+                <div className="text-center py-10" style={{ border: '1px solid rgba(38,61,53,0.08)', borderRadius: '8px' }}>
+                  <p className="font-display text-base italic font-light mb-2" style={{ color: '#263D35' }}>No bookable experiences yet</p>
+                  <p className="text-xs font-light max-w-xs mx-auto" style={{ color: 'rgba(48,51,47,0.5)' }}>
                     {guide.full_name} hasn't added any experiences yet. You can still learn more about this local expert.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-0 border border-[#1a3020]">
+                <div className="space-y-3">
                   {tours.map((tour, i) => (
                     <button
                       key={tour.id}
                       onClick={() => setSelectedTour(tour)}
-                      className={`w-full text-left p-5 transition-colors duration-300 ${i > 0 ? 'border-t border-[#1a3020]' : ''} ${selectedTour?.id === tour.id ? 'bg-[#1a3020]' : 'hover:bg-[#111d11]'}`}
+                      className="w-full text-left p-5 transition-all duration-300"
+                      style={{
+                        border: selectedTour?.id === tour.id ? '1px solid #B69A63' : '1px solid rgba(38,61,53,0.08)',
+                        backgroundColor: selectedTour?.id === tour.id ? 'rgba(182,154,99,0.05)' : 'transparent',
+                        borderRadius: '8px',
+                      }}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            {selectedTour?.id === tour.id && <Check className="w-3 h-3 text-[#c9a84a]" />}
-                            <h4 className="font-display text-base font-light text-[#f5f0e8]">{tour.title}</h4>
+                            {selectedTour?.id === tour.id && <Check className="w-3 h-3" style={{ color: '#B69A63' }} />}
+                            <h4 className="font-display text-base font-light" style={{ color: '#263D35' }}>{tour.title}</h4>
                           </div>
-                          <p className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest uppercase mb-2">
+                          <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2" style={{ color: 'rgba(48,51,47,0.45)' }}>
                             {tour.tour_type} · {tour.duration_hours}h · {tour.difficulty_level}
                           </p>
-                          <p className="text-[#7a9a7a] text-xs font-light line-clamp-2">{tour.description}</p>
+                          <p className="text-xs font-light line-clamp-2" style={{ color: 'rgba(48,51,47,0.55)' }}>{tour.description}</p>
                           {tour.meeting_point && (
-                            <p className="font-jetbrains text-[8px] text-[#3a5a3a] tracking-widest uppercase mt-2">
-                              MEETS AT: {tour.meeting_point}
+                            <p className="font-mono text-[8px] tracking-[0.15em] uppercase mt-2" style={{ color: 'rgba(48,51,47,0.35)' }}>
+                              Meets at: {tour.meeting_point}
                             </p>
                           )}
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-display text-lg font-light text-[#c9a84a]">
+                          <p className="font-display text-lg font-light" style={{ color: '#B69A63' }}>
                             {tour.currency || '₹'}{tour.price_per_person.toLocaleString()}
                           </p>
-                          <p className="font-jetbrains text-[8px] text-[#7a9a7a] tracking-widest">PER PERSON</p>
-                          <p className="font-jetbrains text-[8px] text-[#3a5a3a] tracking-widest mt-1">MAX {tour.max_group_size}</p>
+                          <p className="font-mono text-[8px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Per Person</p>
+                          <p className="font-mono text-[8px] tracking-[0.15em] uppercase mt-1" style={{ color: 'rgba(48,51,47,0.35)' }}>Max {tour.max_group_size}</p>
                         </div>
                       </div>
                     </button>
@@ -395,62 +417,64 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
           {/* Step 2: Date & Group */}
           {step === 2 && selectedTour && (
             <div className="space-y-6">
-              <div className="p-4 border border-[#1a3020] mb-2">
-                <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-1">Selected</p>
-                <p className="font-display text-base font-light text-[#f5f0e8]">{selectedTour.title}</p>
+              <div className="p-4 mb-2" style={{ border: '1px solid rgba(38,61,53,0.08)', borderRadius: '8px' }}>
+                <p style={labelStyle} className="mb-1">Selected</p>
+                <p className="font-display text-base font-light" style={{ color: '#263D35' }}>{selectedTour.title}</p>
               </div>
 
               <div>
-                <label className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest uppercase block mb-2">Date</label>
+                <label style={labelStyle}>Date</label>
                 <input
                   type="date"
                   value={bookingDate}
                   min={minDateStr}
                   onChange={(e) => setBookingDate(e.target.value)}
-                  className="w-full bg-[#0a150a] border border-[#1a3020] text-[#f5f0e8] px-4 py-3 font-jetbrains text-sm focus:outline-none focus:border-[#c9a84a]/40 transition-colors duration-300"
+                  style={inputStyle}
                 />
                 {bookingDate && isDateUnavailable(bookingDate) && (
                   <div className="mt-2 flex items-center gap-1.5">
-                    <AlertCircle className="w-3 h-3 text-red-400/60 flex-shrink-0" />
-                    <p className="font-jetbrains text-[9px] text-red-400/70 tracking-widest uppercase">
+                    <AlertCircle className="w-3 h-3 text-red-500/70 flex-shrink-0" />
+                    <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-red-500/70">
                       This date is unavailable. Please select another date.
                     </p>
                   </div>
                 )}
                 {availabilityLoading && (
-                  <p className="mt-2 font-jetbrains text-[8px] text-[#3a5a3a] tracking-widest uppercase">
+                  <p className="mt-2 font-mono text-[8px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.35)' }}>
                     Loading availability...
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest uppercase block mb-2">Preferred Time</label>
+                <label style={labelStyle}>Preferred Time</label>
                 <input
                   type="time"
                   value={bookingTime}
                   onChange={(e) => setBookingTime(e.target.value)}
-                  className="w-full bg-[#0a150a] border border-[#1a3020] text-[#f5f0e8] px-4 py-3 font-jetbrains text-sm focus:outline-none focus:border-[#c9a84a]/40 transition-colors duration-300"
+                  style={inputStyle}
                 />
               </div>
 
               <div>
-                <label className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest uppercase block mb-2">Group Size (Max {selectedTour.max_group_size})</label>
+                <label style={labelStyle}>Group Size (Max {selectedTour.max_group_size})</label>
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setGroupSize(s => Math.max(1, s - 1))}
-                    className="w-10 h-10 border border-[#1a3020] text-[#7a9a7a] hover:text-[#f5f0e8] hover:border-[#c9a84a]/30 transition-colors duration-300 flex items-center justify-center"
+                    className="w-10 h-10 flex items-center justify-center transition-colors duration-300"
+                    style={{ border: '1px solid rgba(38,61,53,0.12)', color: 'rgba(48,51,47,0.6)', borderRadius: '8px' }}
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="font-display text-2xl font-light text-[#f5f0e8] w-8 text-center">{groupSize}</span>
+                  <span className="font-display text-2xl font-light w-8 text-center" style={{ color: '#263D35' }}>{groupSize}</span>
                   <button
                     onClick={() => setGroupSize(s => Math.min(selectedTour.max_group_size, s + 1))}
-                    className="w-10 h-10 border border-[#1a3020] text-[#7a9a7a] hover:text-[#f5f0e8] hover:border-[#c9a84a]/30 transition-colors duration-300 flex items-center justify-center"
+                    className="w-10 h-10 flex items-center justify-center transition-colors duration-300"
+                    style={{ border: '1px solid rgba(38,61,53,0.12)', color: 'rgba(48,51,47,0.6)', borderRadius: '8px' }}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
-                  <span className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest">
+                  <span className="font-mono text-[9px] tracking-[0.1em]" style={{ color: 'rgba(48,51,47,0.5)' }}>
                     {selectedTour.currency || '₹'}{selectedTour.price_per_person.toLocaleString()} × {groupSize} = {selectedTour.currency || '₹'}{totalPrice.toLocaleString()}
                   </span>
                 </div>
@@ -467,61 +491,61 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
                 { label: 'Phone', value: contactPhone, onChange: setContactPhone, type: 'tel', placeholder: '+91 9876543210' },
               ].map(({ label, value, onChange, type, placeholder }) => (
                 <div key={label}>
-                  <label className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest uppercase block mb-2">{label}</label>
+                  <label style={labelStyle}>{label}</label>
                   <input
                     type={type}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
-                    className="w-full bg-[#0a150a] border border-[#1a3020] text-[#f5f0e8] px-4 py-3 font-light text-sm focus:outline-none focus:border-[#c9a84a]/40 transition-colors duration-300 placeholder:text-[#3a5a3a]"
+                    style={{ ...inputStyle, color: '#263D35' }}
                   />
                 </div>
               ))}
               <div>
-                <label className="font-jetbrains text-[9px] text-[#7a9a7a] tracking-widest uppercase block mb-2">Special Requests (Optional)</label>
+                <label style={labelStyle}>Special Requests (Optional)</label>
                 <textarea
                   value={specialRequests}
                   onChange={(e) => setSpecialRequests(e.target.value)}
                   rows={3}
                   placeholder="Dietary requirements, accessibility needs, specific interests..."
-                  className="w-full bg-[#0a150a] border border-[#1a3020] text-[#f5f0e8] px-4 py-3 font-light text-sm focus:outline-none focus:border-[#c9a84a]/40 transition-colors duration-300 placeholder:text-[#3a5a3a] resize-none"
+                  style={{ ...inputStyle, resize: 'none' }}
                 />
               </div>
             </div>
           )}
 
-          {/* Step 3 → Confirm: Summary before submit */}
+          {/* Step 3: Booking Summary */}
           {step === 3 && selectedTour && (
-            <div className="mt-6 p-4 border border-[#1a3020]">
-              <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-3">Booking Summary</p>
-              <div className="space-y-1.5 text-xs font-light">
+            <div className="mt-6 p-4" style={{ border: '1px solid rgba(38,61,53,0.08)', borderRadius: '8px' }}>
+              <p style={labelStyle} className="mb-3">Booking Summary</p>
+              <div className="space-y-2 text-xs font-light">
                 <div className="flex justify-between">
-                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Experience</span>
-                  <span className="text-[#f5f0e8]">{selectedTour.title}</span>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Experience</span>
+                  <span style={{ color: '#263D35' }}>{selectedTour.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guide</span>
-                  <span className="text-[#f5f0e8]">{guide.full_name}</span>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Guide</span>
+                  <span style={{ color: '#263D35' }}>{guide.full_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Date</span>
-                  <span className="text-[#f5f0e8]">{bookingDate}</span>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Date</span>
+                  <span style={{ color: '#263D35' }}>{bookingDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Time</span>
-                  <span className="text-[#f5f0e8]">{bookingTime}</span>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Time</span>
+                  <span style={{ color: '#263D35' }}>{bookingTime}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guests</span>
-                  <span className="text-[#f5f0e8]">{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Guests</span>
+                  <span style={{ color: '#263D35' }}>{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Contact</span>
-                  <span className="text-[#f5f0e8] text-right max-w-[60%]">{contactName} · {contactEmail} · {contactPhone}</span>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Contact</span>
+                  <span className="text-right max-w-[60%]" style={{ color: '#263D35' }}>{contactName} · {contactEmail} · {contactPhone}</span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-[#1a3020] mt-2">
-                  <span className="text-[#c9a84a]/60 font-jetbrains text-[9px] tracking-widest uppercase">Total</span>
-                  <span className="text-[#c9a84a] font-display text-base">{selectedTour.currency || '₹'}{totalPrice.toLocaleString()}</span>
+                <div className="flex justify-between pt-2 mt-2" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
+                  <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: '#B69A63' }}>Total</span>
+                  <span className="font-display text-base" style={{ color: '#B69A63' }}>{selectedTour.currency || '₹'}{totalPrice.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -531,68 +555,70 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
           {step === 4 && (
             <div className="py-6">
               <div className="text-center mb-6">
-                <div className="w-12 h-12 border border-[#c9a84a]/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-5 h-5 text-[#c9a84a]" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ border: '1px solid rgba(182,154,99,0.3)' }}>
+                  <Check className="w-5 h-5" style={{ color: '#B69A63' }} />
                 </div>
-                <p className="font-jetbrains text-[9px] text-[#c9a84a]/60 tracking-widest uppercase mb-2">Booking Request Submitted</p>
-                <h3 className="font-display text-2xl font-light text-[#f5f0e8] mb-2">Your booking request has been submitted successfully.</h3>
-                <p className="text-[#7a9a7a] text-sm font-light">
+                <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2" style={{ color: '#B69A63' }}>Booking Request Submitted</p>
+                <h3 className="font-display text-2xl font-light mb-2" style={{ color: '#263D35' }}>Your booking request has been submitted successfully.</h3>
+                <p className="text-sm font-light" style={{ color: 'rgba(48,51,47,0.6)' }}>
                   {guide.full_name} will be in touch within 24 hours to confirm your expedition.
                 </p>
               </div>
 
-              <div className="border border-[#1a3020] p-5">
-                <p className="font-jetbrains text-[9px] text-[#c9a84a]/50 tracking-widest uppercase mb-3">Booking Details</p>
-                <div className="space-y-1.5 text-xs font-light">
+              <div className="p-5" style={{ border: '1px solid rgba(38,61,53,0.08)', borderRadius: '8px' }}>
+                <p style={labelStyle} className="mb-3">Booking Details</p>
+                <div className="space-y-2 text-xs font-light">
                   <div className="flex justify-between">
-                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guide</span>
-                    <span className="text-[#f5f0e8]">{guide.full_name}</span>
+                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Guide</span>
+                    <span style={{ color: '#263D35' }}>{guide.full_name}</span>
                   </div>
                   {selectedTour && (
                     <div className="flex justify-between">
-                      <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Experience</span>
-                      <span className="text-[#f5f0e8]">{selectedTour.title}</span>
+                      <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Experience</span>
+                      <span style={{ color: '#263D35' }}>{selectedTour.title}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Date</span>
-                    <span className="text-[#f5f0e8]">{bookingDate}</span>
+                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Date</span>
+                    <span style={{ color: '#263D35' }}>{bookingDate}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#7a9a7a] font-jetbrains text-[9px] tracking-widest uppercase">Guests</span>
-                    <span className="text-[#f5f0e8]">{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
+                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.45)' }}>Guests</span>
+                    <span style={{ color: '#263D35' }}>{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-[#1a3020] mt-2">
-                    <span className="text-[#c9a84a]/60 font-jetbrains text-[9px] tracking-widest uppercase">Reference</span>
-                    <span className="text-[#c9a84a] font-jetbrains tracking-widest">{confirmationCode}</span>
+                  <div className="flex justify-between pt-2 mt-2" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
+                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: '#B69A63' }}>Reference</span>
+                    <span className="font-mono tracking-[0.15em]" style={{ color: '#B69A63' }}>{confirmationCode}</span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-[#3a5a3a] text-xs font-light text-center mt-4">A confirmation has been sent to {contactEmail}</p>
+              <p className="text-xs font-light text-center mt-4" style={{ color: 'rgba(48,51,47,0.4)' }}>A confirmation has been sent to {contactEmail}</p>
               <button
                 onClick={handleClose}
-                className="mt-4 font-jetbrains text-[10px] tracking-widest text-[#c9a84a]/70 border border-[#c9a84a]/20 px-6 py-2 hover:border-[#c9a84a]/50 transition-colors duration-300 block mx-auto"
+                className="mt-4 px-6 py-2.5 text-xs tracking-[0.15em] uppercase transition-all duration-300 block mx-auto"
+                style={{ border: '1px solid rgba(38,61,53,0.2)', color: '#263D35', borderRadius: '999px' }}
               >
-                DONE
+                Done
               </button>
             </div>
           )}
 
           {error && (
-            <p className="mt-4 font-jetbrains text-[9px] text-red-400/70 tracking-widest">{error}</p>
+            <p className="mt-4 font-mono text-[9px] tracking-[0.15em] text-red-500/70">{error}</p>
           )}
         </div>
 
         {/* Footer actions */}
         {step < 4 && (
-          <div className="flex items-center justify-between p-6 border-t border-[#1a3020]">
+          <div className="flex items-center justify-between p-6" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
             {step > 1 ? (
               <button
                 onClick={() => setStep((s) => (s - 1) as Step)}
-                className="flex items-center gap-2 font-jetbrains text-[10px] tracking-widest text-[#7a9a7a] hover:text-[#f5f0e8] transition-colors duration-300"
+                className="flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] uppercase transition-colors duration-300"
+                style={{ color: 'rgba(48,51,47,0.5)' }}
               >
-                <ChevronLeft className="w-3 h-3" /> BACK
+                <ChevronLeft className="w-3 h-3" /> Back
               </button>
             ) : <div />}
 
@@ -600,17 +626,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
               <button
                 onClick={handleNext}
                 disabled={!canAdvance()}
-                className="flex items-center gap-2 font-jetbrains text-[10px] tracking-widest text-[#c9a84a]/70 border border-[#c9a84a]/20 px-6 py-2 hover:border-[#c9a84a]/50 transition-colors duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2.5 font-mono text-[10px] tracking-[0.15em] uppercase transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{ border: '1px solid rgba(38,61,53,0.2)', color: '#263D35', borderRadius: '999px' }}
               >
-                CONTINUE <ChevronRight className="w-3 h-3" />
+                Continue <ChevronRight className="w-3 h-3" />
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !canAdvance()}
-                className="flex items-center gap-2 font-jetbrains text-[10px] tracking-widest text-[#0d1a0d] bg-[#c9a84a] px-6 py-2 hover:bg-[#d4b660] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2.5 font-mono text-[10px] tracking-[0.15em] uppercase transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#263D35', color: '#F6F2E9', borderRadius: '999px' }}
               >
-                {submitting ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
+                {submitting ? 'Confirming...' : 'Confirm Booking'}
               </button>
             )}
           </div>

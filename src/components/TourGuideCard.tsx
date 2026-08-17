@@ -1,11 +1,8 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, ArrowRight } from 'lucide-react';
 import type { TourGuide } from '../shared/supabase';
 import {
-  SAMPLE_GEMS_BY_ARCHETYPE,
-  SAMPLE_FIELD_NOTES,
   WHY_EXPLORE_BY_ARCHETYPE,
-  deterministicNum,
 } from '../data/vanguardSamples';
 
 interface TourGuideCardProps {
@@ -32,10 +29,9 @@ const TourGuideCard: React.FC<TourGuideCardProps> = ({ guide, onBook }) => {
     (guide.specialties.length > 0 ? ARCHETYPE_FALLBACK[guide.specialties[0]] : null) ||
     'Local Expert';
 
-  // Deterministic sample metrics when DB values are zero
- const gemsCount = guide.hidden_gems_count ?? 0;
-const notesCount = guide.field_notes_count ?? 0;
-  // "Why They Explore" — bio first sentence, then archetype-based fallback
+  const gemsCount = guide.hidden_gems_count ?? 0;
+  const yearsExp = guide.years_experience ?? 0;
+
   const whyExplore = (() => {
     if (guide.bio && guide.bio.trim().length > 0) {
       const firstSentence = guide.bio.split(/[.!?]/)[0].trim();
@@ -44,128 +40,86 @@ const notesCount = guide.field_notes_count ?? 0;
     return WHY_EXPLORE_BY_ARCHETYPE[archetype] || WHY_EXPLORE_BY_ARCHETYPE['default'] || '';
   })();
 
-  // Known For — hosted_gems from DB, fallback to archetype-based samples
-  const knownFor: string[] = guide.hosted_gems?.slice(0, 3) ?? [];
-
-  // Field Notes — sample_field_notes from DB, fallback to index-based samples
-  const noteSet = guide.sample_field_notes?.slice(0, 2) ?? [];
-
   return (
-    <div className="group border-b border-r border-forest-800 flex flex-col overflow-hidden">
-      {/* Image */}
-      <div className="relative h-52 overflow-hidden flex-shrink-0">
+    <div
+      className="group flex flex-col overflow-hidden cursor-pointer transition-all duration-300"
+      style={{
+        backgroundColor: '#FBF8F1',
+        borderRadius: '10px',
+        border: '1px solid rgba(38,61,53,0.06)',
+        boxShadow: '0 4px 16px rgba(38,61,53,0.05)',
+      }}
+      onClick={() => onBook(guide)}
+    >
+      {/* Image — bright, warm */}
+      <div className="relative h-72 overflow-hidden flex-shrink-0">
         <img
-          src={
-            guide.profile_image ||
-            'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg?auto=compress&cs=tinysrgb&w=600'
-          }
+          src={guide.profile_image || 'https://images.pexels.com/photos/1659438/pexels-photo-1659438.jpeg?auto=compress&cs=tinysrgb&w=800'}
           alt={guide.full_name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          style={{ filter: 'grayscale(30%) brightness(0.50) saturate(0.7)' }}
+          style={{ filter: 'brightness(1.12) saturate(1.08) sepia(0.05)' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-forest-950/98 via-forest-950/30 to-transparent" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(38,61,53,0.7), rgba(38,61,53,0.05) 50%, transparent)' }} />
 
-        {/* Archetype badge */}
-        <div className="absolute top-3 right-3">
-          <span className="font-mono text-[8px] text-gold-400/70 border border-gold-400/20 px-2 py-0.5 bg-forest-950/70 tracking-widest uppercase">
+        {/* Archetype label */}
+        <div className="absolute top-4 right-4">
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase px-3 py-1" style={{ color: 'rgba(246,242,233,0.85)', backgroundColor: 'rgba(38,61,53,0.5)', borderRadius: '999px', backdropFilter: 'blur(4px)' }}>
             {archetype}
           </span>
         </div>
 
-        {/* Name + location */}
-        <div className="absolute bottom-3 left-4 right-4">
-          <h3 className="font-display text-xl font-light text-cream leading-tight group-hover:text-gold-200 transition-colors duration-300">
+        {/* Name + location over image */}
+        <div className="absolute bottom-4 left-5 right-5">
+          <h3 className="font-display text-2xl font-light leading-tight mb-1" style={{ color: '#F6F2E9' }}>
             {guide.full_name}
           </h3>
-          <div className="flex items-center gap-1 mt-0.5">
-            <MapPin className="h-3 w-3 text-gold-400/40 flex-shrink-0" />
-            <span className="font-mono text-[8px] text-mist-700 tracking-widest uppercase">
-              {guide.location_city}, {guide.location_state}
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-3 w-3 flex-shrink-0" style={{ color: 'rgba(231,217,197,0.7)' }} strokeWidth={1.5} />
+            <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(246,242,233,0.7)' }}>
+              {guide.location_city}{guide.location_state ? `, ${guide.location_state}` : ''}
             </span>
           </div>
         </div>
       </div>
 
       {/* Body */}
-      <div className="flex-1 flex flex-col p-5">
+      <div className="flex-1 flex flex-col p-6">
 
         {/* Why They Explore */}
-        <p className="font-display italic text-sm text-gold-300/60 font-light leading-relaxed mb-4">
+        <p className="font-display italic text-sm font-light leading-relaxed mb-5" style={{ color: '#B77B65' }}>
           {whyExplore}
         </p>
 
-        <div className="border-t border-forest-800 pt-4 mb-4">
-          {/* Metrics */}
-          <div className="flex gap-4 mb-3">
-            {[
-              { value: gemsCount, label: 'Hidden Gems' },
-              { value: notesCount, label: 'Field Notes' },
-              { value: guide.years_experience, label: 'Yrs Exploring' },
-            ].map(({ value, label }) => (
-              <div key={label}>
-                <span className="font-display text-base font-light text-cream">{value}</span>
-                <span className="font-mono text-[7px] text-mist-700 tracking-widest uppercase ml-1 block leading-none mt-0.5">
-                  {label}
-                </span>
-              </div>
-            ))}
+        {/* Metrics — minimal */}
+        <div className="flex items-center gap-5 mb-5 pt-4" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
+          <div>
+            <span className="font-display text-lg font-light" style={{ color: '#263D35' }}>{gemsCount}</span>
+            <span className="font-mono text-[8px] tracking-[0.15em] uppercase ml-1" style={{ color: 'rgba(48,51,47,0.45)' }}>Gems</span>
           </div>
-
-          {/* Languages */}
+          <div>
+            <span className="font-display text-lg font-light" style={{ color: '#263D35' }}>{yearsExp}</span>
+            <span className="font-mono text-[8px] tracking-[0.15em] uppercase ml-1" style={{ color: 'rgba(48,51,47,0.45)' }}>Yrs</span>
+          </div>
           {guide.languages.length > 0 && (
-            <p className="font-mono text-[8px] text-mist-700 tracking-widest">
-              {guide.languages.slice(0, 3).join(' · ')}
-              {guide.languages.length > 3 && ` +${guide.languages.length - 3}`}
-            </p>
+            <div className="ml-auto">
+              <span className="font-mono text-[8px] tracking-[0.1em] uppercase" style={{ color: 'rgba(48,51,47,0.4)' }}>
+                {guide.languages.slice(0, 2).join(' · ')}
+                {guide.languages.length > 2 && ` +${guide.languages.length - 2}`}
+              </span>
+            </div>
           )}
         </div>
 
-        {/* Known For */}
-        {knownFor.length > 0 && (
-  <div className="mb-4">
-    <p className="font-mono text-[8px] text-gold-400/40 tracking-widest uppercase mb-2">
-      Known For
-    </p>
-
-    <div className="flex flex-wrap gap-1">
-      {knownFor.map((gem, i) => (
-        <span
-          key={i}
-          className="font-mono text-[8px] text-mist-600 border border-forest-700 px-2 py-0.5"
-        >
-          {gem}
-        </span>
-      ))}
-    </div>
-  </div>
-)}
-
-        {/* Field Notes */}
-        {noteSet.length > 0 && (
-  <div className="mb-5 flex-1">
-    <p className="font-mono text-[8px] text-gold-400/40 tracking-widest uppercase mb-2">
-      Field Notes
-    </p>
-
-    <div className="space-y-1.5">
-      {noteSet.map((note, i) => (
-        <p
-          key={i}
-          className="font-display italic text-xs text-mist-700 font-light leading-relaxed"
-        >
-          "{note}"
-        </p>
-      ))}
-    </div>
-  </div>
-)}
-
         {/* CTA */}
         <button
-          onClick={() => onBook(guide)}
-          className="w-full font-mono text-[10px] tracking-widest text-gold-300/60 border border-gold-400/20 py-2.5 hover:border-gold-400/50 hover:text-gold-300 hover:bg-forest-900 transition-all duration-300 mt-auto"
+          onClick={(e) => { e.stopPropagation(); onBook(guide); }}
+          className="group/btn flex items-center gap-2 font-mono text-[10px] tracking-[0.15em] uppercase transition-colors duration-300 mt-auto self-start"
+          style={{ color: '#263D35' }}
         >
-          EXPLORE TOGETHER →
+          <span className="border-b pb-0.5 transition-all duration-300 group-hover/btn:border-[#B69A63]" style={{ borderColor: 'rgba(38,61,53,0.2)' }}>
+            Explore Together
+          </span>
+          <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover/btn:translate-x-0.5" strokeWidth={1.5} />
         </button>
       </div>
     </div>
