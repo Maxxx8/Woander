@@ -70,7 +70,7 @@ const Header = () => {
                 style={{ filter: onHero ? 'none' : 'none' }}
               />
               <span
-                className="font-display text-xl font-medium tracking-[0.12em] transition-colors duration-300"
+                className="font-display text-lg font-medium tracking-[0.15em] transition-colors duration-300"
                 style={{ color: logoColor }}
               >
                 Woander
@@ -78,14 +78,14 @@ const Header = () => {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-9 relative z-10">
+            <nav className="hidden md:flex items-center gap-12 relative z-10">
               {NAV_LINKS.map(({ to, label }) => {
                 const active = location.pathname.startsWith(to);
                 return (
                   <Link
                     key={to}
                     to={to}
-                    className="relative text-[12px] tracking-[0.12em] uppercase font-medium transition-colors duration-300 group"
+                    className="relative text-[11px] tracking-[0.14em] uppercase font-normal transition-colors duration-300 group"
                     style={{ color: active ? navHover : navColor }}
                   >
                     {label}
@@ -99,7 +99,7 @@ const Header = () => {
                 );
               })}
 
-              <div className="h-4 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.15)' }} />
+              <div className="h-3 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.12)' }} />
 
               <button
                 onClick={() => setIsSearchModalOpen(true)}
@@ -108,7 +108,7 @@ const Header = () => {
                 type="button"
                 aria-label="Search"
               >
-                <Search size={16} strokeWidth={1.5} />
+                <Search size={15} strokeWidth={1.5} />
               </button>
 
               <button
@@ -118,16 +118,16 @@ const Header = () => {
                 type="button"
                 aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
               >
-                {theme === 'night' ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
+                {theme === 'night' ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
               </button>
 
-              <div className="h-4 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.15)' }} />
+              <div className="h-3 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.12)' }} />
 
               {user ? (
                 <div className="flex items-center gap-5">
                   <Link
                     to="/guide/dashboard"
-                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300"
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-normal transition-colors duration-300"
                     style={{ color: navColor }}
                   >
                     <Compass className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -135,7 +135,7 @@ const Header = () => {
                   </Link>
                   <Link
                     to="/dashboard"
-                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300"
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-normal transition-colors duration-300"
                     style={{ color: navColor }}
                   >
                     <User className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -153,7 +153,7 @@ const Header = () => {
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="px-5 py-2 text-[11px] tracking-[0.12em] uppercase font-medium transition-all duration-300 hover:bg-forest-900 hover:text-parchment"
+                  className="px-5 py-2 text-[11px] tracking-[0.12em] uppercase font-normal transition-all duration-300 hover:bg-forest-900 hover:text-parchment"
                   style={{
                     border: '1px solid rgba(36,58,52,0.3)',
                     color: navColor,

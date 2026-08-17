@@ -44,20 +44,20 @@ const ArchiveSection: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative py-28" style={{ backgroundColor: '#71877A' }}>
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="mb-14">
-          <p className="font-mono text-[10px] tracking-widest uppercase mb-4" style={{ color: 'rgba(245,241,232,0.6)' }}>Archive</p>
+    <section className="relative py-32" style={{ backgroundColor: '#71877A' }}>
+      <div className="relative max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="mb-16">
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'rgba(245,241,232,0.55)' }}>Archive</p>
           <h2 className="font-display text-4xl md:text-5xl font-light" style={{ color: '#F5F1E8' }}>
             Signals From <em className="italic" style={{ color: '#D8C7A5' }}>The Archive.</em>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0" style={{ border: '1px solid rgba(245,241,232,0.15)' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0" style={{ border: '1px solid rgba(245,241,232,0.12)' }}>
           {/* Rotating signal */}
-          <div className="p-12 flex flex-col justify-between min-h-[220px]" style={{ borderBottom: '1px solid rgba(245,241,232,0.15)', borderRight: '0' }}>
+          <div className="p-12 lg:p-14 flex flex-col justify-between min-h-[240px]" style={{ borderBottom: '1px solid rgba(245,241,232,0.12)' }}>
             <div>
-              <span className="font-mono text-[9px] tracking-widest uppercase block mb-6" style={{ color: 'rgba(216,199,165,0.5)' }}>
+              <span className="font-mono text-[9px] tracking-[0.2em] uppercase block mb-8" style={{ color: 'rgba(216,199,165,0.45)' }}>
                 {ARCHIVE_SIGNALS[activeIndex].type === 'coord' ? 'Coordinates' : ARCHIVE_SIGNALS[activeIndex].type === 'quote' ? 'Transmission' : 'Field Note'}
               </span>
               <p
@@ -71,17 +71,17 @@ const ArchiveSection: React.FC = () => {
                 }`}
                 style={{
                   color: ARCHIVE_SIGNALS[activeIndex].type === 'coord'
-                    ? 'rgba(216,199,165,0.8)'
+                    ? 'rgba(216,199,165,0.75)'
                     : ARCHIVE_SIGNALS[activeIndex].type === 'quote'
                     ? '#F5F1E8'
-                    : 'rgba(245,241,232,0.7)',
+                    : 'rgba(245,241,232,0.65)',
                   animation: 'fadeInUp 0.6s ease-out',
                 }}
               >
                 {ARCHIVE_SIGNALS[activeIndex].text}
               </p>
             </div>
-            <div className="flex gap-1 mt-8">
+            <div className="flex gap-1.5 mt-10">
               {ARCHIVE_SIGNALS.map((_, i) => (
                 <button
                   key={i}
@@ -89,7 +89,7 @@ const ArchiveSection: React.FC = () => {
                   className="h-px transition-all duration-300"
                   style={{
                     width: i === activeIndex ? '24px' : '8px',
-                    backgroundColor: i === activeIndex ? '#D8C7A5' : 'rgba(245,241,232,0.2)',
+                    backgroundColor: i === activeIndex ? '#D8C7A5' : 'rgba(245,241,232,0.18)',
                   }}
                   aria-label={`Signal ${i + 1}`}
                 />
@@ -98,17 +98,17 @@ const ArchiveSection: React.FC = () => {
           </div>
 
           {/* Static archive fragments */}
-          <div className="p-12 grid grid-cols-1 gap-5" style={{ borderLeft: '1px solid rgba(245,241,232,0.15)' }}>
+          <div className="p-12 lg:p-14 grid grid-cols-1 gap-6" style={{ borderLeft: '1px solid rgba(245,241,232,0.12)' }}>
             {ARCHIVE_SIGNALS.filter(s => s.type === 'fact').slice(0, 3).map((signal, i) => (
-              <div key={i} className="group flex items-start gap-3">
-                <span className="mt-0.5 flex-shrink-0 transition-colors duration-300" style={{ color: 'rgba(216,199,165,0.3)' }}>◦</span>
-                <p className="text-xs leading-relaxed font-light transition-colors duration-300" style={{ color: 'rgba(245,241,232,0.6)' }}>
+              <div key={i} className="flex items-start gap-3">
+                <span className="mt-0.5 flex-shrink-0" style={{ color: 'rgba(216,199,165,0.25)' }}>◦</span>
+                <p className="text-xs leading-relaxed font-light" style={{ color: 'rgba(245,241,232,0.55)' }}>
                   {signal.text}
                 </p>
               </div>
             ))}
-            <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(245,241,232,0.1)' }}>
-              <p className="font-mono text-[9px] tracking-widest" style={{ color: 'rgba(245,241,232,0.35)' }}>
+            <div className="mt-6 pt-5" style={{ borderTop: '1px solid rgba(245,241,232,0.08)' }}>
+              <p className="font-mono text-[9px] tracking-[0.15em]" style={{ color: 'rgba(245,241,232,0.3)' }}>
                 Last updated: Field season 2024 — 847 gems catalogued
               </p>
             </div>
@@ -242,7 +242,7 @@ const StoryBlock: React.FC<{ section: StorySection; index: number; onBecomeFound
           src={section.image}
           alt=""
           className="story-bg w-full h-full object-cover"
-          style={{ scale: '1.1', filter: 'brightness(1.0) saturate(1.05) contrast(1.02) sepia(0.1)' }}
+          style={{ scale: '1.08', filter: 'brightness(1.12) saturate(1.1) contrast(1.0) sepia(0.06)' }}
         />
       </div>
 
@@ -360,23 +360,23 @@ const HomePage = () => {
       <TerrainDivider />
 
       {/* Hidden Gems community section — warm cream */}
-      <div className="relative pt-28 pb-20" style={{ backgroundColor: '#FAF8F2' }}>
-        <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-14 gap-6">
+      <div className="relative pt-32 pb-28" style={{ backgroundColor: '#FAF8F2' }}>
+        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-20 gap-6">
             <div>
-              <p className="font-mono text-[10px] tracking-widest uppercase mb-4" style={{ color: '#71877A' }}>Community Discoveries</p>
+              <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-6" style={{ color: '#71877A' }}>Community Discoveries</p>
               <h2 className="font-display text-4xl md:text-5xl font-light leading-tight" style={{ color: '#243A34' }}>
                 Hidden Gems,<br />
                 <em className="italic" style={{ color: '#B97862' }}>recently mapped.</em>
               </h2>
             </div>
-            <a href="/hidden-gems" className="font-mono text-[10px] tracking-widest uppercase transition-colors duration-300" style={{ color: '#71877A' }}>
+            <a href="/hidden-gems" className="font-mono text-[10px] tracking-[0.2em] uppercase transition-colors duration-300" style={{ color: '#71877A' }}>
               View All →
             </a>
           </div>
 
           {/* Featured panoramic gem — large */}
-          <div className="mb-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <a href="/hidden-gems" className="lg:col-span-2 relative overflow-hidden group cursor-pointer min-h-[340px] block rounded-sm">
               <img
                 src="https://images.pexels.com/photos/5429543/pexels-photo-5429543.jpeg?auto=compress&cs=tinysrgb&w=1600"
@@ -418,7 +418,7 @@ const HomePage = () => {
           </div>
 
           {/* Smaller gems — offset grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { name: 'Vellarimala Summit Path', location: 'Wayanad, Kerala', founder: 'Rahul K.', notes: 19, visits: 61, verified: false, coord: '11.6854° N', img: 'https://images.pexels.com/photos/34954441/pexels-photo-34954441.jpeg?auto=compress&cs=tinysrgb&w=800' },
               { name: 'Pookode Lake Inlet', location: 'Wayanad, Kerala', founder: 'Divya R.', notes: 5, visits: 22, verified: true, coord: '11.5100° N', img: 'https://images.pexels.com/photos/32942923/pexels-photo-32942923.jpeg?auto=compress&cs=tinysrgb&w=800' },
@@ -467,26 +467,26 @@ const HomePage = () => {
       </div>
 
       {/* Explorer Profiles */}
-      <section className="relative py-28" style={{ backgroundColor: '#A9B7A0' }}>
-        <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="mb-14">
-            <p className="font-mono text-[10px] tracking-widest uppercase mb-4" style={{ color: 'rgba(36,58,52,0.6)' }}>Who Explores Here</p>
+      <section className="relative py-32" style={{ backgroundColor: '#A9B7A0' }}>
+        <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="mb-20">
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-6" style={{ color: 'rgba(36,58,52,0.55)' }}>Who Explores Here</p>
             <h2 className="font-display text-4xl md:text-5xl font-light leading-tight max-w-xl" style={{ color: '#243A34' }}>
               The <em className="italic" style={{ color: '#B97862' }}>explorer hierarchy.</em>
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0" style={{ borderTop: '1px solid rgba(36,58,52,0.15)', borderLeft: '1px solid rgba(36,58,52,0.15)' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0" style={{ borderTop: '1px solid rgba(36,58,52,0.12)', borderLeft: '1px solid rgba(36,58,52,0.12)' }}>
             {[
               { rank: 'Pathfinder', desc: 'First to visit and document an undiscovered place.', stat: '1–3 gems found', icon: '◎' },
               { rank: 'Vanguard', desc: 'Recurring contributor with verified field notes and local connections.', stat: '4–10 gems found', icon: '◈' },
               { rank: 'Gem Founder', desc: 'Discovered a gem that earned community verification and explorer visits.', stat: 'Verified gem owner', icon: '◆' },
               { rank: 'Cartographer', desc: 'Mapped an entire region — trails, guides, seasonal notes, local lore.', stat: 'Region complete', icon: '⊕' },
             ].map((profile, i) => (
-              <div key={i} className="p-8 group transition-colors duration-400" style={{ borderBottom: '1px solid rgba(36,58,52,0.15)', borderRight: '1px solid rgba(36,58,52,0.15)' }}>
-                <span className="text-xl block mb-4 transition-colors duration-300" style={{ color: 'rgba(185,154,91,0.4)' }}>{profile.icon}</span>
-                <h3 className="font-display text-xl font-light mb-2" style={{ color: '#243A34' }}>{profile.rank}</h3>
-                <p className="text-xs leading-relaxed font-light mb-4" style={{ color: 'rgba(36,58,52,0.6)' }}>{profile.desc}</p>
-                <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: '#B99A5B' }}>{profile.stat}</span>
+              <div key={i} className="p-10" style={{ borderBottom: '1px solid rgba(36,58,52,0.12)', borderRight: '1px solid rgba(36,58,52,0.12)' }}>
+                <span className="text-xl block mb-6" style={{ color: 'rgba(185,154,91,0.35)' }}>{profile.icon}</span>
+                <h3 className="font-display text-xl font-light mb-3" style={{ color: '#243A34' }}>{profile.rank}</h3>
+                <p className="text-xs leading-relaxed font-light mb-6" style={{ color: 'rgba(36,58,52,0.55)' }}>{profile.desc}</p>
+                <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: '#B99A5B' }}>{profile.stat}</span>
               </div>
             ))}
           </div>
@@ -500,11 +500,11 @@ const HomePage = () => {
       <TerrainDivider flip />
 
       {/* Search section */}
-      <section className="relative py-28" style={{ backgroundColor: '#FAF8F2' }}>
-        <div className="relative max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="font-mono text-[10px] tracking-widest uppercase mb-5" style={{ color: '#71877A' }}>Seek</p>
-            <h2 className="font-display text-4xl md:text-5xl font-light mb-4 leading-tight" style={{ color: '#243A34' }}>
+      <section className="relative py-32" style={{ backgroundColor: '#FAF8F2' }}>
+        <div className="relative max-w-3xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-6" style={{ color: '#71877A' }}>Seek</p>
+            <h2 className="font-display text-4xl md:text-5xl font-light mb-6 leading-tight" style={{ color: '#243A34' }}>
               Find Your <em className="italic" style={{ color: '#B97862' }}>Hidden Place</em>
             </h2>
             <p className="text-sm font-light max-w-md mx-auto leading-relaxed" style={{ color: '#27302D' }}>
@@ -527,23 +527,25 @@ const HomePage = () => {
       </section>
 
       {/* Final CTA — deep forest with warm ivory text */}
-      <section className="relative py-32" style={{ backgroundColor: '#243A34' }}>
-        <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <Compass className="mx-auto mb-8" size={28} strokeWidth={1.5} style={{ color: 'rgba(216,199,165,0.4)' }} />
-          <h2 className="font-display text-4xl md:text-5xl font-light leading-tight mb-4" style={{ color: '#F5F1E8' }}>
+      <section className="relative py-40" style={{ backgroundColor: '#243A34' }}>
+        <div className="relative max-w-3xl mx-auto px-6 text-center">
+          <Compass className="mx-auto mb-10" size={24} strokeWidth={1.5} style={{ color: 'rgba(216,199,165,0.35)' }} />
+          <h2 className="font-display text-4xl md:text-5xl font-light leading-tight mb-6" style={{ color: '#F5F1E8' }}>
             Where will you <em className="italic" style={{ color: '#D8C7A5' }}>wander next?</em>
           </h2>
-          <p className="text-sm font-light mb-10 max-w-md mx-auto" style={{ color: 'rgba(245,241,232,0.6)' }}>
+          <p className="text-sm font-light mb-12 max-w-md mx-auto" style={{ color: 'rgba(245,241,232,0.55)' }}>
             Create your personalized itinerary in minutes with our intelligent trip planner.
           </p>
           <button
             onClick={() => setShowAddGem(true)}
-            className="group inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.15em] uppercase font-medium transition-all duration-500"
+            className="inline-flex items-center gap-3 px-10 py-4 text-sm tracking-[0.15em] uppercase font-medium transition-all duration-500"
             style={{
-              border: '1px solid rgba(245,241,232,0.3)',
+              border: '1px solid rgba(245,241,232,0.25)',
               color: '#F5F1E8',
               backgroundColor: 'transparent',
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F5F1E8'; e.currentTarget.style.color = '#243A34'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#F5F1E8'; }}
           >
             Become a Gem Founder
           </button>
