@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, LogOut, User, Search, Sun, Moon, Compass } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../shared/AuthContext';
 import { useTheme } from '../shared/ThemeContext';
 import AuthModal from './AuthModal';
@@ -20,70 +20,76 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, signOut } = useAuth();
   const { theme, toggle } = useTheme();
-  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const isHome = location.pathname === '/';
-  const showHeroGradient = isHome && !scrolled;
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-forest-950/95 backdrop-blur-md border-b border-gold-400/10'
-            : isHome
-              ? 'bg-transparent'
-              : 'bg-forest-950/80 backdrop-blur-sm border-b border-transparent'
+            ? 'bg-forest-950/95 backdrop-blur-md'
+            : 'bg-transparent'
         }`}
+        style={{
+          borderBottom: scrolled
+            ? '1px solid rgba(244,240,230,0.12)'
+            : '1px solid transparent',
+        }}
       >
-        {/* Subtle dark gradient behind header when on hero — keeps nav readable over any image */}
-        {showHeroGradient && (
+        {/* Gradient behind header on hero — darker at top, transparent at bottom */}
+        {!scrolled && (
           <div
-            className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+            className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'linear-gradient(to bottom, rgba(7,15,12,0.75) 0%, rgba(7,15,12,0.45) 50%, rgba(7,15,12,0) 100%)',
+                'linear-gradient(to bottom, rgba(7,22,17,0.7) 0%, rgba(7,22,17,0.35) 60%, rgba(7,22,17,0) 100%)',
             }}
           />
         )}
 
         <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-5">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-3 group relative z-10">
               <img
                 src="/Logo Large.jpeg"
                 alt="Woander"
-                className="h-9 w-9 object-contain rounded-full opacity-90 group-hover:opacity-100 transition-opacity duration-300 ring-1 ring-gold-400/20"
+                className="h-9 w-9 object-contain rounded-full opacity-95 group-hover:opacity-100 transition-opacity duration-300 ring-1 ring-cream/15"
               />
-              <span className="font-display text-xl font-light text-cream tracking-[0.15em] group-hover:text-gold-300 transition-colors duration-300">
+              <span
+                className="font-display text-xl font-light tracking-[0.15em] transition-colors duration-300"
+                style={{ color: '#F4F0E6' }}
+              >
                 Woander
               </span>
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-10">
+            <nav className="hidden md:flex items-center gap-9 relative z-10">
               {NAV_LINKS.map(({ to, label }) => {
                 const active = location.pathname.startsWith(to);
                 return (
                   <Link
                     key={to}
                     to={to}
-                    className="relative text-cream/80 hover:text-cream text-[11px] tracking-[0.18em] uppercase font-light transition-colors duration-300 group"
+                    className="relative text-[12px] tracking-[0.12em] uppercase font-medium transition-colors duration-300 group"
+                    style={{ color: active ? '#D8C28C' : '#F4F0E6' }}
                   >
                     {label}
                     <span
-                      className={`absolute -bottom-1.5 left-0 h-px bg-gold-400 transition-all duration-400 ${
-                        active ? 'w-full opacity-80' : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-40'
+                      className={`absolute -bottom-1.5 left-0 h-px transition-all duration-300 ${
+                        active ? 'w-full' : 'w-0 group-hover:w-full'
                       }`}
+                      style={{ backgroundColor: active ? '#D8C28C' : 'rgba(244,240,230,0.3)' }}
                     />
                   </Link>
                 );
@@ -95,7 +101,8 @@ const Header = () => {
               {/* Utility actions */}
               <button
                 onClick={() => setIsSearchModalOpen(true)}
-                className="text-cream/70 hover:text-cream transition-colors duration-300"
+                className="transition-colors duration-300 hover:text-gold-300"
+                style={{ color: '#F4F0E6' }}
                 type="button"
                 aria-label="Search"
               >
@@ -104,7 +111,8 @@ const Header = () => {
 
               <button
                 onClick={toggle}
-                className="text-cream/70 hover:text-gold-300 transition-colors duration-300"
+                className="transition-colors duration-300 hover:text-gold-300"
+                style={{ color: '#F4F0E6' }}
                 type="button"
                 aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
               >
@@ -114,24 +122,27 @@ const Header = () => {
               <div className="h-4 w-px bg-cream/15" />
 
               {user ? (
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-5">
                   <Link
                     to="/guide/dashboard"
-                    className="flex items-center gap-1.5 text-cream/70 hover:text-gold-300 text-[11px] tracking-[0.12em] uppercase font-light transition-colors duration-300"
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300 hover:text-gold-300"
+                    style={{ color: '#F4F0E6' }}
                   >
                     <Compass className="h-3.5 w-3.5" strokeWidth={1.5} />
                     Guide
                   </Link>
                   <Link
                     to="/dashboard"
-                    className="flex items-center gap-1.5 text-cream/70 hover:text-cream text-[11px] tracking-[0.12em] uppercase font-light transition-colors duration-300"
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300 hover:text-gold-300"
+                    style={{ color: '#F4F0E6' }}
                   >
                     <User className="h-3.5 w-3.5" strokeWidth={1.5} />
                     Dashboard
                   </Link>
                   <button
                     onClick={signOut}
-                    className="text-cream/50 hover:text-cream transition-colors duration-300"
+                    className="transition-colors duration-300 hover:text-cream"
+                    style={{ color: 'rgba(244,240,230,0.6)' }}
                     aria-label="Sign out"
                   >
                     <LogOut className="h-4 w-4" strokeWidth={1.5} />
@@ -140,32 +151,39 @@ const Header = () => {
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="px-5 py-2 border border-gold-400/30 text-gold-300 text-[11px] tracking-[0.15em] uppercase font-light hover:border-gold-400/70 hover:text-gold-200 transition-all duration-300"
+                  className="px-5 py-2 border text-[11px] tracking-[0.12em] uppercase font-medium transition-all duration-300 hover:bg-cream/10"
+                  style={{
+                    borderColor: 'rgba(244,240,230,0.35)',
+                    color: '#F4F0E6',
+                  }}
                 >
                   Sign In
                 </button>
               )}
             </nav>
 
-            {/* Mobile: theme toggle + menu button */}
-            <div className="flex items-center gap-4 md:hidden">
+            {/* Mobile: search + theme + menu */}
+            <div className="flex items-center gap-4 md:hidden relative z-10">
               <button
                 onClick={() => setIsSearchModalOpen(true)}
-                className="text-cream/80 hover:text-cream transition-colors duration-300"
+                className="transition-colors duration-300"
+                style={{ color: '#F4F0E6' }}
                 aria-label="Search"
               >
                 <Search size={18} strokeWidth={1.5} />
               </button>
               <button
                 onClick={toggle}
-                className="text-cream/80 hover:text-gold-300 transition-colors duration-300"
+                className="transition-colors duration-300"
+                style={{ color: '#F4F0E6' }}
                 type="button"
                 aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
               >
                 {theme === 'night' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
               </button>
               <button
-                className="text-cream/90 hover:text-cream transition-colors"
+                className="transition-colors"
+                style={{ color: '#F4F0E6' }}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -176,29 +194,30 @@ const Header = () => {
 
           {/* Mobile menu */}
           {isMenuOpen && (
-            <div className="md:hidden border-t border-forest-700/40 pb-6">
+            <div className="md:hidden border-t border-cream/10 pb-6 relative z-10">
               <div className="flex flex-col space-y-5 pt-5">
                 {NAV_LINKS.map(({ to, label }) => (
                   <Link
                     key={to}
                     to={to}
-                    className="text-cream/80 hover:text-gold-300 text-sm tracking-[0.15em] uppercase font-light transition-colors"
+                    className="text-sm tracking-[0.12em] uppercase font-medium transition-colors"
+                    style={{ color: '#F4F0E6' }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {label}
                   </Link>
                 ))}
-                <div className="h-px bg-forest-700/40 my-1" />
+                <div className="h-px bg-cream/10 my-1" />
                 {user ? (
                   <>
-                    <Link to="/guide/dashboard" className="flex items-center gap-2 text-cream/80 hover:text-gold-300 text-sm tracking-wide transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/guide/dashboard" className="flex items-center gap-2 text-sm tracking-wide transition-colors" style={{ color: '#F4F0E6' }} onClick={() => setIsMenuOpen(false)}>
                       <Compass className="h-4 w-4" strokeWidth={1.5} />
                       Guide Dashboard
                     </Link>
-                    <Link to="/dashboard" className="text-cream/80 hover:text-cream text-sm tracking-wide transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/dashboard" className="text-sm tracking-wide transition-colors" style={{ color: '#F4F0E6' }} onClick={() => setIsMenuOpen(false)}>
                       Dashboard
                     </Link>
-                    <button onClick={signOut} className="flex items-center gap-2 text-cream/60 hover:text-cream text-sm transition-colors text-left">
+                    <button onClick={signOut} className="flex items-center gap-2 text-sm transition-colors text-left" style={{ color: 'rgba(244,240,230,0.6)' }}>
                       <LogOut className="h-4 w-4" strokeWidth={1.5} />
                       Sign Out
                     </button>
@@ -206,7 +225,8 @@ const Header = () => {
                 ) : (
                   <button
                     onClick={() => { setIsAuthModalOpen(true); setIsMenuOpen(false); }}
-                    className="text-gold-300 text-sm tracking-[0.15em] uppercase font-light border border-gold-400/30 px-5 py-2 hover:border-gold-400/70 transition-all w-fit"
+                    className="text-sm tracking-[0.12em] uppercase font-medium border px-5 py-2 transition-all w-fit"
+                    style={{ borderColor: 'rgba(244,240,230,0.35)', color: '#F4F0E6' }}
                   >
                     Sign In
                   </button>
