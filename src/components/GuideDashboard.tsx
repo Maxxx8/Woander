@@ -20,7 +20,7 @@ const TOUR_TYPES: Tour['tour_type'][] = [
 ];
 
 const GuideDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [guide, setGuide] = useState<TourGuide | null>(null);
   const [tours, setTours] = useState<Tour[]>([]);
@@ -49,16 +49,34 @@ const GuideDashboard: React.FC = () => {
   const [profileSuccess, setProfileSuccess] = useState('');
 
   const loadGuideData = useCallback(async () => {
-    if (!user) return;
     setLoading(true);
     setActionError('');
 
     try {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error('[GuideDashboard] Auth error:', authError);
+        setGuide(null);
+        return;
+      }
+
+      if (!authUser) {
+        console.log('[GuideDashboard] No authenticated user found');
+        setGuide(null);
+        return;
+      }
+
+      console.log('[GuideDashboard] Auth user ID:', authUser.id);
+
       const { data: guideData, error: guideError } = await supabase
         .from('tour_guides')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .maybeSingle();
+
+      console.log('[GuideDashboard] Guide profile:', guideData);
+      console.log('[GuideDashboard] Guide profile error:', guideError);
 
       if (guideError) {
         console.error('[GuideDashboard] Failed to load guide:', {
@@ -130,11 +148,12 @@ const GuideDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
+    if (authLoading) return;
     loadGuideData();
-  }, [loadGuideData]);
+  }, [loadGuideData, authLoading, user]);
 
   const handleSaveProfile = async () => {
     if (!user || !guide) return;
@@ -270,7 +289,7 @@ const GuideDashboard: React.FC = () => {
     setShowExperienceModal(true);
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-forest-950 pt-20 pb-20 md:pb-0 flex items-center justify-center">
         <div className="w-6 h-6 border border-gold-400/30 border-t-gold-400 rounded-full animate-spin" />
