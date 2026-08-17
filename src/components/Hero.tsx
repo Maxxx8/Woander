@@ -12,12 +12,6 @@ const PHILOSOPHY_LINES = [
   "Travel slower. Discover deeper.",
 ];
 
-const loadingMessages = [
-  "Curiosity precedes discovery.",
-  "Some places are hidden for a reason.",
-  "Every destination was once undiscovered.",
-  "Explore beyond the algorithm.",
-  "Not all maps reveal the territory.",]
 const discoveryNodes = [
   { top: '22%', left: '14%', label: '10.8505° N, 76.2711° E' },
   { top: '38%', left: '78%', label: '9.9312° N, 76.2673° E' },
@@ -31,11 +25,9 @@ const GOLD = '#c9a84a';
 const GOLD_RGB = '201, 168, 74';
 
 /**
- * Animated sacred-geometry canvas background.
- * Draws a slowly rotating golden (Fibonacci) spiral overlaid with
- * a Flower of Life ring pattern, all in hairline gold strokes on a
- * deep forest-black canvas. Falls back to a single static frame on
- * very small screens and pauses when scrolled out of view.
+ * Animated sacred-geometry canvas overlay.
+ * Hairline gold strokes drawn over the photographic background.
+ * Pauses when scrolled out of view.
  */
 const SacredGeometryCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,7 +41,7 @@ const SacredGeometryCanvas: React.FC = () => {
     let raf = 0;
     let running = true;
     let lastDraw = 0;
-    const THROTTLE_MS = 1000 / 30; // ~30 fps target
+    const THROTTLE_MS = 1000 / 30;
     const isSmall = window.innerWidth < 640;
 
     let rotation = 0;
@@ -68,7 +60,6 @@ const SacredGeometryCanvas: React.FC = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    // Pause when hero is off-screen
     const io = new IntersectionObserver(
       (entries) => {
         running = entries[0]?.isIntersecting ?? false;
@@ -78,22 +69,13 @@ const SacredGeometryCanvas: React.FC = () => {
     );
     io.observe(canvas);
 
-    // ---- Drawing helpers ----
-
-    const drawGoldenSpiral = (
-      cx: number,
-      cy: number,
-      scale: number,
-      rot: number,
-      alpha: number
-    ) => {
-      // Logarithmic spiral: r = a * phi^(2θ/π) approximates the Fibonacci spiral
+    const drawGoldenSpiral = (cx: number, cy: number, scale: number, rot: number, alpha: number) => {
       const phi = (1 + Math.sqrt(5)) / 2;
-      const a = 6 * scale; // base radius
+      const a = 6 * scale;
       const points = 240;
       ctx.beginPath();
       for (let i = 0; i <= points; i++) {
-        const t = (i / points) * Math.PI * 6; // ~3 turns
+        const t = (i / points) * Math.PI * 6;
         const r = a * Math.pow(phi, (2 * t) / Math.PI) * 0.18;
         const x = cx + r * Math.cos(t + rot);
         const y = cy + r * Math.sin(t + rot);
@@ -104,7 +86,6 @@ const SacredGeometryCanvas: React.FC = () => {
       ctx.lineWidth = 1.1;
       ctx.stroke();
 
-      // Fibonacci construction squares (faint)
       const fib = [1, 1, 2, 3, 5, 8, 13, 21];
       let dir = 0;
       let px = cx;
@@ -117,7 +98,6 @@ const SacredGeometryCanvas: React.FC = () => {
         ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha * 0.12})`;
         ctx.lineWidth = 0.5;
         ctx.stroke();
-        // step to next square origin along spiral direction
         const ang = (dir * Math.PI) / 2 + rot;
         px += Math.cos(ang) * (s / 2 + cur / 2);
         py += Math.sin(ang) * (s / 2 + cur / 2);
@@ -126,23 +106,13 @@ const SacredGeometryCanvas: React.FC = () => {
       }
     };
 
-    const drawFlowerOfLife = (
-      cx: number,
-      cy: number,
-      radius: number,
-      rot: number,
-      alpha: number
-    ) => {
+    const drawFlowerOfLife = (cx: number, cy: number, radius: number, rot: number, alpha: number) => {
       const r = radius;
       ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha})`;
       ctx.lineWidth = 0.7;
-
-      // Center circle
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.stroke();
-
-      // First ring — 6 circles
       const ring1 = 6;
       for (let i = 0; i < ring1; i++) {
         const ang = (i / ring1) * Math.PI * 2 + rot;
@@ -152,8 +122,6 @@ const SacredGeometryCanvas: React.FC = () => {
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.stroke();
       }
-
-      // Second ring — 12 circles (outer Flower of Life completion)
       const ring2 = 12;
       for (let i = 0; i < ring2; i++) {
         const ang = (i / ring2) * Math.PI * 2 + rot + Math.PI / 12;
@@ -163,20 +131,13 @@ const SacredGeometryCanvas: React.FC = () => {
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.stroke();
       }
-
-      // Outer bounding circle
       ctx.beginPath();
       ctx.arc(cx, cy, r * 2.62, 0, Math.PI * 2);
       ctx.strokeStyle = `rgba(${GOLD_RGB}, ${alpha * 0.5})`;
       ctx.stroke();
     };
 
-    const drawConcentricRings = (
-      cx: number,
-      cy: number,
-      maxR: number,
-      alpha: number
-    ) => {
+    const drawConcentricRings = (cx: number, cy: number, maxR: number, alpha: number) => {
       const rings = 8;
       for (let i = 1; i <= rings; i++) {
         const r = (i / rings) * maxR;
@@ -188,52 +149,35 @@ const SacredGeometryCanvas: React.FC = () => {
       }
     };
 
-    const render = (now: number) => {
+    const render = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
-
       const cx = w / 2;
       const cy = h / 2;
       const minDim = Math.min(w, h);
+      const pulseAlpha = 0.10 + 0.03 * Math.sin(pulse);
 
-      // Base pulse for subtle breathing effect
-      const pulseAlpha = 0.12 + 0.04 * Math.sin(pulse);
-
-      // Concentric guide rings (faintest, behind everything)
-      drawConcentricRings(cx, cy, minDim * 0.55, 0.05);
-
-      // Flower of Life — large, behind the spiral
-      drawFlowerOfLife(cx, cy, minDim * 0.09, rotation * 0.3, 0.08);
-
-      // Second smaller Flower of Life, counter-rotating
-      drawFlowerOfLife(cx, cy, minDim * 0.05, -rotation * 0.5, 0.1);
-
-      // Golden spiral on top
+      drawConcentricRings(cx, cy, minDim * 0.55, 0.04);
+      drawFlowerOfLife(cx, cy, minDim * 0.09, rotation * 0.3, 0.06);
+      drawFlowerOfLife(cx, cy, minDim * 0.05, -rotation * 0.5, 0.07);
       drawGoldenSpiral(cx, cy, minDim * 0.012, rotation, pulseAlpha);
+      drawGoldenSpiral(cx, cy, minDim * 0.012, rotation + Math.PI, pulseAlpha * 0.5);
 
-      // Mirror spiral (rotated 180°) for symmetry
-      drawGoldenSpiral(cx, cy, minDim * 0.012, rotation + Math.PI, pulseAlpha * 0.6);
-
-      // Radial accent lines from center (very faint)
       const spokes = 12;
       for (let i = 0; i < spokes; i++) {
         const ang = (i / spokes) * Math.PI * 2 + rotation * 0.1;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
-        ctx.lineTo(
-          cx + minDim * 0.5 * Math.cos(ang),
-          cy + minDim * 0.5 * Math.sin(ang)
-        );
-        ctx.strokeStyle = `rgba(${GOLD_RGB}, 0.025)`;
+        ctx.lineTo(cx + minDim * 0.5 * Math.cos(ang), cy + minDim * 0.5 * Math.sin(ang));
+        ctx.strokeStyle = `rgba(${GOLD_RGB}, 0.02)`;
         ctx.lineWidth = 0.5;
         ctx.stroke();
       }
     };
 
-    // Static frame for small screens
     if (isSmall) {
-      render(0);
+      render();
       return () => {
         window.removeEventListener('resize', resize);
         io.disconnect();
@@ -247,7 +191,7 @@ const SacredGeometryCanvas: React.FC = () => {
       lastDraw = now;
       rotation += 0.0015;
       pulse += 0.02;
-      render(now);
+      render();
     };
     raf = requestAnimationFrame(loop);
 
@@ -261,18 +205,17 @@ const SacredGeometryCanvas: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full z-[1] pointer-events-none"
+      className="absolute inset-0 w-full h-full z-[2] pointer-events-none"
       aria-hidden="true"
     />
   );
 };
 
 const Hero = () => {
-  const [currentMessage, setCurrentMessage] = useState(0);
-  const overlayRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
   const [philosophyIndex, setPhilosophyIndex] = useState(0);
   const [philosophyVisible, setPhilosophyVisible] = useState(true);
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
@@ -284,39 +227,36 @@ const Hero = () => {
         setPhilosophyIndex(i => (i + 1) % PHILOSOPHY_LINES.length);
         setPhilosophyVisible(true);
       }, 600);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const messageInterval = setInterval(() => {
-      setCurrentMessage(prev => (prev + 1) % loadingMessages.length);
-    }, 4000);
-    return () => clearInterval(messageInterval);
   }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      tl.fromTo('.hero-topline',
+      tl.fromTo('.hero-bg-image',
+        { scale: 1.15, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 2.2, ease: 'power2.out' }
+      )
+      .fromTo('.hero-topline',
         { opacity: 0, y: 20, letterSpacing: '0.4em' },
-        { opacity: 1, y: 0, letterSpacing: '0.25em', duration: 1.4, delay: 0.3 }
+        { opacity: 1, y: 0, letterSpacing: '0.25em', duration: 1.4, delay: 0.6 }
       )
       .fromTo('.hero-headline',
         { opacity: 0, y: 60, filter: 'blur(8px)' },
-        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4 },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.6 },
         '-=0.9'
       )
       .fromTo('.hero-sub',
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 1, ease: 'power2.out' },
-        '-=0.8'
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out' },
+        '-=0.9'
       )
       .fromTo('.hero-supporting',
-        { opacity: 0, y: 15 },
+        { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 1 },
-        '-=0.7'
+        '-=0.8'
       )
       .fromTo('.hero-cta',
         { opacity: 0, y: 30, scale: 0.96 },
@@ -339,10 +279,10 @@ const Hero = () => {
         '-=0.3'
       );
 
-      // Subtle parallax on the geometry canvas
-      if (heroRef.current) {
-        gsap.to('.hero-bg-canvas', {
-          yPercent: 12,
+      // Subtle parallax on the background image
+      if (imgRef.current) {
+        gsap.to('.hero-bg-image', {
+          yPercent: 15,
           ease: 'none',
           scrollTrigger: {
             trigger: heroRef.current,
@@ -353,18 +293,17 @@ const Hero = () => {
         });
       }
 
-      if (overlayRef.current) {
-        gsap.to(overlayRef.current, {
-          opacity: 0.95,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: heroRef.current,
-            start: 'top top',
-            end: '50% top',
-            scrub: true,
-          },
-        });
-      }
+      // Fade overlay as you scroll
+      gsap.to('.hero-overlay', {
+        opacity: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: '50% top',
+          scrub: true,
+        },
+      });
     }, heroRef);
 
     return () => ctx.revert();
@@ -380,37 +319,54 @@ const Hero = () => {
       id="home"
       className="relative h-screen min-h-screen flex items-center justify-center overflow-hidden bg-forest-950"
     >
-      {/* Sacred geometry canvas background */}
-      <div className="absolute inset-0 w-full h-full">
-        <SacredGeometryCanvas />
+      {/* Cinematic background image */}
+      <div ref={imgRef} className="absolute inset-0 z-[0] overflow-hidden">
+        <img
+          src="https://images.pexels.com/photos/1671325/pexels-photo-1671325.jpeg?auto=compress&cs=tinysrgb&w=2400"
+          alt=""
+          className="hero-bg-image w-full h-full object-cover"
+          style={{ filter: 'brightness(0.55) saturate(0.85) contrast(1.05)' }}
+        />
       </div>
 
-      {/* Radial vignette — keeps center text readable, darkens edges */}
+      {/* Dark gradient overlays — stronger at top (for header) and center (for text) */}
       <div
-        ref={overlayRef}
-        className="absolute inset-0 z-[2] pointer-events-none"
+        className="hero-overlay absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(13,17,16,0.15) 0%, rgba(13,17,16,0.55) 55%, rgba(13,17,16,0.92) 100%)',
+            'linear-gradient(to bottom, rgba(7,15,12,0.7) 0%, rgba(7,15,12,0.25) 30%, rgba(7,15,12,0.35) 50%, rgba(7,15,12,0.6) 80%, rgba(7,15,12,0.95) 100%)',
+          opacity: 0.85,
+        }}
+      />
+      {/* Center radial darkening for text readability */}
+      <div
+        className="absolute inset-0 z-[1] pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 70% 50% at center, rgba(7,15,12,0.55) 0%, rgba(7,15,12,0.15) 60%, transparent 100%)',
         }}
       />
 
-      {/* Topographic SVG pattern — subtle texture layer */}
-      <svg
-        className="absolute inset-0 w-full h-full z-[2] pointer-events-none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ opacity: 0.08 }}
-      >
-        <defs>
-          <pattern id="topo" x="0" y="0" width="300" height="300" patternUnits="userSpaceOnUse">
-            <ellipse cx="150" cy="150" rx="130" ry="100" fill="none" stroke="#c9a84a" strokeWidth="0.8"/>
-            <ellipse cx="150" cy="150" rx="95" ry="72" fill="none" stroke="#c9a84a" strokeWidth="0.6"/>
-            <ellipse cx="150" cy="150" rx="60" ry="45" fill="none" stroke="#c9a84a" strokeWidth="0.5"/>
-            <ellipse cx="150" cy="150" rx="28" ry="20" fill="none" stroke="#c9a84a" strokeWidth="0.4"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#topo)" />
-      </svg>
+      {/* Sacred geometry canvas — subtle gold overlay */}
+      <SacredGeometryCanvas />
+
+      {/* Subtle grain texture */}
+      <div
+        className="absolute inset-0 z-[2] pointer-events-none opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
+        }}
+      />
+
+      {/* Vignette */}
+      <div
+        className="absolute inset-0 z-[2] pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 40%, rgba(7,15,12,0.5) 100%)',
+        }}
+      />
 
       {/* Discovery Nodes */}
       {discoveryNodes.map((node, i) => (
@@ -429,12 +385,10 @@ const Hero = () => {
               animationDelay: `${i * 0.3}s`,
             }}
           />
-          {/* Pulse ring */}
           <div
             className="absolute inset-0 rounded-full border border-gold-400/30"
             style={{ animation: `discoveryRing ${3 + i * 0.5}s ease-out infinite`, animationDelay: `${i * 0.4}s` }}
           />
-          {/* Coordinate tooltip */}
           {hoveredNode === i && (
             <div className="absolute left-4 top-0 -translate-y-1/2 whitespace-nowrap z-10">
               <span className="font-jetbrains text-gold-400/80 text-[10px] tracking-widest">
@@ -446,7 +400,7 @@ const Hero = () => {
       ))}
 
       {/* Compass — top right */}
-      <div className="absolute top-24 right-8 z-[3] opacity-20 pointer-events-none" style={{ animation: 'compassSway 8s ease-in-out infinite' }}>
+      <div className="absolute top-28 right-8 z-[3] opacity-15 pointer-events-none" style={{ animation: 'compassSway 8s ease-in-out infinite' }}>
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="24" cy="24" r="22" stroke="#c9a84a" strokeWidth="0.8"/>
           <circle cx="24" cy="24" r="16" stroke="#c9a84a" strokeWidth="0.5"/>
@@ -464,75 +418,62 @@ const Hero = () => {
         </svg>
       </div>
 
-      {/* Hidden coordinate easter egg — bottom left */}
-      <div className="absolute bottom-16 left-6 z-[3] pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-1000">
-        <span className="font-jetbrains text-[10px] text-gold-400/40 tracking-widest">
-          10.8505° N, 76.2711° E — Nelliyampathy
-        </span>
-      </div>
-
       {/* Main content */}
-      <div ref={contentRef} className="relative z-10 text-center text-white max-w-4xl mx-auto px-6">
+      <div ref={contentRef} className="relative z-10 text-center max-w-4xl mx-auto px-6">
 
-        {/* Top line */}
-        <p className="hero-topline opacity-0 font-jetbrains text-xs text-gold-400/80 tracking-[0.25em] uppercase mb-8">
-          Some places are still undiscovered.
+        {/* Label */}
+        <p className="hero-topline opacity-0 font-jetbrains text-[11px] text-gold-300/90 tracking-[0.25em] uppercase mb-10">
+          Some places are still undiscovered
         </p>
 
         {/* Main headline */}
-        <h1 className="hero-headline opacity-0 font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light leading-[1.05] text-cream mb-6">
+        <h1 className="hero-headline opacity-0 font-display text-7xl sm:text-8xl md:text-9xl font-light leading-[1.0] text-cream mb-8 tracking-tight">
           Woander.
         </h1>
-        <p className="hero-headline opacity-0 font-display italic text-3xl sm:text-4xl md:text-5xl font-light text-gold-300/80 mb-8">
+
+        {/* Sub headline */}
+        <p className="hero-sub opacity-0 font-display italic text-3xl sm:text-4xl md:text-5xl font-light text-gold-300 mb-10">
           Travel deeper.
         </p>
 
         {/* Supporting text */}
-        <p className="hero-supporting opacity-0 text-mist-400 text-sm sm:text-base max-w-md mx-auto mb-12 leading-relaxed font-light">
+        <p className="hero-supporting opacity-0 text-cream/80 text-sm sm:text-base max-w-md mx-auto mb-14 leading-relaxed font-light">
           Discover places, people and stories that don't appear on the usual map.
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col items-center gap-5">
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <button
-              onClick={() => navigate('/hidden-gems')}
-              className="hero-cta opacity-0 group relative px-10 py-4 border border-gold-400/40 text-cream text-sm tracking-[0.15em] uppercase font-light transition-all duration-500 hover:border-gold-400/80 hover:bg-gold-400/8 overflow-hidden"
-            >
-              <span className="relative z-10">Explore India</span>
-              <span className="absolute inset-0 bg-gold-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
+          <button
+            onClick={() => navigate('/hidden-gems')}
+            className="hero-cta opacity-0 group relative px-12 py-4 border border-cream/40 text-cream text-sm tracking-[0.2em] uppercase font-light transition-all duration-500 hover:bg-cream hover:text-forest-950 hover:border-cream overflow-hidden"
+          >
+            <span className="relative z-10">Explore India</span>
+          </button>
 
-            <button
-              onClick={() => navigate('/vanguard')}
-              className="hero-secondary-cta opacity-0 font-jetbrains text-[11px] text-mist-500 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300"
-            >
-              Meet the Vanguard →
-            </button>
-          </div>
+          <button
+            onClick={() => navigate('/vanguard')}
+            className="hero-secondary-cta opacity-0 group font-display text-base text-cream/80 hover:text-gold-300 tracking-wide transition-colors duration-300"
+          >
+            <span className="border-b border-cream/20 group-hover:border-gold-300/60 pb-0.5 transition-all duration-300">
+              Meet the Vanguard
+            </span>
+          </button>
         </div>
 
         {/* "Discovered by" Badge */}
-        <div className="mt-16 md:mt-20 flex items-center justify-center gap-2 text-mist-500/40">
-          <div className="w-8 h-px bg-gradient-to-r from-transparent via-mist-500/30 to-transparent" />
+        <div className="mt-20 flex items-center justify-center gap-3 text-cream/30">
+          <div className="w-8 h-px bg-gradient-to-r from-transparent via-cream/20 to-transparent" />
           <span className="text-[10px] uppercase tracking-[0.25em]">
             discovered by curious explorers
           </span>
-          <div className="w-8 h-px bg-gradient-to-r from-transparent via-mist-500/30 to-transparent" />
+          <div className="w-8 h-px bg-gradient-to-r from-transparent via-cream/20 to-transparent" />
         </div>
       </div>
 
-      {/* Floating Philosophical Message */}
-      <div className="absolute bottom-32 md:bottom-40 left-1/2 -translate-x-1/2 text-center">
-        <p className="text-xs text-mist-500/50 tracking-widest uppercase text-philosophy">
-          {loadingMessages[currentMessage]}
-        </p>
-      </div>
-
       {/* Rotating philosophy line */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[3] text-center pointer-events-none">
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-[3] text-center pointer-events-none hidden md:block">
         <p
-          className="font-display italic text-mist-500/60 text-sm transition-all duration-500"
+          className="font-display italic text-cream/40 text-sm transition-all duration-500"
           style={{ opacity: philosophyVisible ? 1 : 0, transform: philosophyVisible ? 'translateY(0)' : 'translateY(8px)' }}
         >
           "{PHILOSOPHY_LINES[philosophyIndex]}"
@@ -542,11 +483,11 @@ const Hero = () => {
       {/* Scroll indicator */}
       <button
         onClick={scrollDown}
-        className="hero-scroll-indicator opacity-0 absolute bottom-6 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2 text-mist-500 hover:text-gold-400 transition-colors duration-300 group"
+        className="hero-scroll-indicator opacity-0 absolute bottom-8 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2 text-cream/50 hover:text-gold-300 transition-colors duration-300 group"
         aria-label="Scroll down"
       >
-        <span className="font-jetbrains text-[10px] tracking-widest uppercase">Descend</span>
-        <div className="w-px h-8 bg-mist-500/40 group-hover:bg-gold-400/60 transition-colors duration-300" style={{ animation: 'descend 2s ease-in-out infinite' }} />
+        <span className="font-jetbrains text-[10px] tracking-[0.2em] uppercase">Scroll to explore</span>
+        <div className="w-px h-10 bg-gradient-to-b from-cream/40 to-transparent group-hover:from-gold-300/60 transition-colors duration-300" style={{ animation: 'descend 2s ease-in-out infinite' }} />
       </button>
 
       <style>{`
@@ -563,8 +504,8 @@ const Hero = () => {
           50% { transform: rotate(4deg); }
         }
         @keyframes descend {
-          0%, 100% { transform: scaleY(1); opacity: 0.5; }
-          50% { transform: scaleY(1.3); opacity: 1; }
+          0%, 100% { transform: scaleY(1); opacity: 0.4; }
+          50% { transform: scaleY(1.3); opacity: 0.8; }
         }
       `}</style>
     </section>

@@ -350,19 +350,19 @@ const HomePage = () => {
       {/* Terrain divider into Hidden Gems */}
       <TerrainDivider />
 
-      {/* Hidden Gems community section — varied composition */}
-      <div className="relative bg-forest-950 pt-28 pb-20">
+      {/* Hidden Gems community section — warm cream editorial contrast */}
+      <div className="relative bg-cream pt-28 pb-20">
         <TopoBackground opacity={0.04} />
         <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-14 gap-6">
             <div>
-              <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-4">Community Discoveries</p>
-              <h2 className="font-display text-4xl md:text-5xl font-light text-cream leading-tight">
+              <p className="font-jetbrains text-[10px] text-forest-700/70 tracking-widest uppercase mb-4">Community Discoveries</p>
+              <h2 className="font-display text-4xl md:text-5xl font-light text-forest-950 leading-tight">
                 Hidden Gems,<br />
-                <em className="italic text-gold-300">recently mapped.</em>
+                <em className="italic text-forest-600">recently mapped.</em>
               </h2>
             </div>
-            <a href="/hidden-gems" className="font-jetbrains text-[10px] text-mist-600 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300">
+            <a href="/hidden-gems" className="font-jetbrains text-[10px] text-forest-600 hover:text-gold-600 tracking-widest uppercase transition-colors duration-300">
               View All →
             </a>
           </div>

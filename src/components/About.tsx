@@ -47,27 +47,27 @@ const About = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} id="about" className="relative py-32 bg-forest-950 overflow-hidden">
+    <section ref={sectionRef} id="about" className="relative py-32 bg-cream overflow-hidden">
       <TopoBackground opacity={0.04} />
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
 
         {/* Section label */}
-        <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-10">The Origin</p>
+        <p className="font-jetbrains text-[10px] text-forest-700/70 tracking-widest uppercase mb-10">The Origin</p>
 
         {/* Asymmetrical layout — text offset left, image overlapping right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-20">
           <div className="about-text-block lg:col-span-6 lg:col-start-1">
-            <h2 className="font-display text-5xl md:text-6xl font-light text-cream leading-[1.05] mb-10">
+            <h2 className="font-display text-5xl md:text-6xl font-light text-forest-950 leading-[1.05] mb-10">
               Woander was built<br />
-              <em className="italic text-gold-300">for the quiet seekers.</em>
+              <em className="italic text-forest-600">for the quiet seekers.</em>
             </h2>
-            <p className="text-mist-400 text-base leading-relaxed mb-6 font-light">
+            <p className="text-forest-800 text-base leading-relaxed mb-6 font-light">
               The places that matter most in India are kept alive by the people who live near them — fishermen who know which reef is untouched, tea farmers who walk trails with no name.
             </p>
-            <p className="text-mist-500 text-sm leading-relaxed mb-10 font-light">
+            <p className="text-forest-700 text-sm leading-relaxed mb-10 font-light">
               Woander honors that knowledge. Gives it structure, visibility, and value — without destroying what makes it rare.
             </p>
-            <blockquote className="font-display text-xl italic text-gold-400/70 border-l border-gold-400/30 pl-6">
+            <blockquote className="font-display text-xl italic text-forest-600 border-l border-forest-400/40 pl-6">
               "Adventure is worthwhile in itself." — Amelia Earhart
             </blockquote>
           </div>
