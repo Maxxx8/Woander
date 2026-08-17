@@ -57,6 +57,13 @@ export default {
         },
         cream: rgb('--color-cream'),
         charcoal: rgb('--color-charcoal'),
+        ivory: rgb('--color-ivory'),
+        parchment: rgb('--color-parchment'),
+        sand: rgb('--color-sand'),
+        sage: rgb('--color-sage'),
+        eucalyptus: rgb('--color-eucalyptus'),
+        terracotta: rgb('--color-terracotta'),
+        'antique-gold': rgb('--color-antique-gold'),
         spice: '#c45628',
         coral: {
           50: '#fff1f1',

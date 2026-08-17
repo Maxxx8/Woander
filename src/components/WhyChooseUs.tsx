@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { TopoBackground } from './FieldElements';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,44 +56,41 @@ const WhyChooseUs = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-28 bg-forest-900 border-t border-forest-800 overflow-hidden">
-      <TopoBackground opacity={0.03} />
+    <section ref={sectionRef} className="relative py-28 overflow-hidden" style={{ backgroundColor: '#F5F1E8' }}>
       <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
 
-        {/* Header — offset left, larger hierarchy */}
         <div className="mb-20 max-w-2xl">
-          <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-5">The Foundation</p>
-          <h2 className="font-display text-5xl md:text-6xl font-light text-cream leading-[1.05]">
+          <p className="font-mono text-[10px] tracking-widest uppercase mb-5" style={{ color: '#71877A' }}>The Foundation</p>
+          <h2 className="font-display text-5xl md:text-6xl font-light leading-[1.05]" style={{ color: '#243A34' }}>
             Built on four<br />
-            <em className="italic text-gold-300">uncomfortable truths.</em>
+            <em className="italic" style={{ color: '#B97862' }}>uncomfortable truths.</em>
           </h2>
         </div>
 
-        {/* Pillars — borderless, more breathing room */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-forest-800/60">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px" style={{ backgroundColor: 'rgba(36,58,52,0.1)' }}>
           {pillars.map((pillar, i) => (
             <div
               key={i}
-              className="pillar-item opacity-0 p-10 bg-forest-900 group hover:bg-forest-800/40 transition-colors duration-500"
+              className="pillar-item opacity-0 p-10 group transition-colors duration-500"
+              style={{ backgroundColor: '#F5F1E8' }}
             >
-              <span className="font-jetbrains text-xs text-gold-400/40 tracking-widest block mb-8">
+              <span className="font-mono text-xs tracking-widest block mb-8" style={{ color: 'rgba(185,154,91,0.5)' }}>
                 {pillar.number}
               </span>
-              <h3 className="font-display text-2xl font-light text-cream mb-5 group-hover:text-gold-300 transition-colors duration-300">
+              <h3 className="font-display text-2xl font-light mb-5" style={{ color: '#243A34' }}>
                 {pillar.title}
               </h3>
-              <p className="text-mist-500 text-sm leading-relaxed mb-6 font-light">
+              <p className="text-sm leading-relaxed mb-6 font-light" style={{ color: 'rgba(36,58,52,0.65)' }}>
                 {pillar.description}
               </p>
-              <p className="font-display italic text-mist-700 text-sm group-hover:text-mist-400 transition-colors duration-300 border-t border-forest-800 pt-5">
+              <p className="font-display italic text-sm pt-5" style={{ color: '#B97862', borderTop: '1px solid rgba(36,58,52,0.1)' }}>
                 {pillar.quote}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Stats strip — larger numbers, more space */}
-        <div className="mt-20 pt-14 border-t border-forest-800 grid grid-cols-2 md:grid-cols-4 gap-10 max-w-4xl">
+        <div className="mt-20 pt-14 grid grid-cols-2 md:grid-cols-4 gap-10 max-w-4xl" style={{ borderTop: '1px solid rgba(36,58,52,0.12)' }}>
           {[
             { value: '847', label: 'Hidden Gems Mapped' },
             { value: '3,240+', label: 'Field Notes Written' },
@@ -102,8 +98,8 @@ const WhyChooseUs = () => {
             { value: '64', label: 'Guides Verified' },
           ].map(({ value, label }) => (
             <div key={label}>
-              <p className="font-display text-4xl md:text-5xl font-light text-cream mb-2">{value}</p>
-              <p className="font-jetbrains text-[10px] text-mist-700 tracking-widest uppercase">{label}</p>
+              <p className="font-display text-4xl md:text-5xl font-light mb-2" style={{ color: '#243A34' }}>{value}</p>
+              <p className="font-mono text-[10px] tracking-widest uppercase" style={{ color: '#71877A' }}>{label}</p>
             </div>
           ))}
         </div>

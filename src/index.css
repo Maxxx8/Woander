@@ -52,9 +52,18 @@
   --color-cream: 250 248 245;
   --color-charcoal: 26 31 46;
 
-  --color-bg-base: var(--color-forest-900);
-  --color-text-base: var(--color-mist-100);
-  --color-field-image-filter: grayscale(18%) brightness(0.78) saturate(0.82) contrast(1.02);
+  /* Warm editorial palette */
+  --color-ivory: 245 241 232;
+  --color-parchment: 250 248 242;
+  --color-sand: 216 199 165;
+  --color-sage: 169 183 160;
+  --color-eucalyptus: 113 135 122;
+  --color-terracotta: 185 120 98;
+  --color-antique-gold: 185 154 91;
+
+  --color-bg-base: var(--color-parchment);
+  --color-text-base: var(--color-charcoal);
+  --color-field-image-filter: brightness(1.05) saturate(1.0) contrast(1.02) sepia(0.08);
   --color-glass-bg: rgba(10, 18, 10, 0.55);
   --color-glass-border: rgba(201, 168, 74, 0.12);
   --color-glass-shadow: rgba(0, 0, 0, 0.35);
@@ -62,7 +71,7 @@
   --color-cinematic-overlay-2: rgba(6, 13, 6, 0.6);
   --color-cinematic-overlay-3: rgba(6, 13, 6, 0.85);
   --color-fog-overlay: rgba(15, 26, 15, 0.4);
-  --color-paper-grain-bg: #0a120a;
+  --color-paper-grain-bg: #faf8f2;
   --color-paper-grain-gold: rgba(201, 168, 74, 0.04);
   --color-paper-grain-earth: rgba(154, 107, 69, 0.05);
   --color-discovery-node: #c9a84a;

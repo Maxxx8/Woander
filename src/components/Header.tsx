@@ -29,28 +29,31 @@ const Header = () => {
   }, []);
 
   const isHome = location.pathname === '/';
+  const onHero = isHome && !scrolled;
+
+  // On hero: dark forest text over bright image. On scroll: warm ivory bg, dark forest text.
+  const navColor = '#243A34';
+  const navHover = '#B99A5B';
+  const logoColor = '#243A34';
 
   return (
     <>
       <header
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-forest-950/95 backdrop-blur-md'
-            : 'bg-transparent'
+          scrolled ? 'bg-parchment/95 backdrop-blur-md' : 'bg-transparent'
         }`}
         style={{
-          borderBottom: scrolled
-            ? '1px solid rgba(244,240,230,0.12)'
-            : '1px solid transparent',
+          borderBottom: scrolled ? '1px solid rgba(36,58,52,0.1)' : '1px solid transparent',
+          boxShadow: scrolled ? '0 1px 8px rgba(36,58,52,0.06)' : 'none',
         }}
       >
-        {/* Gradient behind header on hero — darker at top, transparent at bottom */}
-        {!scrolled && (
+        {/* Subtle warm gradient behind header on hero for readability */}
+        {onHero && (
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'linear-gradient(to bottom, rgba(7,22,17,0.7) 0%, rgba(7,22,17,0.35) 60%, rgba(7,22,17,0) 100%)',
+                'linear-gradient(to bottom, rgba(250,248,242,0.55) 0%, rgba(250,248,242,0.25) 60%, rgba(250,248,242,0) 100%)',
             }}
           />
         )}
@@ -63,11 +66,12 @@ const Header = () => {
               <img
                 src="/Logo Large.jpeg"
                 alt="Woander"
-                className="h-9 w-9 object-contain rounded-full opacity-95 group-hover:opacity-100 transition-opacity duration-300 ring-1 ring-cream/15"
+                className="h-9 w-9 object-contain rounded-full opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ filter: onHero ? 'none' : 'none' }}
               />
               <span
-                className="font-display text-xl font-light tracking-[0.15em] transition-colors duration-300"
-                style={{ color: '#F4F0E6' }}
+                className="font-display text-xl font-medium tracking-[0.12em] transition-colors duration-300"
+                style={{ color: logoColor }}
               >
                 Woander
               </span>
@@ -82,27 +86,25 @@ const Header = () => {
                     key={to}
                     to={to}
                     className="relative text-[12px] tracking-[0.12em] uppercase font-medium transition-colors duration-300 group"
-                    style={{ color: active ? '#D8C28C' : '#F4F0E6' }}
+                    style={{ color: active ? navHover : navColor }}
                   >
                     {label}
                     <span
                       className={`absolute -bottom-1.5 left-0 h-px transition-all duration-300 ${
                         active ? 'w-full' : 'w-0 group-hover:w-full'
                       }`}
-                      style={{ backgroundColor: active ? '#D8C28C' : 'rgba(244,240,230,0.3)' }}
+                      style={{ backgroundColor: active ? navHover : 'rgba(36,58,52,0.3)' }}
                     />
                   </Link>
                 );
               })}
 
-              {/* Divider */}
-              <div className="h-4 w-px bg-cream/15" />
+              <div className="h-4 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.15)' }} />
 
-              {/* Utility actions */}
               <button
                 onClick={() => setIsSearchModalOpen(true)}
-                className="transition-colors duration-300 hover:text-gold-300"
-                style={{ color: '#F4F0E6' }}
+                className="transition-colors duration-300"
+                style={{ color: navColor }}
                 type="button"
                 aria-label="Search"
               >
@@ -111,38 +113,38 @@ const Header = () => {
 
               <button
                 onClick={toggle}
-                className="transition-colors duration-300 hover:text-gold-300"
-                style={{ color: '#F4F0E6' }}
+                className="transition-colors duration-300"
+                style={{ color: navColor }}
                 type="button"
                 aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
               >
                 {theme === 'night' ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
               </button>
 
-              <div className="h-4 w-px bg-cream/15" />
+              <div className="h-4 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.15)' }} />
 
               {user ? (
                 <div className="flex items-center gap-5">
                   <Link
                     to="/guide/dashboard"
-                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300 hover:text-gold-300"
-                    style={{ color: '#F4F0E6' }}
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300"
+                    style={{ color: navColor }}
                   >
                     <Compass className="h-3.5 w-3.5" strokeWidth={1.5} />
                     Guide
                   </Link>
                   <Link
                     to="/dashboard"
-                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300 hover:text-gold-300"
-                    style={{ color: '#F4F0E6' }}
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-medium transition-colors duration-300"
+                    style={{ color: navColor }}
                   >
                     <User className="h-3.5 w-3.5" strokeWidth={1.5} />
                     Dashboard
                   </Link>
                   <button
                     onClick={signOut}
-                    className="transition-colors duration-300 hover:text-cream"
-                    style={{ color: 'rgba(244,240,230,0.6)' }}
+                    className="transition-colors duration-300"
+                    style={{ color: 'rgba(36,58,52,0.5)' }}
                     aria-label="Sign out"
                   >
                     <LogOut className="h-4 w-4" strokeWidth={1.5} />
@@ -151,10 +153,10 @@ const Header = () => {
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="px-5 py-2 border text-[11px] tracking-[0.12em] uppercase font-medium transition-all duration-300 hover:bg-cream/10"
+                  className="px-5 py-2 text-[11px] tracking-[0.12em] uppercase font-medium transition-all duration-300 hover:bg-forest-900 hover:text-parchment"
                   style={{
-                    borderColor: 'rgba(244,240,230,0.35)',
-                    color: '#F4F0E6',
+                    border: '1px solid rgba(36,58,52,0.3)',
+                    color: navColor,
                   }}
                 >
                   Sign In
@@ -162,28 +164,25 @@ const Header = () => {
               )}
             </nav>
 
-            {/* Mobile: search + theme + menu */}
+            {/* Mobile */}
             <div className="flex items-center gap-4 md:hidden relative z-10">
               <button
                 onClick={() => setIsSearchModalOpen(true)}
-                className="transition-colors duration-300"
-                style={{ color: '#F4F0E6' }}
+                style={{ color: navColor }}
                 aria-label="Search"
               >
                 <Search size={18} strokeWidth={1.5} />
               </button>
               <button
                 onClick={toggle}
-                className="transition-colors duration-300"
-                style={{ color: '#F4F0E6' }}
+                style={{ color: navColor }}
                 type="button"
                 aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
               >
                 {theme === 'night' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
               </button>
               <button
-                className="transition-colors"
-                style={{ color: '#F4F0E6' }}
+                style={{ color: navColor }}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -194,30 +193,30 @@ const Header = () => {
 
           {/* Mobile menu */}
           {isMenuOpen && (
-            <div className="md:hidden border-t border-cream/10 pb-6 relative z-10">
+            <div className="md:hidden pb-6 relative z-10" style={{ borderTop: '1px solid rgba(36,58,52,0.1)' }}>
               <div className="flex flex-col space-y-5 pt-5">
                 {NAV_LINKS.map(({ to, label }) => (
                   <Link
                     key={to}
                     to={to}
                     className="text-sm tracking-[0.12em] uppercase font-medium transition-colors"
-                    style={{ color: '#F4F0E6' }}
+                    style={{ color: navColor }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {label}
                   </Link>
                 ))}
-                <div className="h-px bg-cream/10 my-1" />
+                <div className="h-px" style={{ backgroundColor: 'rgba(36,58,52,0.1)' }} />
                 {user ? (
                   <>
-                    <Link to="/guide/dashboard" className="flex items-center gap-2 text-sm tracking-wide transition-colors" style={{ color: '#F4F0E6' }} onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/guide/dashboard" className="flex items-center gap-2 text-sm" style={{ color: navColor }} onClick={() => setIsMenuOpen(false)}>
                       <Compass className="h-4 w-4" strokeWidth={1.5} />
                       Guide Dashboard
                     </Link>
-                    <Link to="/dashboard" className="text-sm tracking-wide transition-colors" style={{ color: '#F4F0E6' }} onClick={() => setIsMenuOpen(false)}>
+                    <Link to="/dashboard" className="text-sm" style={{ color: navColor }} onClick={() => setIsMenuOpen(false)}>
                       Dashboard
                     </Link>
-                    <button onClick={signOut} className="flex items-center gap-2 text-sm transition-colors text-left" style={{ color: 'rgba(244,240,230,0.6)' }}>
+                    <button onClick={signOut} className="flex items-center gap-2 text-sm text-left" style={{ color: 'rgba(36,58,52,0.5)' }}>
                       <LogOut className="h-4 w-4" strokeWidth={1.5} />
                       Sign Out
                     </button>
@@ -226,7 +225,7 @@ const Header = () => {
                   <button
                     onClick={() => { setIsAuthModalOpen(true); setIsMenuOpen(false); }}
                     className="text-sm tracking-[0.12em] uppercase font-medium border px-5 py-2 transition-all w-fit"
-                    style={{ borderColor: 'rgba(244,240,230,0.35)', color: '#F4F0E6' }}
+                    style={{ border: '1px solid rgba(36,58,52,0.3)', color: navColor }}
                   >
                     Sign In
                   </button>

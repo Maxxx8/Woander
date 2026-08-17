@@ -12,11 +12,10 @@ const PHILOSOPHY_LINES = [
   "Travel slower. Discover deeper.",
 ];
 
-// Reduced to 3 subtle gold points — restrained decoration
 const discoveryNodes = [
-  { top: '30%', left: '16%', label: '10.8505° N, 76.2711° E' },
-  { top: '68%', left: '72%', label: '11.6854° N, 75.9912° E' },
-  { top: '52%', left: '85%', label: '9.2648° N, 76.7870° E' },
+  { top: '28%', left: '14%', label: '10.8505° N, 76.2711° E' },
+  { top: '65%', left: '78%', label: '11.6854° N, 75.9912° E' },
+  { top: '50%', left: '88%', label: '9.2648° N, 76.7870° E' },
 ];
 
 const Hero = () => {
@@ -44,7 +43,7 @@ const Hero = () => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
       tl.fromTo('.hero-bg-image',
-        { scale: 1.12, opacity: 0 },
+        { scale: 1.1, opacity: 0 },
         { scale: 1, opacity: 1, duration: 2.0, ease: 'power2.out' }
       )
       .fromTo('.hero-topline',
@@ -87,7 +86,6 @@ const Hero = () => {
         '-=0.3'
       );
 
-      // Subtle parallax on the background image
       if (imgRef.current) {
         gsap.to('.hero-bg-image', {
           yPercent: 15,
@@ -113,71 +111,61 @@ const Hero = () => {
     <section
       ref={heroRef}
       id="home"
-      className="relative h-screen min-h-screen flex items-center justify-center overflow-hidden bg-forest-950"
+      className="relative h-screen min-h-screen flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: '#F5F1E8' }}
     >
-      {/* Cinematic background image */}
+      {/* Bright, warm cinematic background image */}
       <div ref={imgRef} className="absolute inset-0 z-[0] overflow-hidden">
         <img
           src="https://images.pexels.com/photos/1671325/pexels-photo-1671325.jpeg?auto=compress&cs=tinysrgb&w=2400"
           alt=""
           className="hero-bg-image w-full h-full object-cover"
-          style={{ filter: 'brightness(0.62) saturate(0.9) contrast(1.05)' }}
+          style={{ filter: 'brightness(1.0) saturate(1.1) contrast(1.02) sepia(0.12)' }}
         />
       </div>
 
-      {/* Layered gradient overlays — cinematic depth, image still visible */}
-      {/* Top: darker for header readability */}
+      {/* Warm ivory gradient overlay — lighter than dark, preserves image */}
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(7,22,17,0.65) 0%, rgba(7,22,17,0.25) 35%, rgba(7,22,17,0.25) 55%, rgba(7,22,17,0.55) 100%)',
+            'linear-gradient(to bottom, rgba(245,241,232,0.5) 0%, rgba(245,241,232,0.15) 30%, rgba(245,241,232,0.2) 55%, rgba(245,241,232,0.6) 100%)',
         }}
       />
-      {/* Center radial for text readability */}
+      {/* Soft warm radial glow behind text */}
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 60% 45% at center, rgba(7,22,17,0.45) 0%, rgba(7,22,17,0.1) 65%, transparent 100%)',
+            'radial-gradient(ellipse 55% 40% at center, rgba(245,241,232,0.4) 0%, rgba(245,241,232,0.05) 70%, transparent 100%)',
         }}
       />
 
-      {/* One extremely faint orbital ring — brand detail, not decoration overload */}
+      {/* Extremely faint orbital ring — brand detail */}
       <div className="absolute inset-0 z-[2] pointer-events-none flex items-center justify-center">
         <svg
-          width="600"
-          height="600"
-          viewBox="0 0 600 600"
+          width="500"
+          height="500"
+          viewBox="0 0 500 500"
           fill="none"
-          className="opacity-[0.04]"
+          className="opacity-[0.05]"
           style={{ animation: 'slowSpin 120s linear infinite' }}
         >
-          <circle cx="300" cy="300" r="280" stroke="#D8C28C" strokeWidth="0.5" fill="none" />
-          <circle cx="300" cy="300" r="220" stroke="#D8C28C" strokeWidth="0.4" fill="none" />
-          <circle cx="300" cy="300" r="160" stroke="#D8C28C" strokeWidth="0.3" fill="none" />
+          <circle cx="250" cy="250" r="240" stroke="#B99A5B" strokeWidth="0.4" fill="none" />
+          <circle cx="250" cy="250" r="180" stroke="#B99A5B" strokeWidth="0.3" fill="none" />
         </svg>
       </div>
 
-      {/* Subtle grain texture */}
+      {/* Subtle grain */}
       <div
-        className="absolute inset-0 z-[2] pointer-events-none opacity-[0.05]"
+        className="absolute inset-0 z-[2] pointer-events-none opacity-[0.04]"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
         }}
       />
 
-      {/* Vignette */}
-      <div
-        className="absolute inset-0 z-[2] pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, transparent 45%, rgba(7,22,17,0.4) 100%)',
-        }}
-      />
-
-      {/* 3 subtle gold discovery points */}
+      {/* 3 subtle gold points */}
       {discoveryNodes.map((node, i) => (
         <div
           key={i}
@@ -189,15 +177,15 @@ const Hero = () => {
           <div
             className="w-1.5 h-1.5 rounded-full"
             style={{
-              backgroundColor: '#D8C28C',
-              boxShadow: '0 0 6px 2px rgba(216,194,140,0.4)',
+              backgroundColor: '#B99A5B',
+              boxShadow: '0 0 6px 2px rgba(185,154,91,0.3)',
               animation: `discoveryPulse ${3 + i * 0.5}s ease-in-out infinite`,
               animationDelay: `${i * 0.4}s`,
             }}
           />
           {hoveredNode === i && (
             <div className="absolute left-4 top-0 -translate-y-1/2 whitespace-nowrap z-10">
-              <span className="font-jetbrains text-[10px] tracking-widest" style={{ color: 'rgba(216,194,140,0.8)' }}>
+              <span className="font-mono text-[10px] tracking-widest" style={{ color: 'rgba(185,154,91,0.8)' }}>
                 {node.label}
               </span>
             </div>
@@ -205,44 +193,43 @@ const Hero = () => {
         </div>
       ))}
 
-      {/* Main content — positioned slightly above center (~45% viewport) */}
+      {/* Main content — positioned slightly above center */}
       <div
         ref={contentRef}
         className="relative z-10 text-center max-w-4xl mx-auto px-6"
         style={{ transform: 'translateY(-4vh)' }}
       >
-
-        {/* Eyebrow label */}
+        {/* Eyebrow */}
         <p
-          className="hero-topline opacity-0 font-jetbrains text-[11px] tracking-[0.25em] uppercase mb-8"
-          style={{ color: '#D8C28C' }}
+          className="hero-topline opacity-0 font-mono text-[11px] tracking-[0.25em] uppercase mb-8"
+          style={{ color: '#71877A' }}
         >
           Some places are still undiscovered
         </p>
 
-        {/* Main headline — strong cream with text shadow for readability */}
+        {/* Main headline — deep forest, strong serif */}
         <h1
-          className="hero-headline opacity-0 font-display text-7xl sm:text-8xl md:text-9xl font-light leading-[1.0] mb-6 tracking-tight"
+          className="hero-headline opacity-0 font-display text-7xl sm:text-8xl md:text-9xl font-medium leading-[1.0] mb-6 tracking-tight"
           style={{
-            color: '#F4F0E6',
-            textShadow: '0 2px 20px rgba(7,22,17,0.5), 0 0 60px rgba(7,22,17,0.3)',
+            color: '#243A34',
+            textShadow: '0 2px 30px rgba(245,241,232,0.6)',
           }}
         >
           Woander.
         </h1>
 
-        {/* Sub headline */}
+        {/* Sub headline — italic terracotta */}
         <p
           className="hero-sub opacity-0 font-display italic text-3xl sm:text-4xl md:text-5xl font-light mb-8"
-          style={{ color: '#D8C28C' }}
+          style={{ color: '#B97862' }}
         >
           Travel deeper.
         </p>
 
-        {/* Supporting text */}
+        {/* Supporting text — warm charcoal */}
         <p
           className="hero-supporting opacity-0 text-sm sm:text-base max-w-md mx-auto mb-12 leading-relaxed font-light"
-          style={{ color: 'rgba(244,240,230,0.85)' }}
+          style={{ color: '#27302D' }}
         >
           Discover places, people and stories that don't appear on the usual map.
         </p>
@@ -251,11 +238,11 @@ const Hero = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
           <button
             onClick={() => navigate('/hidden-gems')}
-            className="hero-cta opacity-0 relative px-12 py-4 text-sm tracking-[0.2em] uppercase font-light transition-all duration-300 hover:bg-cream hover:text-forest-950"
+            className="hero-cta opacity-0 relative px-12 py-4 text-sm tracking-[0.15em] uppercase font-medium transition-all duration-300 hover:bg-forest-900 hover:text-parchment"
             style={{
-              border: '1px solid #F4F0E6',
-              backgroundColor: 'transparent',
-              color: '#F4F0E6',
+              border: '1px solid #243A34',
+              backgroundColor: '#F5F1E8',
+              color: '#243A34',
             }}
           >
             Explore India
@@ -264,21 +251,21 @@ const Hero = () => {
           <button
             onClick={() => navigate('/vanguard')}
             className="hero-secondary-cta opacity-0 group font-display text-base tracking-wide transition-colors duration-300"
-            style={{ color: 'rgba(244,240,230,0.8)' }}
+            style={{ color: '#27302D' }}
           >
-            <span className="border-b pb-0.5 transition-all duration-300 group-hover:border-gold-300" style={{ borderColor: 'rgba(244,240,230,0.25)' }}>
+            <span className="border-b pb-0.5 transition-all duration-300 group-hover:border-terracotta" style={{ borderColor: 'rgba(36,58,52,0.2)' }}>
               Meet the Vanguard
             </span>
           </button>
         </div>
 
-        {/* "Discovered by" Badge */}
-        <div className="mt-16 flex items-center justify-center gap-3" style={{ color: 'rgba(244,240,230,0.3)' }}>
-          <div className="w-8 h-px bg-gradient-to-r from-transparent via-cream/20 to-transparent" />
+        {/* Discovered by badge */}
+        <div className="mt-16 flex items-center justify-center gap-3" style={{ color: 'rgba(36,58,52,0.35)' }}>
+          <div className="w-8 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(36,58,52,0.2), transparent)' }} />
           <span className="text-[10px] uppercase tracking-[0.25em]">
             discovered by curious explorers
           </span>
-          <div className="w-8 h-px bg-gradient-to-r from-transparent via-cream/20 to-transparent" />
+          <div className="w-8 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(36,58,52,0.2), transparent)' }} />
         </div>
       </div>
 
@@ -287,7 +274,7 @@ const Hero = () => {
         <p
           className="font-display italic text-sm transition-all duration-500"
           style={{
-            color: 'rgba(244,240,230,0.4)',
+            color: 'rgba(36,58,52,0.4)',
             opacity: philosophyVisible ? 1 : 0,
             transform: philosophyVisible ? 'translateY(0)' : 'translateY(8px)',
           }}
@@ -300,14 +287,14 @@ const Hero = () => {
       <button
         onClick={scrollDown}
         className="hero-scroll-indicator opacity-0 absolute bottom-8 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2 transition-colors duration-300 group"
-        style={{ color: 'rgba(244,240,230,0.5)' }}
+        style={{ color: 'rgba(36,58,52,0.5)' }}
         aria-label="Scroll down"
       >
-        <span className="font-jetbrains text-[10px] tracking-[0.2em] uppercase">Scroll to explore</span>
+        <span className="font-mono text-[10px] tracking-[0.2em] uppercase">Scroll to explore</span>
         <div
-          className="w-px h-10 transition-colors duration-300 group-hover:bg-gold-300/60"
+          className="w-px h-10"
           style={{
-            background: 'linear-gradient(to bottom, rgba(244,240,230,0.4), transparent)',
+            background: 'linear-gradient(to bottom, rgba(36,58,52,0.4), transparent)',
             animation: 'descend 2s ease-in-out infinite',
           }}
         />
@@ -315,16 +302,16 @@ const Hero = () => {
 
       <style>{`
         @keyframes discoveryPulse {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.3); }
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.3); }
         }
         @keyframes slowSpin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
         @keyframes descend {
-          0%, 100% { transform: scaleY(1); opacity: 0.4; }
-          50% { transform: scaleY(1.3); opacity: 0.7; }
+          0%, 100% { transform: scaleY(1); opacity: 0.3; }
+          50% { transform: scaleY(1.3); opacity: 0.6; }
         }
       `}</style>
     </section>
