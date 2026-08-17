@@ -481,36 +481,35 @@ const Hero = () => {
 
         {/* Main headline */}
         <h1 className="hero-headline opacity-0 font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light leading-[1.05] text-cream mb-6">
-          Discover Places.<br />
-          <em className="italic text-gold-300">Create Destinations.</em>
+          Woander.
         </h1>
-
-        {/* Subheadline */}
-        <p className="hero-sub opacity-0 text-mist-300 text-sm sm:text-base tracking-wide max-w-xl mx-auto mb-4 font-light">
-          The community-powered discovery network for hidden India.
+        <p className="hero-headline opacity-0 font-display italic text-3xl sm:text-4xl md:text-5xl font-light text-gold-300/80 mb-8">
+          Travel deeper.
         </p>
 
         {/* Supporting text */}
-        <p className="hero-supporting opacity-0 text-mist-500 text-xs sm:text-sm max-w-md mx-auto mb-12 leading-relaxed font-light">
-          Modern travel made the world more accessible — yet somehow less discoverable.
+        <p className="hero-supporting opacity-0 text-mist-400 text-sm sm:text-base max-w-md mx-auto mb-12 leading-relaxed font-light">
+          Discover places, people and stories that don't appear on the usual map.
         </p>
 
         {/* CTAs */}
         <div className="flex flex-col items-center gap-5">
-          <button
-            onClick={() => navigate('/hidden-gems')}
-            className="hero-cta opacity-0 group relative px-10 py-4 border border-gold-400/40 text-cream text-sm tracking-[0.15em] uppercase font-light transition-all duration-500 hover:border-gold-400/80 hover:bg-gold-400/8 hover:tracking-[0.2em] overflow-hidden"
-          >
-            <span className="relative z-10">Explore Beyond The Algorithm</span>
-            <span className="absolute inset-0 bg-gold-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <button
+              onClick={() => navigate('/hidden-gems')}
+              className="hero-cta opacity-0 group relative px-10 py-4 border border-gold-400/40 text-cream text-sm tracking-[0.15em] uppercase font-light transition-all duration-500 hover:border-gold-400/80 hover:bg-gold-400/8 overflow-hidden"
+            >
+              <span className="relative z-10">Explore India</span>
+              <span className="absolute inset-0 bg-gold-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </button>
 
-          <button
-            onClick={() => navigate('/vanguard')}
-            className="hero-secondary-cta opacity-0 font-jetbrains text-[11px] text-mist-500 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300"
-          >
-            Become a Gem Founder →
-          </button>
+            <button
+              onClick={() => navigate('/vanguard')}
+              className="hero-secondary-cta opacity-0 font-jetbrains text-[11px] text-mist-500 hover:text-gold-400 tracking-widest uppercase transition-colors duration-300"
+            >
+              Meet the Vanguard →
+            </button>
+          </div>
         </div>
 
         {/* "Discovered by" Badge */}
