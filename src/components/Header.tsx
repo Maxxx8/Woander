@@ -23,41 +23,27 @@ const Header = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const isHome = location.pathname === '/';
-  const onHero = isHome && !scrolled;
-
-  // On hero: dark forest text over bright image. On scroll: warm ivory bg, dark forest text.
-  const navColor = '#243A34';
-  const navHover = '#B99A5B';
-  const logoColor = '#243A34';
+  // Always warm ivory background, dark forest text — sits naturally on cream canvas
+  const navColor = '#263D35';
+  const navHover = '#B69A63';
+  const logoColor = '#263D35';
 
   return (
     <>
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? 'bg-parchment/95 backdrop-blur-md' : 'bg-transparent'
-        }`}
+        className="fixed top-0 left-0 w-full z-50 transition-all duration-300"
         style={{
-          borderBottom: scrolled ? '1px solid rgba(36,58,52,0.1)' : '1px solid transparent',
-          boxShadow: scrolled ? '0 1px 8px rgba(36,58,52,0.06)' : 'none',
+          backgroundColor: scrolled ? 'rgba(251,248,241,0.96)' : 'rgba(246,242,233,0.9)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid rgba(38,61,53,0.08)',
+          boxShadow: scrolled ? '0 1px 6px rgba(38,61,53,0.04)' : 'none',
         }}
       >
-        {/* Subtle warm gradient behind header on hero for readability */}
-        {onHero && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                'linear-gradient(to bottom, rgba(250,248,242,0.55) 0%, rgba(250,248,242,0.25) 60%, rgba(250,248,242,0) 100%)',
-            }}
-          />
-        )}
-
         <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="flex justify-between items-center py-5">
 
@@ -66,8 +52,7 @@ const Header = () => {
               <img
                 src="/Logo Large.jpeg"
                 alt="Woander"
-                className="h-9 w-9 object-contain rounded-full opacity-95 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ filter: onHero ? 'none' : 'none' }}
+                className="h-8 w-8 object-contain rounded-full opacity-90 group-hover:opacity-100 transition-opacity duration-300"
               />
               <span
                 className="font-display text-lg font-medium tracking-[0.15em] transition-colors duration-300"
@@ -93,17 +78,17 @@ const Header = () => {
                       className={`absolute -bottom-1.5 left-0 h-px transition-all duration-300 ${
                         active ? 'w-full' : 'w-0 group-hover:w-full'
                       }`}
-                      style={{ backgroundColor: active ? navHover : 'rgba(36,58,52,0.3)' }}
+                      style={{ backgroundColor: active ? navHover : 'rgba(38,61,53,0.25)' }}
                     />
                   </Link>
                 );
               })}
 
-              <div className="h-3 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.12)' }} />
+              <div className="h-3 w-px" style={{ backgroundColor: 'rgba(38,61,53,0.1)' }} />
 
               <button
                 onClick={() => setIsSearchModalOpen(true)}
-                className="transition-colors duration-300"
+                className="transition-colors duration-300 hover:text-[#B69A63]"
                 style={{ color: navColor }}
                 type="button"
                 aria-label="Search"
@@ -113,7 +98,7 @@ const Header = () => {
 
               <button
                 onClick={toggle}
-                className="transition-colors duration-300"
+                className="transition-colors duration-300 hover:text-[#B69A63]"
                 style={{ color: navColor }}
                 type="button"
                 aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
@@ -121,13 +106,13 @@ const Header = () => {
                 {theme === 'night' ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
               </button>
 
-              <div className="h-3 w-px" style={{ backgroundColor: 'rgba(36,58,52,0.12)' }} />
+              <div className="h-3 w-px" style={{ backgroundColor: 'rgba(38,61,53,0.1)' }} />
 
               {user ? (
                 <div className="flex items-center gap-5">
                   <Link
                     to="/guide/dashboard"
-                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-normal transition-colors duration-300"
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-normal transition-colors duration-300 hover:text-[#B69A63]"
                     style={{ color: navColor }}
                   >
                     <Compass className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -135,7 +120,7 @@ const Header = () => {
                   </Link>
                   <Link
                     to="/dashboard"
-                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-normal transition-colors duration-300"
+                    className="flex items-center gap-1.5 text-[11px] tracking-[0.1em] uppercase font-normal transition-colors duration-300 hover:text-[#B69A63]"
                     style={{ color: navColor }}
                   >
                     <User className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -143,8 +128,8 @@ const Header = () => {
                   </Link>
                   <button
                     onClick={signOut}
-                    className="transition-colors duration-300"
-                    style={{ color: 'rgba(36,58,52,0.5)' }}
+                    className="transition-colors duration-300 hover:text-[#B69A63]"
+                    style={{ color: 'rgba(38,61,53,0.45)' }}
                     aria-label="Sign out"
                   >
                     <LogOut className="h-4 w-4" strokeWidth={1.5} />
@@ -153,9 +138,9 @@ const Header = () => {
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="px-5 py-2 text-[11px] tracking-[0.12em] uppercase font-normal transition-all duration-300 hover:bg-forest-900 hover:text-parchment"
+                  className="px-5 py-2 text-[11px] tracking-[0.12em] uppercase font-normal transition-all duration-300 hover:bg-[#263D35] hover:text-[#F6F2E9]"
                   style={{
-                    border: '1px solid rgba(36,58,52,0.3)',
+                    border: '1px solid rgba(38,61,53,0.25)',
                     color: navColor,
                   }}
                 >
@@ -193,7 +178,7 @@ const Header = () => {
 
           {/* Mobile menu */}
           {isMenuOpen && (
-            <div className="md:hidden pb-6 relative z-10" style={{ borderTop: '1px solid rgba(36,58,52,0.1)' }}>
+            <div className="md:hidden pb-6 relative z-10" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
               <div className="flex flex-col space-y-5 pt-5">
                 {NAV_LINKS.map(({ to, label }) => (
                   <Link
@@ -206,7 +191,7 @@ const Header = () => {
                     {label}
                   </Link>
                 ))}
-                <div className="h-px" style={{ backgroundColor: 'rgba(36,58,52,0.1)' }} />
+                <div className="h-px" style={{ backgroundColor: 'rgba(38,61,53,0.08)' }} />
                 {user ? (
                   <>
                     <Link to="/guide/dashboard" className="flex items-center gap-2 text-sm" style={{ color: navColor }} onClick={() => setIsMenuOpen(false)}>
@@ -216,7 +201,7 @@ const Header = () => {
                     <Link to="/dashboard" className="text-sm" style={{ color: navColor }} onClick={() => setIsMenuOpen(false)}>
                       Dashboard
                     </Link>
-                    <button onClick={signOut} className="flex items-center gap-2 text-sm text-left" style={{ color: 'rgba(36,58,52,0.5)' }}>
+                    <button onClick={signOut} className="flex items-center gap-2 text-sm text-left" style={{ color: 'rgba(38,61,53,0.45)' }}>
                       <LogOut className="h-4 w-4" strokeWidth={1.5} />
                       Sign Out
                     </button>
@@ -225,7 +210,7 @@ const Header = () => {
                   <button
                     onClick={() => { setIsAuthModalOpen(true); setIsMenuOpen(false); }}
                     className="text-sm tracking-[0.12em] uppercase font-medium border px-5 py-2 transition-all w-fit"
-                    style={{ border: '1px solid rgba(36,58,52,0.3)', color: navColor }}
+                    style={{ border: '1px solid rgba(38,61,53,0.25)', color: navColor }}
                   >
                     Sign In
                   </button>

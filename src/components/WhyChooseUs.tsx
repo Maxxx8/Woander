@@ -37,12 +37,12 @@ const WhyChooseUs = () => {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo('.pillar-item',
-        { opacity: 0, y: 40 },
+        { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
           duration: 0.9,
-          stagger: 0.15,
+          stagger: 0.12,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: sectionRef.current,
@@ -56,41 +56,41 @@ const WhyChooseUs = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-28 overflow-hidden" style={{ backgroundColor: '#F5F1E8' }}>
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <section ref={sectionRef} className="relative py-32 overflow-hidden" style={{ backgroundColor: '#F6F2E9' }}>
+      <div className="relative max-w-6xl mx-auto px-6 sm:px-10 lg:px-16">
 
         <div className="mb-20 max-w-2xl">
-          <p className="font-mono text-[10px] tracking-widest uppercase mb-5" style={{ color: '#71877A' }}>The Foundation</p>
-          <h2 className="font-display text-5xl md:text-6xl font-light leading-[1.05]" style={{ color: '#243A34' }}>
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-6" style={{ color: 'rgba(48,51,47,0.5)' }}>The Foundation</p>
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-light leading-[1.1]" style={{ color: '#263D35' }}>
             Built on four<br />
-            <em className="italic" style={{ color: '#B97862' }}>uncomfortable truths.</em>
+            <em className="italic" style={{ color: '#B77B65' }}>uncomfortable truths.</em>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px" style={{ backgroundColor: 'rgba(36,58,52,0.1)' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px" style={{ backgroundColor: 'rgba(38,61,53,0.08)' }}>
           {pillars.map((pillar, i) => (
             <div
               key={i}
-              className="pillar-item opacity-0 p-10 group transition-colors duration-500"
-              style={{ backgroundColor: '#F5F1E8' }}
+              className="pillar-item opacity-0 p-10"
+              style={{ backgroundColor: '#F6F2E9' }}
             >
-              <span className="font-mono text-xs tracking-widest block mb-8" style={{ color: 'rgba(185,154,91,0.5)' }}>
+              <span className="font-mono text-xs tracking-[0.2em] block mb-8" style={{ color: 'rgba(182,154,99,0.5)' }}>
                 {pillar.number}
               </span>
-              <h3 className="font-display text-2xl font-light mb-5" style={{ color: '#243A34' }}>
+              <h3 className="font-display text-xl font-light mb-5" style={{ color: '#263D35' }}>
                 {pillar.title}
               </h3>
-              <p className="text-sm leading-relaxed mb-6 font-light" style={{ color: 'rgba(36,58,52,0.65)' }}>
+              <p className="text-sm leading-relaxed mb-6 font-light" style={{ color: 'rgba(48,51,47,0.6)' }}>
                 {pillar.description}
               </p>
-              <p className="font-display italic text-sm pt-5" style={{ color: '#B97862', borderTop: '1px solid rgba(36,58,52,0.1)' }}>
+              <p className="font-display italic text-sm pt-5" style={{ color: '#B77B65', borderTop: '1px solid rgba(38,61,53,0.08)' }}>
                 {pillar.quote}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-20 pt-14 grid grid-cols-2 md:grid-cols-4 gap-10 max-w-4xl" style={{ borderTop: '1px solid rgba(36,58,52,0.12)' }}>
+        <div className="mt-20 pt-14 grid grid-cols-2 md:grid-cols-4 gap-10 max-w-4xl" style={{ borderTop: '1px solid rgba(38,61,53,0.1)' }}>
           {[
             { value: '847', label: 'Hidden Gems Mapped' },
             { value: '3,240+', label: 'Field Notes Written' },
@@ -98,8 +98,8 @@ const WhyChooseUs = () => {
             { value: '64', label: 'Guides Verified' },
           ].map(({ value, label }) => (
             <div key={label}>
-              <p className="font-display text-4xl md:text-5xl font-light mb-2" style={{ color: '#243A34' }}>{value}</p>
-              <p className="font-mono text-[10px] tracking-widest uppercase" style={{ color: '#71877A' }}>{label}</p>
+              <p className="font-display text-4xl md:text-5xl font-light mb-2" style={{ color: '#263D35' }}>{value}</p>
+              <p className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(48,51,47,0.5)' }}>{label}</p>
             </div>
           ))}
         </div>

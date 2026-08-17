@@ -61,8 +61,8 @@
   --color-terracotta: 185 120 98;
   --color-antique-gold: 185 154 91;
 
-  --color-bg-base: var(--color-parchment);
-  --color-text-base: var(--color-charcoal);
+  --color-bg-base: 246 242 233;
+  --color-text-base: 48 51 47;
   --color-field-image-filter: brightness(1.05) saturate(1.0) contrast(1.02) sepia(0.08);
   --color-glass-bg: rgba(10, 18, 10, 0.55);
   --color-glass-border: rgba(201, 168, 74, 0.12);
