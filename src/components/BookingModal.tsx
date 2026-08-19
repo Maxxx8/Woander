@@ -1,9 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { X, ChevronRight, ChevronLeft, Check, Minus, Plus, MapPin, Star, Globe, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, ChevronRight, ChevronLeft, Check, Minus, Plus, MapPin, Star, Globe, AlertCircle, Loader, Clock } from 'lucide-react';
 import type { TourGuide, Tour } from '../shared/supabase';
 import { vanguardService } from '../services/vanguardService';
 import { useAuth } from '../shared/AuthContext';
 import { supabase } from '../shared/supabase';
+
+// Format a Date as YYYY-MM-DD in local time (not UTC), avoiding the common
+// off-by-one caused by toISOString().
+const formatLocalDate = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const TIME_SLOTS = [
+  '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+  '18:00', '19:00', '20:00',
+];
 
 const ARCHETYPE_FALLBACK: Record<string, string> = {
   cultural: 'Storykeeper',
@@ -45,6 +60,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
   const [error, setError] = useState('');
   const [unavailableDates, setUnavailableDates] = useState<Set<string>>(new Set());
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<Record<string, string>>({});
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -63,8 +81,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
       const now = new Date();
       const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       const endDate = new Date(now.getFullYear() + 1, now.getMonth(), 0);
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      const startDateStr = formatLocalDate(startDate);
+      const endDateStr = formatLocalDate(endDate);
 
       const { data, error: availError } = await supabase
         .from('tour_guide_availability')
@@ -95,6 +113,35 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     }
   };
 
+  // Fetch booked time slots for the selected date so we can disable taken times.
+  const loadBookedSlots = useCallback(async (dateStr: string) => {
+    if (!dateStr) {
+      setBookedSlots({});
+      return;
+    }
+    setSlotsLoading(true);
+    setSlotsError('');
+    try {
+      const slots = await vanguardService.getBookedTimeSlots(guide.id, dateStr);
+      setBookedSlots(slots);
+    } catch (err) {
+      console.error('[BookingModal] Failed to load booked slots:', err);
+      setSlotsError('Could not load time slot availability. Please try again.');
+      setBookedSlots({});
+    } finally {
+      setSlotsLoading(false);
+    }
+  }, [guide.id]);
+
+  // When the selected date changes, refresh booked slots and reset the time.
+  useEffect(() => {
+    if (bookingDate) {
+      loadBookedSlots(bookingDate);
+    } else {
+      setBookedSlots({});
+    }
+  }, [bookingDate, loadBookedSlots]);
+
   const loadTours = async () => {
     setToursLoading(true);
     try {
@@ -110,11 +157,23 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
   const totalPrice = selectedTour ? selectedTour.price_per_person * groupSize : 0;
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const minDateStr = minDate.toISOString().split('T')[0];
+  const minDateStr = formatLocalDate(minDate);
+
+  // A time slot is selectable only if it is in the future and not already booked.
+  const isSlotBooked = (time: string): boolean => Boolean(bookedSlots[time]);
+
+  const isSlotPast = (time: string): boolean => {
+    if (!bookingDate) return false;
+    const now = new Date();
+    const slot = new Date(`${bookingDate}T${time}:00`);
+    return slot.getTime() <= now.getTime();
+  };
+
+  const isSlotDisabled = (time: string): boolean => isSlotBooked(time) || isSlotPast(time);
 
   const canAdvance = () => {
     if (step === 1) return selectedTour !== null;
-    if (step === 2) return bookingDate !== '' && groupSize >= 1 && !isDateUnavailable(bookingDate);
+    if (step === 2) return bookingDate !== '' && groupSize >= 1 && !isDateUnavailable(bookingDate) && !isSlotDisabled(bookingTime);
     if (step === 3) return contactName.trim() !== '' && contactEmail.trim() !== '' && contactPhone.trim() !== '';
     return false;
   };
@@ -141,6 +200,24 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     setSubmitting(true);
     setError('');
     try {
+      // Final server-side conflict check before creating the booking.
+      let slotFree = false;
+      try {
+        slotFree = await vanguardService.checkSlotAvailability(guide.id, bookingDate, bookingTime);
+      } catch (err) {
+        console.error('[Booking] Slot availability check failed:', err);
+        setError('Could not verify availability right now. Please try again.');
+        setSubmitting(false);
+        return;
+      }
+      if (!slotFree) {
+        setError('Sorry, this guide is no longer available for this time slot. Please choose another time.');
+        setStep(2 as Step);
+        await loadBookedSlots(bookingDate);
+        setSubmitting(false);
+        return;
+      }
+
       const booking = await vanguardService.createBooking({
         tour_id: selectedTour.id,
         guide_id: guide.id,
@@ -169,7 +246,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
       const userMsg = err?.code === '42501'
         ? 'You do not have permission to create this booking. Please ensure you are signed in.'
         : err?.code === '23505'
-        ? 'This booking already exists. Please try again.'
+        ? 'Sorry, this guide is no longer available for this time slot. Please choose another time.'
         : 'Something went wrong while submitting your booking. Please try again.';
       setError(userMsg);
     } finally {
@@ -181,6 +258,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     setStep(1);
     setSelectedTour(null);
     setBookingDate('');
+    setBookingTime('09:00');
     setGroupSize(1);
     setContactName('');
     setContactEmail('');
@@ -188,6 +266,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
     setSpecialRequests('');
     setError('');
     setConfirmationCode('');
+    setBookedSlots({});
+    setSlotsError('');
     onClose();
   };
 
@@ -448,12 +528,63 @@ const BookingModal: React.FC<BookingModalProps> = ({ guide, isOpen, onClose }) =
 
               <div>
                 <label style={labelStyle}>Preferred Time</label>
-                <input
-                  type="time"
-                  value={bookingTime}
-                  onChange={(e) => setBookingTime(e.target.value)}
-                  style={inputStyle}
-                />
+                {slotsLoading ? (
+                  <div className="flex items-center gap-2 py-2">
+                    <Loader className="w-3.5 h-3.5 animate-spin" style={{ color: '#B69A63' }} />
+                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.5)' }}>
+                      Checking available times...
+                    </span>
+                  </div>
+                ) : slotsError ? (
+                  <div className="flex items-center gap-1.5 py-2">
+                    <AlertCircle className="w-3 h-3 text-red-500/70 flex-shrink-0" />
+                    <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-red-500/70">{slotsError}</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    {TIME_SLOTS.map((time) => {
+                      const booked = isSlotBooked(time);
+                      const past = isSlotPast(time);
+                      const disabled = booked || past;
+                      const selected = bookingTime === time;
+                      return (
+                        <button
+                          key={time}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => setBookingTime(time)}
+                          className="font-mono text-[10px] tracking-[0.1em] py-2 transition-all duration-200"
+                          style={{
+                            border: selected ? '1px solid #B69A63' : disabled ? '1px solid rgba(38,61,53,0.06)' : '1px solid rgba(38,61,53,0.12)',
+                            backgroundColor: selected ? 'rgba(182,154,99,0.1)' : disabled ? 'rgba(38,61,53,0.03)' : 'transparent',
+                            color: selected ? '#B69A63' : disabled ? 'rgba(48,51,47,0.25)' : 'rgba(48,51,47,0.65)',
+                            borderRadius: '6px',
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                            textDecoration: booked ? 'line-through' : 'none',
+                          }}
+                        >
+                          {time}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {bookedSlots[bookingTime] && (
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-3 h-3 text-red-500/70 flex-shrink-0" />
+                    <p className="font-mono text-[9px] tracking-[0.15em] uppercase text-red-500/70">
+                      This time is already booked. Please choose another time.
+                    </p>
+                  </div>
+                )}
+                {!bookedSlots[bookingTime] && !slotsLoading && !slotsError && bookingDate && (
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" style={{ color: '#B69A63' }} />
+                    <p className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.5)' }}>
+                      Selected: {bookingTime}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>

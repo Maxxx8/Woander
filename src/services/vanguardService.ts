@@ -322,6 +322,41 @@ export const vanguardService = {
     return { isAvailable: data.is_available, notes: data.notes };
   },
 
+  // Server-side check: is this specific (guide, date, time) slot free of
+  // conflicting bookings? Uses a SECURITY DEFINER function so the caller can
+  // see bookings made by other users (RLS would otherwise hide them).
+  async checkSlotAvailability(guideId: string, date: string, time: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .rpc('check_booking_slot_available', {
+        p_guide_id: guideId,
+        p_booking_date: date,
+        p_booking_time: time,
+      });
+
+    if (error) throw error;
+    return Boolean(data);
+  },
+
+  // Returns the set of booked time slots for a guide on a given date, so the
+  // booking UI can disable taken times. Also uses a SECURITY DEFINER function.
+  async getBookedTimeSlots(guideId: string, date: string): Promise<Record<string, string>> {
+    const { data, error } = await supabase
+      .rpc('get_booked_time_slots', {
+        p_guide_id: guideId,
+        p_booking_date: date,
+      });
+
+    if (error) throw error;
+
+    const map: Record<string, string> = {};
+    (data || []).forEach((row: { booking_time: string; status: string }) => {
+      // booking_time comes back as "HH:MM:SS"; normalize to "HH:MM" for matching
+      const t = String(row.booking_time).slice(0, 5);
+      map[t] = row.status;
+    });
+    return map;
+  },
+
   async setAvailability(guideId: string, date: string, isAvailable: boolean, notes?: string) {
     const { data, error } = await supabase
       .from('tour_guide_availability')
