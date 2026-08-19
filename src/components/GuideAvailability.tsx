@@ -38,6 +38,7 @@ const GuideAvailability: React.FC<GuideAvailabilityProps> = ({ guideId }) => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const formatDateKey = (date: Date): string => {
     const y = date.getFullYear();
@@ -157,7 +158,7 @@ const GuideAvailability: React.FC<GuideAvailabilityProps> = ({ guideId }) => {
       if (existing) {
         const { error: updateError } = await supabase
           .from('tour_guide_availability')
-          .update({ is_available: isAvailable, updated_at: new Date().toISOString() })
+          .update({ is_available: isAvailable })
           .eq('id', existing.id);
 
         if (updateError) {
@@ -322,7 +323,7 @@ const GuideAvailability: React.FC<GuideAvailabilityProps> = ({ guideId }) => {
         <div className="flex items-center justify-center py-12 border border-forest-800">
           <div className="w-6 h-6 border border-gold-400/30 border-t-gold-400 rounded-full animate-spin" />
         </div>
-      ) : !hasAnyAvailability && Object.keys(bookingsByDate).length === 0 ? (
+      ) : !hasAnyAvailability && Object.keys(bookingsByDate).length === 0 && !showCalendar ? (
         <div className="border border-forest-800 p-12 text-center">
           <Calendar className="w-10 h-10 text-gold-400/20 mx-auto mb-4" />
           <p className="font-display text-lg italic font-light text-cream mb-2">No availability configured</p>
@@ -334,6 +335,7 @@ const GuideAvailability: React.FC<GuideAvailabilityProps> = ({ guideId }) => {
               const tomorrow = new Date();
               tomorrow.setDate(tomorrow.getDate() + 1);
               setSelectedDate(formatDateKey(tomorrow));
+              setShowCalendar(true);
             }}
             className="font-mono text-[10px] tracking-widest text-gold-300/70 border border-gold-400/20 px-6 py-2 hover:border-gold-400/50 transition-colors duration-300"
           >
