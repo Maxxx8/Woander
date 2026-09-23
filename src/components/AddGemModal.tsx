@@ -42,6 +42,8 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
   const [uploadMethod, setUploadMethod] = useState<'url' | 'upload'>('upload');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
+  const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -54,6 +56,33 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
     best_time_to_visit: '',
     tips: ''
   });
+
+  const attributeOptions = [
+    { value: 'historical', label: 'Historical' },
+    { value: 'archaeological', label: 'Archaeological' },
+    { value: 'cultural', label: 'Cultural' },
+    { value: 'natural', label: 'Natural' },
+    { value: 'living_heritage', label: 'Living Heritage' },
+    { value: 'ancestral', label: 'Ancestral' },
+    { value: 'community', label: 'Community' },
+    { value: 'hidden', label: 'Hidden' },
+  ];
+
+  const evidenceOptions = [
+    { value: 'archaeologically_documented', label: 'Archaeologically documented' },
+    { value: 'officially_documented', label: 'Officially documented' },
+    { value: 'scholarly_interpretation', label: 'Scholarly interpretation' },
+    { value: 'community_memory', label: 'Community memory' },
+    { value: 'explorer_observation', label: 'Explorer observation' },
+  ];
+
+  const toggleAttribute = (value: string) => {
+    setSelectedAttributes(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
+  };
+
+  const toggleEvidence = (value: string) => {
+    setSelectedEvidence(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
+  };
 
   const categories = [
     { value: 'cafe', label: 'Café' },
@@ -146,7 +175,9 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
         best_time_to_visit: formData.best_time_to_visit.trim() || null,
         tips: formData.tips.trim() || null,
         submitted_by: user.id,
-        verification_status: 'pending'
+        verification_status: 'pending',
+        place_attributes: selectedAttributes,
+        evidence_labels: selectedEvidence,
       };
 
       const { error: gemError } = await supabase.from('hidden_gems').insert(gemData);
@@ -172,6 +203,8 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
       setSuccess(true);
       setTimeout(() => {
         setFormData({ title: '', description: '', location: '', latitude: '', longitude: '', category: 'other', difficulty_level: 'easy', image_url: '', best_time_to_visit: '', tips: '' });
+        setSelectedAttributes([]);
+        setSelectedEvidence([]);
         setSelectedFile(null);
         setPreviewUrl('');
         setUploadMethod('upload');
@@ -214,12 +247,12 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
 
           {/* Header */}
           <div className="mb-8">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-3" style={{ color: 'rgba(48,51,47,0.4)' }}>Leave a Field Note</p>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-3" style={{ color: 'rgba(48,51,47,0.4)' }}>Add to the Record</p>
             <h2 className="font-display text-3xl font-light mb-2" style={{ color: '#263D35' }}>
-              Add your <em className="italic" style={{ color: '#B77B65' }}>discovery.</em>
+              Add to the <em className="italic" style={{ color: '#B77B65' }}>record.</em>
             </h2>
             <p className="text-sm font-light" style={{ color: 'rgba(48,51,47,0.5)' }}>
-              Share a hidden gem with the community. It will appear once verified by a fellow explorer.
+              Know something about this place that the map doesn&rsquo;t yet know?
             </p>
           </div>
 
@@ -236,10 +269,10 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
                 <Check className="w-6 h-6" style={{ color: '#B69A63' }} strokeWidth={1.5} />
               </div>
               <p className="font-display text-2xl font-light mb-2" style={{ color: '#263D35' }}>
-                You added a piece to the map.
+                You added a piece to the record.
               </p>
               <p className="font-display italic text-sm font-light" style={{ color: 'rgba(48,51,47,0.45)' }}>
-                Founded by you.
+                Your contribution will appear once reviewed.
               </p>
             </div>
           ) : (
@@ -378,6 +411,60 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
                   </div>
                 </div>
 
+                {/* Place Attributes */}
+                <div className="md:col-span-2">
+                  <label style={labelStyle}>Place Attributes <span style={{ textTransform: 'none', letterSpacing: '0', color: 'rgba(48,51,47,0.35)' }}>(optional — select all that apply)</span></label>
+                  <div className="flex flex-wrap gap-2">
+                    {attributeOptions.map((attr) => {
+                      const selected = selectedAttributes.includes(attr.value);
+                      return (
+                        <button
+                          key={attr.value}
+                          type="button"
+                          onClick={() => toggleAttribute(attr.value)}
+                          className="font-mono text-[9px] tracking-[0.12em] uppercase px-3 py-2 transition-all duration-300"
+                          style={{
+                            border: selected ? '1px solid rgba(182,154,99,0.4)' : '1px solid rgba(38,61,53,0.12)',
+                            backgroundColor: selected ? 'rgba(182,154,99,0.06)' : 'transparent',
+                            color: selected ? '#263D35' : 'rgba(48,51,47,0.5)',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {attr.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Evidence */}
+                <div className="md:col-span-2">
+                  <label style={labelStyle}>How do we know? <span style={{ textTransform: 'none', letterSpacing: '0', color: 'rgba(48,51,47,0.35)' }}>(optional — select all that apply)</span></label>
+                  <div className="flex flex-wrap gap-2">
+                    {evidenceOptions.map((ev) => {
+                      const selected = selectedEvidence.includes(ev.value);
+                      return (
+                        <button
+                          key={ev.value}
+                          type="button"
+                          onClick={() => toggleEvidence(ev.value)}
+                          className="font-mono text-[9px] tracking-[0.12em] uppercase px-3 py-2 transition-all duration-300"
+                          style={{
+                            border: selected ? '1px solid rgba(182,154,99,0.4)' : '1px solid rgba(38,61,53,0.12)',
+                            backgroundColor: selected ? 'rgba(182,154,99,0.06)' : 'transparent',
+                            color: selected ? '#263D35' : 'rgba(48,51,47,0.5)',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {ev.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="md:col-span-2">
                   <label style={labelStyle}>Image *</label>
                   <div className="flex gap-2 mb-4">
@@ -494,7 +581,7 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
                 <div className="text-xs font-light" style={{ color: 'rgba(48,51,47,0.5)' }}>
                   <p className="font-mono text-[9px] tracking-[0.15em] uppercase mb-2" style={{ color: 'rgba(48,51,47,0.4)' }}>Submission Guidelines</p>
                   <ul className="space-y-1 list-disc list-inside">
-                    <li>Your discovery will be reviewed before appearing publicly</li>
+                    <li>Your contribution will be reviewed before appearing publicly</li>
                     <li>Only submit places you have personally visited</li>
                     <li>Respect local communities and private property</li>
                   </ul>
@@ -524,7 +611,7 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
                   {loading || uploading ? (
                     <><Loader className="h-4 w-4 animate-spin" /> {uploading ? 'Uploading...' : 'Submitting...'}</>
                   ) : (
-                    <>Submit Discovery</>
+                    <>Add to the Record</>
                   )}
                 </button>
               </div>

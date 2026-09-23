@@ -10,7 +10,7 @@ import HomePage from './pages/HomePage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import AboutPage from './pages/AboutPage';
 import AdventuresPage from './pages/AdventuresPage';
-import HiddenGemsPage from './pages/HiddenGemsPage';
+import WorthyPlacesPage from './pages/WorthyPlacesPage';
 import DashboardPage from './pages/DashboardPage';
 import VanguardPage from './pages/VanguardPage';
 import GuideDashboardPage from './pages/GuideDashboardPage';
@@ -116,7 +116,8 @@ function AppLayout() {
               <Route path="/experiences" element={<ExperiencesPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/adventures" element={<AdventuresPage />} />
-              <Route path="/hidden-gems" element={<HiddenGemsPage />} />
+              <Route path="/worthy-places" element={<WorthyPlacesPage />} />
+              <Route path="/hidden-gems" element={<Navigate to="/worthy-places" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/guide/dashboard" element={<GuideDashboardPage />} />
               <Route path="/admin/*" element={<AdminSection />} />

@@ -8,7 +8,7 @@ const MobileNavigation: React.FC = () => {
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/vanguard', icon: Shield, label: 'Guides' },
-    { path: '/hidden-gems', icon: MapPin, label: 'Gems' },
+    { path: '/worthy-places', icon: MapPin, label: 'Places' },
     { path: '/adventures', icon: Compass, label: 'Adventures' },
     { path: '/experiences', icon: Sparkles, label: 'Experiences' }
   ];

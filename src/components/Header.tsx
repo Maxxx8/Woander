@@ -7,7 +7,7 @@ import AuthModal from './AuthModal';
 import SearchModal from './SearchModal';
 
 const NAV_LINKS = [
-  { to: '/hidden-gems', label: 'Hidden Gems' },
+  { to: '/worthy-places', label: 'Worthy Places' },
   { to: '/adventures', label: 'Adventures' },
   { to: '/experiences', label: 'Experiences' },
   { to: '/vanguard', label: 'Vanguard' },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, MapPin, Mountain, Calendar, Lightbulb, Loader, ArrowUp, MessageSquare, Footprints, Check, AlertCircle } from 'lucide-react';
+import { X, MapPin, Mountain, Calendar, Lightbulb, Loader, ArrowUp, MessageSquare, Footprints, Check, AlertCircle, ChevronDown } from 'lucide-react';
 import { supabase } from '../shared/supabase';
 import { useAuth } from '../shared/AuthContext';
 
@@ -18,6 +18,9 @@ export interface GemDetail {
   tips?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  submitted_by?: string | null;
+  place_attributes?: string[] | null;
+  evidence_labels?: string[] | null;
 }
 
 interface Comment {
@@ -33,9 +36,28 @@ interface GemDetailModalProps {
   onClose: () => void;
 }
 
-// Featured gems have non-UUID ids (e.g. "featured-0") — DB actions are disabled for them.
 const isRealGem = (id: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+const ATTRIBUTE_LABELS: Record<string, string> = {
+  historical: 'Historical',
+  archaeological: 'Archaeological',
+  cultural: 'Cultural',
+  natural: 'Natural',
+  living_heritage: 'Living Heritage',
+  ancestral: 'Ancestral',
+  community: 'Community',
+  hidden: 'Hidden',
+};
+
+const EVIDENCE_LABELS: Record<string, string> = {
+  archaeologically_documented: 'Archaeologically documented',
+  officially_documented: 'Officially documented',
+  scholarly_interpretation: 'Scholarly interpretation',
+  community_memory: 'Community memory',
+  explorer_observation: 'Explorer observation',
+  unverified: 'Unverified',
+};
 
 const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose }) => {
   const { user } = useAuth();
@@ -49,18 +71,18 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
   const [submittingComment, setSubmittingComment] = useState(false);
   const [voting, setVoting] = useState(false);
   const [loggingVisit, setLoggingVisit] = useState(false);
-  // Separate state: auth nag vs action error
   const [needsAuth, setNeedsAuth] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>('why');
 
   const loadData = useCallback(async () => {
     if (!gem) return;
     setLoading(true);
     setNeedsAuth(false);
     setActionError(null);
+    setExpandedSection('why');
 
     if (!isRealGem(gem.id)) {
-      // Featured gem — show static data, no DB queries needed
       setVoteCount(gem.total_votes);
       setVisitCount(gem.total_visits);
       setHasVoted(false);
@@ -122,7 +144,6 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
     }
   }, [isOpen, gem, loadData]);
 
-  // Reset local state when a new gem opens
   useEffect(() => {
     if (isOpen) {
       setCommentText('');
@@ -161,7 +182,6 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
       setHasVoted(true);
       setVoteCount(c => c + 1);
     } catch (err: any) {
-      // Unique violation means already voted — treat as success
       if (err?.code === '23505') {
         setHasVoted(true);
       } else {
@@ -232,9 +252,40 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
   if (!isOpen || !gem) return null;
 
   const isFeatured = !isRealGem(gem.id);
-  const categoryLabel = gem.category.charAt(0).toUpperCase() + gem.category.slice(1);
-  const difficultyLabel = (gem.difficulty_level || 'easy').charAt(0).toUpperCase() + (gem.difficulty_level || 'easy').slice(1);
   const fallbackImage = 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=1200';
+  const attributes = (gem.place_attributes || []) as string[];
+  const evidence = (gem.evidence_labels || []) as string[];
+  const verificationLabel = gem.verification_status.replace(/_/g, ' ').toUpperCase();
+
+  // Place DNA values
+  const dnaTime = gem.best_time_to_visit || '—';
+  const dnaSignificance = attributes.length > 0 ? attributes.map(a => ATTRIBUTE_LABELS[a] || a).join(' · ') : '—';
+  const dnaEvidence = evidence.length > 0 ? evidence.map(e => EVIDENCE_LABELS[e] || e).join(' · ') : (isFeatured ? 'Featured' : 'Explorer observation');
+  const dnaPeople = gem.submitted_by ? 'A fellow explorer' : 'Community';
+  const dnaMemory = comments.length > 0 ? `${comments.length} ${comments.length === 1 ? 'note' : 'notes'}` : 'No notes yet';
+  const dnaStatus = verificationLabel;
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
+  const SectionHeader: React.FC<{ id: string; label: string; sublabel?: string }> = ({ id, label, sublabel }) => (
+    <button
+      onClick={() => toggleSection(id)}
+      className="w-full flex items-center justify-between text-left py-4 transition-colors duration-300"
+      style={{ borderTop: '1px solid rgba(201,168,74,0.08)' }}
+    >
+      <div>
+        <p className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(201,168,74,0.6)' }}>{label}</p>
+        {sublabel && <p className="font-display italic text-xs font-light mt-0.5" style={{ color: 'rgba(173,181,189,0.3)' }}>{sublabel}</p>}
+      </div>
+      <ChevronDown
+        className="h-4 w-4 transition-transform duration-300 flex-shrink-0 ml-4"
+        style={{ color: 'rgba(201,168,74,0.3)', transform: expandedSection === id ? 'rotate(180deg)' : 'rotate(0)' }}
+        strokeWidth={1.5}
+      />
+    </button>
+  );
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -265,11 +316,13 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-jetbrains text-[9px] text-gold-400/70 border border-gold-400/20 px-2 py-0.5 bg-forest-950/60">
-                  {gem.verification_status.replace(/_/g, ' ').toUpperCase()}
+                  {verificationLabel}
                 </span>
-                <span className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase">
-                  {categoryLabel}
-                </span>
+                {attributes.length > 0 && attributes.slice(0, 3).map((attr) => (
+                  <span key={attr} className="font-jetbrains text-[8px] text-mist-700 tracking-widest uppercase border border-forest-700 px-2 py-0.5">
+                    {ATTRIBUTE_LABELS[attr] || attr}
+                  </span>
+                ))}
               </div>
               <h2 className="font-display text-2xl sm:text-3xl font-light text-cream mb-1">{gem.title}</h2>
               <div className="flex items-center gap-1">
@@ -280,7 +333,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
           </div>
 
           {/* Body */}
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-0">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader className="w-5 h-5 text-gold-400/50 animate-spin" />
@@ -289,12 +342,12 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
               <>
                 {/* Sign-in nudge */}
                 {needsAuth && (
-                  <div className="border border-forest-700 bg-forest-900/60 p-4 flex items-start gap-3">
+                  <div className="border border-forest-700 bg-forest-900/60 p-4 flex items-start gap-3 mb-4">
                     <AlertCircle className="h-4 w-4 text-gold-400/60 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="font-jetbrains text-[10px] text-gold-400/70 tracking-widest uppercase mb-1">Sign In Required</p>
                       <p className="text-mist-500 text-sm font-light">
-                        Sign in to signal gems, log visits, and leave field notes. Your contributions help verify discoveries.
+                        Sign in to signal places, log visits, and add to the record.
                       </p>
                     </div>
                   </div>
@@ -302,30 +355,31 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
 
                 {/* Action error */}
                 {actionError && (
-                  <div className="border border-red-900/40 bg-red-950/30 p-4 flex items-start gap-3">
+                  <div className="border border-red-900/40 bg-red-950/30 p-4 flex items-start gap-3 mb-4">
                     <AlertCircle className="h-4 w-4 text-red-400/60 mt-0.5 flex-shrink-0" />
                     <p className="text-red-300/70 text-sm font-light">{actionError}</p>
                   </div>
                 )}
 
-                {/* Stats row */}
-                <div className="flex items-center gap-0 border border-forest-800">
-                  <div className="flex-1 px-4 py-3 border-r border-forest-800">
-                    <p className="font-display text-xl font-light text-cream">{voteCount}</p>
-                    <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase">Signals</p>
-                  </div>
-                  <div className="flex-1 px-4 py-3 border-r border-forest-800">
-                    <p className="font-display text-xl font-light text-cream">{visitCount}</p>
-                    <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase">Visits</p>
-                  </div>
-                  <div className="flex-1 px-4 py-3">
-                    <p className="font-display text-xl font-light text-cream">{comments.length}</p>
-                    <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase">Field Notes</p>
-                  </div>
+                {/* Place DNA strip */}
+                <div className="flex flex-wrap gap-x-6 gap-y-2 py-4 mb-2" style={{ borderBottom: '1px solid rgba(201,168,74,0.08)' }}>
+                  {[
+                    { label: 'Time', value: dnaTime },
+                    { label: 'Significance', value: dnaSignificance },
+                    { label: 'Evidence', value: dnaEvidence },
+                    { label: 'People', value: dnaPeople },
+                    { label: 'Memory', value: dnaMemory },
+                    { label: 'Status', value: dnaStatus },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <p className="font-jetbrains text-[8px] text-gold-400/40 tracking-widest uppercase mb-0.5">{item.label}</p>
+                      <p className="text-mist-600 text-xs font-light">{item.value}</p>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 py-4">
                   <button
                     onClick={handleVote}
                     disabled={voting || hasVoted}
@@ -336,7 +390,7 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
                     }`}
                   >
                     {voting ? <Loader className="h-4 w-4 animate-spin" /> : hasVoted ? <Check className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
-                    {hasVoted ? 'Signaled' : 'Signal This Gem'}
+                    {hasVoted ? 'Signaled' : 'Signal This Place'}
                   </button>
                   <button
                     onClick={handleLogVisit}
@@ -352,105 +406,184 @@ const GemDetailModal: React.FC<GemDetailModalProps> = ({ gem, isOpen, onClose })
                   </button>
                 </div>
 
-                {/* Description */}
-                <div>
-                  <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase mb-3">The Discovery</p>
-                  <p className="text-mist-500 text-sm font-light leading-relaxed">{gem.description}</p>
-                </div>
+                {/* ── Progressive disclosure sections ── */}
 
-                {/* Details grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border-t border-l border-forest-800">
-                  <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3">
-                    <Mountain className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Difficulty</p>
-                      <p className="text-mist-500 text-sm font-light">{difficultyLabel}</p>
-                    </div>
+                {/* WHY IT MATTERS */}
+                <SectionHeader id="why" label="Why it matters" sublabel="The central question" />
+                {expandedSection === 'why' && (
+                  <div className="pb-4">
+                    <p className="text-mist-500 text-sm font-light leading-relaxed">{gem.description}</p>
                   </div>
-                  {gem.best_time_to_visit && (
-                    <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3">
-                      <Calendar className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Best Time</p>
-                        <p className="text-mist-500 text-sm font-light">{gem.best_time_to_visit}</p>
-                      </div>
-                    </div>
-                  )}
-                  {gem.tips && (
-                    <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3 sm:col-span-2">
-                      <Lightbulb className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Insider Tips</p>
-                        <p className="text-mist-500 text-sm font-light">{gem.tips}</p>
-                      </div>
-                    </div>
-                  )}
-                  {gem.latitude && gem.longitude && (
-                    <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3 sm:col-span-2">
-                      <MapPin className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Coordinates</p>
-                        <p className="font-jetbrains text-[11px] text-gold-400/50">{gem.latitude.toFixed(4)}°, {gem.longitude.toFixed(4)}°</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
 
-                {/* Field notes / comments */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <MessageSquare className="h-4 w-4 text-gold-400/40" />
-                    <p className="font-jetbrains text-[10px] text-gold-400/60 tracking-widest uppercase">Field Notes</p>
-                  </div>
-
-                  {/* Comment form — only for real DB gems */}
-                  {!isFeatured && (
-                    <form onSubmit={handleSubmitComment} className="mb-5">
-                      <textarea
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        placeholder="Share your experience or add a field note..."
-                        rows={3}
-                        className="w-full bg-forest-900 border border-forest-700 text-cream px-4 py-3 font-light text-sm focus:outline-none focus:border-gold-400/40 transition-colors duration-300 resize-none placeholder:text-mist-800"
-                      />
-                      <button
-                        type="submit"
-                        disabled={submittingComment || !commentText.trim()}
-                        className="mt-2 px-6 py-2 border border-gold-400/30 text-gold-300 font-jetbrains text-[10px] tracking-widest uppercase hover:border-gold-400/60 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        {submittingComment ? 'Posting...' : 'Post Field Note'}
-                      </button>
-                    </form>
-                  )}
-
-                  {isFeatured ? (
-                    <div className="border border-forest-800 p-6 text-center">
-                      <p className="font-display text-base italic font-light text-mist-600 mb-1">Signal in progress.</p>
-                      <p className="text-mist-800 text-xs font-light">Field notes will be available once this discovery is fully verified.</p>
-                    </div>
-                  ) : comments.length === 0 ? (
-                    <div className="border border-forest-800 p-6 text-center">
-                      <p className="font-display text-base italic font-light text-mist-600 mb-1">No field notes yet.</p>
-                      <p className="text-mist-800 text-xs font-light">Be the first to document this discovery.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-0 border-t border-l border-forest-800">
-                      {comments.map((c) => (
-                        <div key={c.id} className="p-4 border-b border-r border-forest-800">
-                          <p className="text-mist-500 text-sm font-light leading-relaxed mb-2">{c.comment_text}</p>
-                          <div className="flex items-center justify-between">
-                            <span className="font-jetbrains text-[9px] text-gold-400/40 tracking-widest">
-                              EXPLORER {c.user_id.slice(0, 6).toUpperCase()}
-                            </span>
-                            <span className="font-jetbrains text-[9px] text-mist-800">
-                              {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </span>
+                {/* WHAT WE KNOW */}
+                <SectionHeader id="what" label="What we know" sublabel="Practical knowledge" />
+                {expandedSection === 'what' && (
+                  <div className="pb-4 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border-t border-l border-forest-800">
+                      <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3">
+                        <Mountain className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Difficulty</p>
+                          <p className="text-mist-500 text-sm font-light">{(gem.difficulty_level || 'easy').charAt(0).toUpperCase() + (gem.difficulty_level || 'easy').slice(1)}</p>
+                        </div>
+                      </div>
+                      {gem.best_time_to_visit && (
+                        <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3">
+                          <Calendar className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Best Time</p>
+                            <p className="text-mist-500 text-sm font-light">{gem.best_time_to_visit}</p>
                           </div>
                         </div>
-                      ))}
+                      )}
+                      {gem.tips && (
+                        <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3 sm:col-span-2">
+                          <Lightbulb className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Insider Tips</p>
+                            <p className="text-mist-500 text-sm font-light">{gem.tips}</p>
+                          </div>
+                        </div>
+                      )}
+                      {gem.latitude && gem.longitude && (
+                        <div className="p-4 border-b border-r border-forest-800 flex items-start gap-3 sm:col-span-2">
+                          <MapPin className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Coordinates</p>
+                            <p className="font-jetbrains text-[11px] text-gold-400/50">{gem.latitude.toFixed(4)}°, {gem.longitude.toFixed(4)}°</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {/* WHAT PEOPLE REMEMBER */}
+                <SectionHeader id="memory" label="What people remember" sublabel={`${comments.length} ${comments.length === 1 ? 'field note' : 'field notes'}`} />
+                {expandedSection === 'memory' && (
+                  <div className="pb-4">
+                    {/* Comment form — only for real DB gems */}
+                    {!isFeatured && (
+                      <form onSubmit={handleSubmitComment} className="mb-5">
+                        <textarea
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          placeholder="Add to the record — share what you remember about this place..."
+                          rows={3}
+                          className="w-full bg-forest-900 border border-forest-700 text-cream px-4 py-3 font-light text-sm focus:outline-none focus:border-gold-400/40 transition-colors duration-300 resize-none placeholder:text-mist-800"
+                        />
+                        <button
+                          type="submit"
+                          disabled={submittingComment || !commentText.trim()}
+                          className="mt-2 px-6 py-2 border border-gold-400/30 text-gold-300 font-jetbrains text-[10px] tracking-widest uppercase hover:border-gold-400/60 transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          {submittingComment ? 'Posting...' : 'Add Field Note'}
+                        </button>
+                      </form>
+                    )}
+
+                    {isFeatured ? (
+                      <div className="border border-forest-800 p-6 text-center">
+                        <p className="font-display text-base italic font-light text-mist-600 mb-1">Signal in progress.</p>
+                        <p className="text-mist-800 text-xs font-light">Field notes will be available once this place is fully verified.</p>
+                      </div>
+                    ) : comments.length === 0 ? (
+                      <div className="border border-forest-800 p-6 text-center">
+                        <p className="font-display text-base italic font-light text-mist-600 mb-1">No field notes yet.</p>
+                        <p className="text-mist-800 text-xs font-light">Be the first to add to the record.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-0 border-t border-l border-forest-800">
+                        {comments.map((c) => (
+                          <div key={c.id} className="p-4 border-b border-r border-forest-800">
+                            <p className="text-mist-500 text-sm font-light leading-relaxed mb-2">{c.comment_text}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="font-jetbrains text-[9px] text-gold-400/40 tracking-widest">
+                                EXPLORER {c.user_id.slice(0, 6).toUpperCase()}
+                              </span>
+                              <span className="font-jetbrains text-[9px] text-mist-800">
+                                {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* HOW WE KNOW */}
+                {evidence.length > 0 && (
+                  <>
+                    <SectionHeader id="how" label="How we know" sublabel="Evidence" />
+                    {expandedSection === 'how' && (
+                      <div className="pb-4">
+                        <div className="flex flex-wrap gap-2">
+                          {evidence.map((ev) => (
+                            <span
+                              key={ev}
+                              className="font-mono text-[8px] tracking-[0.12em] uppercase px-3 py-1.5"
+                              style={{ border: '1px solid rgba(201,168,74,0.15)', color: 'rgba(201,168,74,0.5)', borderRadius: '3px' }}
+                            >
+                              {EVIDENCE_LABELS[ev] || ev}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* WHO CONTRIBUTED */}
+                <SectionHeader id="who" label="Who contributed" sublabel="Attribution" />
+                {expandedSection === 'who' && (
+                  <div className="pb-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="flex items-center justify-center flex-shrink-0"
+                        style={{
+                          width: '40px', height: '40px', borderRadius: '50%',
+                          border: '1px solid rgba(201,168,74,0.15)',
+                        }}
+                      >
+                        <Footprints className="w-4 h-4" style={{ color: 'rgba(201,168,74,0.3)' }} strokeWidth={1.2} />
+                      </div>
+                      <div>
+                        <p className="text-mist-500 text-sm font-light">
+                          {gem.submitted_by ? 'A fellow explorer' : 'Community'}
+                        </p>
+                        <p className="font-jetbrains text-[9px] text-mist-800 tracking-widest uppercase mt-0.5">
+                          {voteCount} signals · {visitCount} visits
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* WHAT ELSE IS CONNECTED */}
+                {gem.latitude && gem.longitude && (
+                  <>
+                    <SectionHeader id="connected" label="What else is connected" sublabel="Nearby" />
+                    {expandedSection === 'connected' && (
+                      <div className="pb-4">
+                        <div className="flex items-start gap-3 border border-forest-800 p-4">
+                          <MapPin className="h-4 w-4 text-gold-400/40 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-jetbrains text-[9px] text-mist-700 tracking-widest uppercase mb-1">Coordinates</p>
+                            <p className="font-jetbrains text-[11px] text-gold-400/50">{gem.latitude.toFixed(4)}°, {gem.longitude.toFixed(4)}°</p>
+                            <p className="text-mist-800 text-xs font-light mt-2">
+                              Other worthy places near these coordinates may appear as the record grows.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Bottom spacing */}
+                <div style={{ borderTop: '1px solid rgba(201,168,74,0.08)' }} className="py-4" />
               </>
             )}
           </div>
