@@ -183,21 +183,26 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
       const { error: gemError } = await supabase.from('hidden_gems').insert(gemData);
       if (gemError) throw gemError;
 
-      const { data: contribution } = await supabase
-        .from('user_contributions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Contribution stats are a non-blocking side effect — the place is already saved.
+      try {
+        const { data: contribution } = await supabase
+          .from('user_contributions')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-      if (contribution) {
-        await supabase
-          .from('user_contributions')
-          .update({ gems_discovered: contribution.gems_discovered + 1, updated_at: new Date().toISOString() })
-          .eq('user_id', user.id);
-      } else {
-        await supabase
-          .from('user_contributions')
-          .insert({ user_id: user.id, gems_discovered: 1, gems_verified: 0, total_votes_received: 0, explorer_level: 1 });
+        if (contribution) {
+          await supabase
+            .from('user_contributions')
+            .update({ gems_discovered: contribution.gems_discovered + 1, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id);
+        } else {
+          await supabase
+            .from('user_contributions')
+            .insert({ user_id: user.id, gems_discovered: 1, gems_verified: 0, total_votes_received: 0, explorer_level: 1 });
+        }
+      } catch (statsErr) {
+        console.error('Non-blocking: could not update contribution stats:', statsErr);
       }
 
       setSuccess(true);
@@ -214,13 +219,19 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
       }, 1500);
     } catch (err: unknown) {
       console.error('Error submitting Worthy Place:', err);
-      const message = err instanceof Error ? err.message.toLowerCase() : '';
-      if (message.includes('bucket') || message.includes('storage')) {
-        setError('The photo could not be uploaded. Please choose another image and try again.');
-      } else if (message.includes('row-level security') || message.includes('permission')) {
-        setError('Your session does not have permission to add this place. Please sign in again and retry.');
+      const rawMessage =
+        (err && typeof err === 'object' && 'message' in err && typeof (err as any).message === 'string')
+          ? (err as any).message as string
+          : err instanceof Error ? err.message : String(err);
+      const message = rawMessage.toLowerCase();
+      if (message.includes('bucket') || message.includes('storage') || message.includes('upload')) {
+        setError('The photo could not be uploaded. Please try again or use an image URL instead.');
+      } else if (message.includes('row-level security') || message.includes('rls') || message.includes('permission') || message.includes('policy')) {
+        setError('Your session may have expired. Please sign out, sign back in, and try again.');
+      } else if (message.includes('network') || message.includes('fetch')) {
+        setError('Network issue — please check your connection and try again.');
       } else {
-        setError('Unable to save this place right now. Please try again.');
+        setError('Unable to save this place: ' + rawMessage);
       }
     } finally {
       setLoading(false);
