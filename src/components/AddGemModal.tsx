@@ -163,43 +163,38 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
         imageUrl = await uploadImage();
       }
 
-      const { error: gemError } = await supabase.rpc('insert_worthy_place', {
-        p_title: formData.title.trim(),
-        p_description: formData.description.trim(),
-        p_location: formData.location.trim(),
-        p_latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-        p_longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        p_category: formData.category,
-        p_difficulty_level: formData.difficulty_level,
-        p_image_url: imageUrl,
-        p_best_time_to_visit: formData.best_time_to_visit.trim() || null,
-        p_tips: formData.tips.trim() || null,
-        p_submitted_by: user.id,
-        p_place_attributes: selectedAttributes,
-        p_evidence_labels: selectedEvidence,
-      });
-      if (gemError) throw gemError;
+      const gemData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+        category: formData.category,
+        difficulty_level: formData.difficulty_level,
+        image_url: imageUrl,
+        best_time_to_visit: formData.best_time_to_visit.trim() || null,
+        tips: formData.tips.trim() || null,
+        place_attributes: selectedAttributes,
+        evidence_labels: selectedEvidence,
+      };
 
-      // Contribution stats are a non-blocking side effect — the place is already saved.
-      try {
-        const { data: contribution } = await supabase
-          .from('user_contributions')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (contribution) {
-          await supabase
-            .from('user_contributions')
-            .update({ gems_discovered: contribution.gems_discovered + 1, updated_at: new Date().toISOString() })
-            .eq('user_id', user.id);
-        } else {
-          await supabase
-            .from('user_contributions')
-            .insert({ user_id: user.id, gems_discovered: 1, gems_verified: 0, total_votes_received: 0, explorer_level: 1 });
+      const { data: session } = await supabase.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-worthy-place`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify(gemData),
         }
-      } catch (statsErr) {
-        console.error('Non-blocking: could not update contribution stats:', statsErr);
+      );
+
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(errBody.error || `Request failed (${response.status})`);
       }
 
       setSuccess(true);
