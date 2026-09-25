@@ -152,7 +152,7 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) { setError('Please sign in to submit a hidden gem.'); return; }
+    if (!user) { setError('Please sign in to add to the record.'); return; }
     if (!validateForm()) return;
     setError('');
     setLoading(true);
@@ -212,9 +212,16 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
         onSuccess();
         onClose();
       }, 1500);
-    } catch (err) {
-      console.error('Error submitting gem:', err);
-      setError('Unable to save your discovery. Please try again.');
+    } catch (err: unknown) {
+      console.error('Error submitting Worthy Place:', err);
+      const message = err instanceof Error ? err.message.toLowerCase() : '';
+      if (message.includes('bucket') || message.includes('storage')) {
+        setError('The photo could not be uploaded. Please choose another image and try again.');
+      } else if (message.includes('row-level security') || message.includes('permission')) {
+        setError('Your session does not have permission to add this place. Please sign in again and retry.');
+      } else {
+        setError('Unable to save this place right now. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
