@@ -163,24 +163,21 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
         imageUrl = await uploadImage();
       }
 
-      const gemData = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        location: formData.location.trim(),
-        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        category: formData.category,
-        difficulty_level: formData.difficulty_level,
-        image_url: imageUrl,
-        best_time_to_visit: formData.best_time_to_visit.trim() || null,
-        tips: formData.tips.trim() || null,
-        submitted_by: user.id,
-        verification_status: 'pending',
-        place_attributes: selectedAttributes,
-        evidence_labels: selectedEvidence,
-      };
-
-      const { error: gemError } = await supabase.from('hidden_gems').insert(gemData);
+      const { error: gemError } = await supabase.rpc('insert_worthy_place', {
+        p_title: formData.title.trim(),
+        p_description: formData.description.trim(),
+        p_location: formData.location.trim(),
+        p_latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        p_longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+        p_category: formData.category,
+        p_difficulty_level: formData.difficulty_level,
+        p_image_url: imageUrl,
+        p_best_time_to_visit: formData.best_time_to_visit.trim() || null,
+        p_tips: formData.tips.trim() || null,
+        p_submitted_by: user.id,
+        p_place_attributes: selectedAttributes,
+        p_evidence_labels: selectedEvidence,
+      });
       if (gemError) throw gemError;
 
       // Contribution stats are a non-blocking side effect — the place is already saved.
