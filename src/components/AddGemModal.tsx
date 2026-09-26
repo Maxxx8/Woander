@@ -178,7 +178,11 @@ const AddGemModal: React.FC<AddGemModalProps> = ({ isOpen, onClose, onSuccess })
         evidence_labels: selectedEvidence,
       };
 
-      const { data: session } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError('Your session has expired. Please sign out, sign back in, and try again.');
+        return;
+      }
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-worthy-place`,
         {
