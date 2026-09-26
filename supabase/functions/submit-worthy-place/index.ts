@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+// verify_jwt is false in config.toml; auth is verified inside the function body.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
