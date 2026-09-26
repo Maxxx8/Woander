@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  MapPin, Plus, ArrowRight, Loader, Check, Compass, X,
+  MapPin, Plus, ArrowRight, Loader, Check, Compass, X, Filter, ChevronDown,
 } from 'lucide-react';
 import Footer from '../components/Footer';
 import AddGemModal from '../components/AddGemModal';
@@ -86,6 +86,10 @@ const WorthyPlacesPage = () => {
   const [hoveredNode, setHoveredNode] = useState<MapNode | null>(null);
   const [selectedNode, setSelectedNode] = useState<MapNode | null>(null);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterLocation, setFilterLocation] = useState<string>('');
+  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [filterAttribute, setFilterAttribute] = useState<string>('');
   const pageRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -151,7 +155,43 @@ const WorthyPlacesPage = () => {
   };
 
   const featuredPlace = places[0] || null;
-  const recentPlaces = places.slice(0, 8);
+
+  const uniqueLocations = useMemo(() => {
+    const locs = new Set<string>();
+    places.forEach(p => { if (p.location) locs.add(p.location); });
+    return Array.from(locs).sort();
+  }, [places]);
+
+  const uniqueCategories = useMemo(() => {
+    const cats = new Set<string>();
+    places.forEach(p => { if (p.category) cats.add(p.category); });
+    return Array.from(cats).sort();
+  }, [places]);
+
+  const allAttributes = useMemo(() => {
+    const attrs = new Set<string>();
+    places.forEach(p => {
+      (p.place_attributes || []).forEach((a: string) => attrs.add(a));
+    });
+    return Array.from(attrs).sort();
+  }, [places]);
+
+  const filteredPlaces = useMemo(() => {
+    return places.filter(p => {
+      if (filterLocation && p.location !== filterLocation) return false;
+      if (filterCategory && p.category !== filterCategory) return false;
+      if (filterAttribute && !(p.place_attributes || []).includes(filterAttribute)) return false;
+      return true;
+    });
+  }, [places, filterLocation, filterCategory, filterAttribute]);
+
+  const hasActiveFilters = filterLocation || filterCategory || filterAttribute;
+
+  const clearFilters = () => {
+    setFilterLocation('');
+    setFilterCategory('');
+    setFilterAttribute('');
+  };
 
   return (
     <div ref={pageRef} className="min-h-screen" style={{ backgroundColor: '#F6F2E9' }}>
@@ -448,11 +488,138 @@ const WorthyPlacesPage = () => {
       {/* ── 3. FIELD NOTES (editorial, not cards) ── */}
       <section className="py-20 lg:py-28" style={{ backgroundColor: '#F6F2E9' }}>
         <div className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-16">
-          <div className="mb-16 wp-fade">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'rgba(48,51,47,0.5)' }}>Field Notes</p>
-            <h2 className="font-display text-3xl md:text-5xl font-light leading-tight" style={{ color: '#263D35' }}>
-              Why is this place <em className="italic" style={{ color: '#B77B65' }}>worth knowing?</em>
-            </h2>
+          <div className="mb-12 wp-fade">
+            <div className="flex items-end justify-between flex-wrap gap-4 mb-5">
+              <div>
+                <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-5" style={{ color: 'rgba(48,51,47,0.5)' }}>Field Notes</p>
+                <h2 className="font-display text-3xl md:text-5xl font-light leading-tight" style={{ color: '#263D35' }}>
+                  Why is this place <em className="italic" style={{ color: '#B77B65' }}>worth knowing?</em>
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowFilters(s => !s)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-xs tracking-[0.12em] uppercase font-light transition-all duration-300"
+                style={{
+                  border: '1px solid rgba(38,61,53,0.15)',
+                  color: hasActiveFilters ? '#B69A63' : 'rgba(48,51,47,0.5)',
+                  backgroundColor: hasActiveFilters ? 'rgba(182,154,99,0.06)' : 'transparent',
+                  borderRadius: '6px',
+                }}
+              >
+                <Filter className="h-3.5 w-3.5" strokeWidth={1.5} />
+                Filter
+                {hasActiveFilters && (
+                  <span className="font-mono text-[9px]" style={{ color: '#B69A63' }}>
+                    ({[filterLocation, filterCategory, filterAttribute].filter(Boolean).length})
+                  </span>
+                )}
+                <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`} strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Filter panel */}
+            {showFilters && (
+              <div
+                className="wp-fade p-6 mb-8"
+                style={{
+                  border: '1px solid rgba(38,61,53,0.1)',
+                  borderRadius: '10px',
+                  backgroundColor: '#FBF8F1',
+                }}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {/* Location filter */}
+                  <div>
+                    <label className="font-mono text-[9px] tracking-[0.15em] uppercase block mb-2" style={{ color: 'rgba(48,51,47,0.4)' }}>Location</label>
+                    <select
+                      value={filterLocation}
+                      onChange={(e) => setFilterLocation(e.target.value)}
+                      className="w-full text-sm font-light p-2.5 transition-all duration-300"
+                      style={{
+                        border: '1px solid rgba(38,61,53,0.15)',
+                        borderRadius: '6px',
+                        backgroundColor: 'transparent',
+                        color: '#263D35',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="">All locations</option>
+                      {uniqueLocations.map(loc => (
+                        <option key={loc} value={loc}>{loc}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Category filter */}
+                  <div>
+                    <label className="font-mono text-[9px] tracking-[0.15em] uppercase block mb-2" style={{ color: 'rgba(48,51,47,0.4)' }}>Type of place</label>
+                    <select
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                      className="w-full text-sm font-light p-2.5 transition-all duration-300"
+                      style={{
+                        border: '1px solid rgba(38,61,53,0.15)',
+                        borderRadius: '6px',
+                        backgroundColor: 'transparent',
+                        color: '#263D35',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="">All types</option>
+                      {uniqueCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Attribute filter */}
+                  <div>
+                    <label className="font-mono text-[9px] tracking-[0.15em] uppercase block mb-2" style={{ color: 'rgba(48,51,47,0.4)' }}>Attribute</label>
+                    <select
+                      value={filterAttribute}
+                      onChange={(e) => setFilterAttribute(e.target.value)}
+                      className="w-full text-sm font-light p-2.5 transition-all duration-300"
+                      style={{
+                        border: '1px solid rgba(38,61,53,0.15)',
+                        borderRadius: '6px',
+                        backgroundColor: 'transparent',
+                        color: '#263D35',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="">All attributes</option>
+                      {allAttributes.map(attr => (
+                        <option key={attr} value={attr}>{ATTRIBUTE_LABELS[attr] || attr}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {hasActiveFilters && (
+                  <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: '1px solid rgba(38,61,53,0.08)' }}>
+                    <p className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.4)' }}>
+                      Showing {filteredPlaces.length} of {places.length} places
+                    </p>
+                    <button
+                      onClick={clearFilters}
+                      className="inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.15em] uppercase transition-all duration-300"
+                      style={{ color: '#B69A63' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = '#263D35'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = '#B69A63'; }}
+                    >
+                      <X className="h-3 w-3" strokeWidth={1.5} />
+                      Clear filters
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!hasActiveFilters && (
+              <p className="text-xs font-mono tracking-[0.15em] uppercase" style={{ color: 'rgba(48,51,47,0.35)' }}>
+                {places.length} places in the record
+              </p>
+            )}
           </div>
 
           {loading && (
@@ -471,6 +638,21 @@ const WorthyPlacesPage = () => {
                 style={{ border: '1px solid rgba(38,61,53,0.2)', color: '#263D35' }}
               >
                 Retry
+              </button>
+            </div>
+          )}
+
+          {!loading && !fetchError && filteredPlaces.length === 0 && places.length > 0 && (
+            <div className="text-center py-20">
+              <p className="font-display text-xl font-light italic mb-3" style={{ color: 'rgba(48,51,47,0.5)' }}>
+                No places match your filters.
+              </p>
+              <button
+                onClick={clearFilters}
+                className="font-mono text-[10px] tracking-[0.2em] uppercase px-5 py-2 transition-all duration-300"
+                style={{ border: '1px solid rgba(38,61,53,0.2)', color: '#263D35' }}
+              >
+                Clear filters
               </button>
             </div>
           )}
@@ -494,9 +676,9 @@ const WorthyPlacesPage = () => {
             </div>
           )}
 
-          {!loading && !fetchError && recentPlaces.length > 0 && (
+          {!loading && !fetchError && filteredPlaces.length > 0 && (
             <div className="space-y-16 lg:space-y-24">
-              {recentPlaces.map((place, index) => {
+              {filteredPlaces.map((place, index) => {
                 const isEven = index % 2 === 0;
                 const fnNum = formatFieldNoteNumber(index);
                 const attributes = (place.place_attributes || []) as string[];
