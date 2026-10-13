@@ -163,8 +163,9 @@ const ListYourTourModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
         guideId = newGuide.id;
       }
 
-      const { data: submission, error: submissionError } = await supabase.functions.invoke('submit-tour-package', {
+      const { data: submission, error: submissionError } = await supabase.functions.invoke('submit-worthy-place', {
         body: {
+        kind: 'tour_package',
         guide_id: guideId,
         title: title.trim(),
         description: description.trim(),
