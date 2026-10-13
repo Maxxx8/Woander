@@ -70,69 +70,52 @@ Deno.serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
 
-      const { data: guide, error: guideError } = await adminClient
-        .from("tour_guides")
-        .select("id")
-        .eq("id", body.guide_id)
-        .eq("user_id", user.id)
-        .maybeSingle();
+      const { data: rpcResult, error: rpcError } = await userClient.rpc("insert_tour_package", {
+        p_guide_id: body.guide_id ?? null,
+        p_title: body.title.trim(),
+        p_description: body.description.trim(),
+        p_tour_type: body.tour_type ?? "adventure",
+        p_duration_hours: body.duration_hours ?? 4,
+        p_duration_days: body.duration_days ?? null,
+        p_price_per_person: body.price_per_person,
+        p_currency: body.currency ?? "INR",
+        p_max_group_size: body.max_group_size ?? 10,
+        p_min_group_size: body.min_group_size ?? 1,
+        p_difficulty_level: body.difficulty_level ?? "moderate",
+        p_booking_type: body.booking_type ?? "enquiry",
+        p_featured_image: body.featured_image || null,
+        p_location_city: body.location_city?.trim() ?? "",
+        p_location_state: body.location_state?.trim() ?? "",
+        p_destination: body.destination?.trim() || null,
+        p_accommodation_type: body.accommodation_type || null,
+        p_transport_type: body.transport_type || null,
+        p_meals_included: Array.isArray(body.meals_included) ? body.meals_included : [],
+        p_equipment_included: Array.isArray(body.equipment_included) ? body.equipment_included : [],
+        p_guide_included: body.guide_included ?? true,
+        p_included_items: Array.isArray(body.included_items) ? body.included_items : [],
+        p_excluded_items: Array.isArray(body.excluded_items) ? body.excluded_items : [],
+        p_cancellation_policy: body.cancellation_policy?.trim() ?? "",
+        p_pricing_notes: body.pricing_notes?.trim() || null,
+        p_itinerary: Array.isArray(body.itinerary) ? body.itinerary : [],
+        p_operator_name: body.operator_name?.trim() || null,
+        p_operator_instagram: body.operator_instagram?.trim() || null,
+        p_operator_website: body.operator_website?.trim() || null,
+        p_operator_phone: body.operator_phone?.trim() || null,
+        p_operator_email: body.operator_email?.trim() || null,
+        p_package_status: body.package_status === "draft" ? "draft" : "pending_review",
+      });
 
-      if (guideError || !guide) return new Response(
-        JSON.stringify({ error: "Your operator profile could not be verified." }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-
-      const { data: newPackage, error: packageError } = await adminClient
-        .from("tours")
-        .insert({
-          guide_id: guide.id,
-          title: body.title.trim(),
-          description: body.description.trim(),
-          tour_type: body.tour_type ?? "adventure",
-          duration_hours: body.duration_hours ?? 4,
-          duration_days: body.duration_days ?? null,
-          price_per_person: body.price_per_person,
-          currency: body.currency ?? "INR",
-          max_group_size: body.max_group_size ?? 10,
-          min_group_size: body.min_group_size ?? 1,
-          difficulty_level: body.difficulty_level ?? "moderate",
-          booking_type: body.booking_type ?? "enquiry",
-          featured_image: body.featured_image || null,
-          location_city: body.location_city?.trim() ?? "",
-          location_state: body.location_state?.trim() ?? "",
-          destination: body.destination?.trim() || null,
-          accommodation_type: body.accommodation_type || null,
-          transport_type: body.transport_type || null,
-          meals_included: Array.isArray(body.meals_included) ? body.meals_included : [],
-          equipment_included: Array.isArray(body.equipment_included) ? body.equipment_included : [],
-          guide_included: body.guide_included ?? true,
-          included_items: Array.isArray(body.included_items) ? body.included_items : [],
-          excluded_items: Array.isArray(body.excluded_items) ? body.excluded_items : [],
-          cancellation_policy: body.cancellation_policy?.trim() ?? "",
-          pricing_notes: body.pricing_notes?.trim() || null,
-          itinerary: Array.isArray(body.itinerary) ? body.itinerary : [],
-          operator_name: body.operator_name?.trim() || null,
-          operator_instagram: body.operator_instagram?.trim() || null,
-          operator_website: body.operator_website?.trim() || null,
-          operator_phone: body.operator_phone?.trim() || null,
-          operator_email: body.operator_email?.trim() || null,
-          is_operator_verified: false,
-          package_status: body.package_status === "draft" ? "draft" : "pending_review",
-          is_active: true,
-        })
-        .select("id")
-        .maybeSingle();
-
-      if (packageError || !newPackage) {
-        console.error("Tour package insert error:", packageError);
+      if (rpcError || !rpcResult) {
+        console.error("Tour package RPC error:", rpcError);
+        const msg = rpcError?.message || "Could not save the tour package.";
         return new Response(
-          JSON.stringify({ error: "Could not save the tour package." }),
+          JSON.stringify({ error: msg }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
       return new Response(
-        JSON.stringify({ id: newPackage.id, success: true }),
+        JSON.stringify({ id: rpcResult, success: true }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }

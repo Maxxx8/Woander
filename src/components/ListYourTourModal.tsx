@@ -202,7 +202,8 @@ const ListYourTourModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
       });
 
       if (submissionError || !submission?.success) {
-        setError('Could not save package: ' + (submissionError?.message || submission?.error || 'The package could not be saved.'));
+        const errMsg = submission?.error || submissionError?.message || 'The package could not be saved.';
+        setError('Could not save package: ' + errMsg);
         setSubmitting(false);
         return;
       }
