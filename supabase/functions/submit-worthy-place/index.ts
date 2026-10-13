@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
@@ -53,13 +53,6 @@ Deno.serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    if (!body.location?.trim()) {
-      return new Response(
-        JSON.stringify({ error: "Location is required." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
     // Use service-role client to insert — bypasses PostgREST schema cache issues
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
@@ -141,6 +134,13 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ id: newPackage.id, success: true }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (!body.location?.trim()) {
+      return new Response(
+        JSON.stringify({ error: "Location is required." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
