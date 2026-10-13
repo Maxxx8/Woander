@@ -163,43 +163,45 @@ const ListYourTourModal: React.FC<Props> = ({ isOpen, onClose, onSuccess }) => {
         guideId = newGuide.id;
       }
 
-      const { error: rpcError } = await supabase.rpc('insert_tour_package', {
-        p_guide_id: guideId,
-        p_title: title.trim(),
-        p_description: description.trim(),
-        p_tour_type: tourType,
-        p_duration_hours: durationHours ? parseFloat(durationHours) : (durationDays ? parseFloat(durationDays) * 24 : 4),
-        p_duration_days: durationDays ? parseInt(durationDays) : null,
-        p_price_per_person: parseFloat(pricePerPerson),
-        p_currency: currency,
-        p_max_group_size: parseInt(maxGroupSize) || 10,
-        p_min_group_size: parseInt(minGroupSize) || 1,
-        p_difficulty_level: difficulty,
-        p_booking_type: bookingType,
-        p_featured_image: featuredImage.trim() || null,
-        p_location_city: locationCity.trim(),
-        p_location_state: locationState.trim(),
-        p_destination: destination.trim() || null,
-        p_accommodation_type: accommodation || null,
-        p_transport_type: transport || null,
-        p_meals_included: mealsIncluded,
-        p_equipment_included: equipmentIncluded,
-        p_guide_included: guideIncluded,
-        p_included_items: includedItems,
-        p_excluded_items: excludedItems,
-        p_cancellation_policy: cancellationPolicy.trim(),
-        p_pricing_notes: pricingNotes.trim() || null,
-        p_itinerary: itinerary.filter(d => d.title.trim() || d.description.trim()),
-        p_operator_name: operatorName.trim(),
-        p_operator_instagram: operatorInstagram.trim() || null,
-        p_operator_website: operatorWebsite.trim() || null,
-        p_operator_phone: operatorPhone.trim() || null,
-        p_operator_email: operatorEmail.trim() || null,
-        p_package_status: asDraft ? 'draft' : 'pending_review',
+      const { data: submission, error: submissionError } = await supabase.functions.invoke('submit-tour-package', {
+        body: {
+        guide_id: guideId,
+        title: title.trim(),
+        description: description.trim(),
+        tour_type: tourType,
+        duration_hours: durationHours ? parseFloat(durationHours) : (durationDays ? parseFloat(durationDays) * 24 : 4),
+        duration_days: durationDays ? parseInt(durationDays) : null,
+        price_per_person: parseFloat(pricePerPerson),
+        currency,
+        max_group_size: parseInt(maxGroupSize) || 10,
+        min_group_size: parseInt(minGroupSize) || 1,
+        difficulty_level: difficulty,
+        booking_type: bookingType,
+        featured_image: featuredImage.trim() || null,
+        location_city: locationCity.trim(),
+        location_state: locationState.trim(),
+        destination: destination.trim() || null,
+        accommodation_type: accommodation || null,
+        transport_type: transport || null,
+        meals_included: mealsIncluded,
+        equipment_included: equipmentIncluded,
+        guide_included: guideIncluded,
+        included_items: includedItems,
+        excluded_items: excludedItems,
+        cancellation_policy: cancellationPolicy.trim(),
+        pricing_notes: pricingNotes.trim() || null,
+        itinerary: itinerary.filter(d => d.title.trim() || d.description.trim()),
+        operator_name: operatorName.trim(),
+        operator_instagram: operatorInstagram.trim() || null,
+        operator_website: operatorWebsite.trim() || null,
+        operator_phone: operatorPhone.trim() || null,
+        operator_email: operatorEmail.trim() || null,
+        package_status: asDraft ? 'draft' : 'pending_review',
+        },
       });
 
-      if (rpcError) {
-        setError('Could not save package: ' + rpcError.message);
+      if (submissionError || !submission?.success) {
+        setError('Could not save package: ' + (submissionError?.message || submission?.error || 'The package could not be saved.'));
         setSubmitting(false);
         return;
       }

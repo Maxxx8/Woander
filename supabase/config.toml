@@ -1,3 +1,7 @@
 [functions.submit-worthy-place]
 verify_jwt = false
 entrypoint = "./functions/submit-worthy-place/index.ts"
+
+[functions.submit-tour-package]
+verify_jwt = false
+entrypoint = "./functions/submit-tour-package/index.ts"
